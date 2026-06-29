@@ -8,3 +8,5 @@ app = FastAPI()
 @app.get("/")
 def read_root():
     return {"message": "Database is ready!"}
+
+# testing
