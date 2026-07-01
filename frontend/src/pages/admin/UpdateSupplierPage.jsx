@@ -44,7 +44,7 @@ const UpdateSupplierPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       {/* SIDEBAR */}
-      <div className="w-64 bg-white border-r border-gray-100 flex-shrink-0">
+      {/* <div className="w-64 bg-white border-r border-gray-100 flex-shrink-0">
         <div className="p-8"><h1 className="text-2xl font-bold text-[#F25278]">Stationero</h1></div>
         <nav className="mt-4 px-3 space-y-1">
           <NavItem icon="fa-solid fa-chart-line" label="Dashboard" />
@@ -58,7 +58,7 @@ const UpdateSupplierPage = () => {
           <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" />
           <NavItem icon="fa-solid fa-right-from-bracket" label="Logout" className="mt-10 text-red-500" />
         </nav>
-      </div>
+      </div> */}
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col">

@@ -46,7 +46,7 @@ const AddSupplierPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-100 font-sans">
       {/* --- SIDEBAR --- */}
-      <div className="w-64 shadow-md bg-[#F8FAFC]">
+      {/* <div className="w-64 shadow-md bg-[#F8FAFC]">
         <div className="p-6">
           <h1 className="text-2xl font-bold text-[#F25278]">Stationero</h1>
         </div>
@@ -62,7 +62,7 @@ const AddSupplierPage = () => {
           <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" />
           <NavItem icon="fa-solid fa-right-from-bracket" label="Logout" className="mt-10 text-red-500" />
         </nav>
-      </div>
+      </div> */}
 
       {/* --- MAIN CONTENT --- */}
       <div className="flex-1">

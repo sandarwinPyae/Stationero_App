@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/admin/Sidebar';
 
 const SupplierPage = () => {
   const navigate = useNavigate();
@@ -65,7 +66,7 @@ const SupplierPage = () => {
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
       {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0">
+      {/* <aside className="w-64 bg-white border-r border-gray-100 flex-shrink-0">
         <div className="p-8"><h1 className="text-2xl font-bold text-[#F25278]">Stationero</h1></div>
         <nav className="mt-4 px-2 space-y-1">
           <NavItem icon="fa-solid fa-chart-line" label="Dashboard" />
@@ -79,7 +80,8 @@ const SupplierPage = () => {
           <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" />
           <NavItem icon="fa-solid fa-right-from-bracket" label="Logout" className="mt-10 text-red-500" />
         </nav>
-      </aside>
+      </aside> */}
+      
 
       {/* RIGHT CONTENT */}
       <div className="flex-1 flex flex-col w-full overflow-hidden">
@@ -206,12 +208,7 @@ const SupplierPage = () => {
 };
 
 
-const NavItem = ({ icon, label, active = false, color = "", className = "" }) => (
-  <div className={`flex items-center p-4 cursor-pointer ${className}`} style={{ backgroundColor: active ? '#E2E8F0' : 'transparent', borderRight: active ? `4px solid ${color}` : 'none' }}>
-    <span className="mr-4 text-lg w-6 text-center"><i className={icon}></i></span>
-    <span className="text-gray-700 font-medium">{label}</span>
-  </div>
-);
+
 
 
 
