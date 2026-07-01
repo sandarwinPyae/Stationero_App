@@ -11,8 +11,24 @@ const AddSupplierPage = () => {
     address: ''
   });
 
+  const [errors, setErrors] = useState({});
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleChangeEmail = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    if (name === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(value) && value !== "") {
+        setErrors({ ...errors, email: "Invalid email format" });
+      } else {
+        setErrors({ ...errors, email: "" });
+      }
+    }
   };
 
   const handleSave = async (e) => {
@@ -77,7 +93,15 @@ const AddSupplierPage = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
-                <input name="email" type="email" value={formData.email} onChange={handleChange} className="w-full mt-1 p-2 border rounded" placeholder="email@gmail.com" />
+                <input 
+                  name="email" 
+                  type="email" 
+                  value={formData.email} 
+                  onChange={handleChangeEmail} 
+                  className={`w-full mt-1 p-2 border rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`} 
+                  placeholder="email@gmail.com" 
+                />
+                {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone Number</label>
@@ -89,7 +113,12 @@ const AddSupplierPage = () => {
               </div>
               <button 
                 onClick={handleSave} 
-                className="text-white px-8 py-2 rounded-md font-semibold mt-4 w-full sm:w-auto" 
+                disabled={errors.email !== "" || !formData.name || !formData.email || !formData.phone || !formData.address}
+                className={`text-white px-8 py-2 rounded-md font-semibold mt-4 w-full sm:w-auto ${
+                  (errors.email !== "" || !formData.name || !formData.email || !formData.phone || !formData.address) 
+                  ? 'opacity-50 cursor-not-allowed' 
+                  : 'opacity-100'
+                }`}
                 style={{ backgroundColor: '#F25278' }}
               >
                 Save Info
