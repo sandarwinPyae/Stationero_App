@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 
 const UpdateSupplierPage = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // URL ထဲက id ကို ယူသည်
+  const { id } = useParams(); 
   const [formData, setFormData] = useState({
     supplier_name: '',
     supplier_email: '',

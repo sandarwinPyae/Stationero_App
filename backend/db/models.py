@@ -41,6 +41,7 @@ class Product(Base):
     selling_price = Column(Float)
     current_qty = Column(Integer)
     product_img_url = Column(String)
+    product_description = Column(String , nullable=True)
     del_flag = Column(Integer,default=0)
     created_date = Column(DateTime, default=func.now())
     updated_date = Column(DateTime, default=func.now(), onupdate=func.now())

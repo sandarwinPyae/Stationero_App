@@ -55,7 +55,6 @@ const SupplierPage = () => {
       await axios.delete(`http://localhost:8000/suppliers/${id}`);
       alert("Supplier deleted successfully!");
       setIsModalOpen(false); // Modal ပိတ်ရန်
-      // Data list ကို ပြန် refresh လုပ်ပေးပါ (ဥပမာ fetchSuppliers() ကို ပြန်ခေါ်ပါ)
       fetchSuppliers(); 
     } catch (error) {
       console.error("Error deleting supplier:", error);
@@ -120,7 +119,7 @@ const SupplierPage = () => {
           {/* TABLE */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider">
+              <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
                 <tr>
                   <th className="py-4 px-6">ID</th>
                   <th className="py-4 px-6">Name</th>
