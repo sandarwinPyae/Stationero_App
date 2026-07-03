@@ -7,7 +7,13 @@ import ProductList from './ProductList';
 import AddProductPage from './AddProductPage';
 import ViewProductDetails from './ViewProductDetails';
 import UpdateProductPage from './UpdateProductPage';
+import CategoryList from './CategoryList';
+import AddCategoryPage from './AddCategoryPage';
+import UpdateCategoryPage from './UpdateCategoryPage';
 import Sidebar from '../../components/admin/Sidebar';
+import PurchasePage from './PurchasePage';
+import AddPurchaseOrderPage from './AddPurchaseOrderPage';
+import PurchaseOrderDetail from './PurchaseOrderDetail';
 
 function App() {
   return (
@@ -24,6 +30,12 @@ function App() {
             <Route path="/add-product" element={<AddProductPage />} />
             <Route path="/view-product/:id" element={<ViewProductDetails />} />
             <Route path="/edit-product/:id" element={<UpdateProductPage />} />
+            <Route path="/categories" element={<CategoryList />} />
+            <Route path="/categories/:id" element={<UpdateCategoryPage />} />
+            <Route path="/categories/add" element={<AddCategoryPage />} />
+            <Route path='/purchase' element={<PurchasePage />} />
+            <Route path="/purchase/add" element={<AddPurchaseOrderPage />} />
+            <Route path="/purchase/details/:id" element={<PurchaseOrderDetail />} />
             
             
           </Routes>

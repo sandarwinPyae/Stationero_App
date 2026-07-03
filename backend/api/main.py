@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from .routes import supplier_routes
 from .routes import product_routes
 from .routes import category_routes
+from .routes import purchase_routes
 
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -32,3 +33,4 @@ app.add_middleware(
 app.include_router(supplier_routes.router)
 app.include_router(product_routes.router)
 app.include_router(category_routes.router)
+app.include_router(purchase_routes.router)

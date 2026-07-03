@@ -13,10 +13,15 @@ const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
   </div>
 );
 
+
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isProductOpen, setIsProductOpen] = useState(true);
+  const [isPurchaseOpen, setIsPurchaseOpen] = useState(false);
+  const [isInventoryOpen, setIsInventoryOpen] = useState(false);
+  const [isSaleReportOpen, setIsSaleReportOpen] = useState(false);
+  const [isPurchaseReportOpen, setIsPurchaseReportOpen] = useState(false);
 
   const isActive = (keyword) => location.pathname.toLowerCase().includes(keyword.toLowerCase());
 
@@ -29,7 +34,7 @@ const Sidebar = () => {
       <nav className="mt-4 px-3 space-y-1 flex-1">
         <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/dashboard')} active={isActive('dashboard')} />
         <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => navigate('/customers')} active={isActive('customer')} />
-        <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => navigate('/orders')} active={isActive('order')} />
+        <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => navigate('/confirm-orders')} active={isActive('confirm-order')} />
         
         <NavItem icon="fa-solid fa-users" label="Suppliers" onClick={() => navigate('/suppliers')} active={isActive('supplier')} color="#F25278" />
         
@@ -49,16 +54,69 @@ const Sidebar = () => {
           <NavItem 
             icon="fa-solid fa-tags" 
             label="Category" 
-            onClick={() => navigate('/category')} 
-            active={isActive('category')} 
+            onClick={() => navigate('/categories')} 
+            active={isActive('categories')} 
             isSubMenu={true}
           />
         )}
         
-        <NavItem icon="fa-solid fa-cart-shopping" label="Purchase" onClick={() => navigate('/purchase')} active={isActive('purchase')} />
-        <NavItem icon="fa-solid fa-chart-pie" label="Inventory Reports" onClick={() => navigate('/inventory')} active={isActive('inventory')} />
-        <NavItem icon="fa-solid fa-chart-column" label="Sale Reports" onClick={() => navigate('/sales')} active={isActive('sale')} />
-        <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" onClick={() => navigate('/purchase-reports')} active={isActive('purchase-reports')} />
+        {/* Purchase */}
+        <NavItem 
+          icon="fa-solid fa-cart-shopping" 
+          label="Purchase" 
+          onClick={() => {
+            navigate('/purchase');
+            setIsPurchaseOpen(!isPurchaseOpen);
+          }}
+          // active={isActive('purchase-order') || isActive('purchase-return')} 
+          active={location.pathname === '/purchase'} 
+        />
+        {isPurchaseOpen && (
+          <>
+            <NavItem 
+              icon="fa-solid fa-file-invoice" 
+              label="Purchase Order" 
+              onClick={() => navigate('/purchase-order')} 
+              active={isActive('purchase-order')} 
+              isSubMenu={true}
+            />
+            <NavItem 
+              icon="fa-solid fa-right-left" 
+              label="Purchase Return" 
+              onClick={() => navigate('/purchase-return')} 
+              active={isActive('purchase-return')} 
+              isSubMenu={true}
+            />
+          </>
+        )}
+
+        {/* Inventory Reports */}
+        <NavItem 
+          icon="fa-solid fa-chart-pie" 
+          label="Inventory Reports" 
+          onClick={() => { navigate('/inventory'); setIsInventoryOpen(!isInventoryOpen); }}
+          active={location.pathname === '/inventory'} 
+        />
+        {isInventoryOpen && (
+          <>
+            <NavItem icon="fa-solid fa-layer-group" label="Stock Report" onClick={() => navigate('/stock-report')} active={location.pathname === '/stock-report'} isSubMenu={true} />
+            <NavItem icon="fa-solid fa-exclamation-triangle" label="Low Stock Report" onClick={() => navigate('/low-stock-report')} active={location.pathname === '/low-stock-report'} isSubMenu={true} />
+          </>
+        )}
+        {/* Sale Reports */}
+        <NavItem icon="fa-solid fa-chart-column" label="Sale Reports" onClick={() => { navigate('/sales'); setIsSaleReportOpen(!isSaleReportOpen); }} active={location.pathname === '/sales'} />
+        {isSaleReportOpen && (
+          <NavItem icon="fa-solid fa-rotate-left" label="Sale Return Report" onClick={() => navigate('/sale-return-report')} active={location.pathname === '/sale-return-report'} isSubMenu={true} />
+        )}
+        
+        {/* Purchase Reports */}
+        <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" onClick={() => { navigate('/purchase-reports'); setIsPurchaseReportOpen(!isPurchaseReportOpen); }} active={location.pathname === '/purchase-reports'} />
+        {isPurchaseReportOpen && (
+          <>
+            <NavItem icon="fa-solid fa-file-contract" label="Purchase Summary" onClick={() => navigate('/purchase-summary')} active={location.pathname === '/purchase-summary'} isSubMenu={true} />
+            <NavItem icon="fa-solid fa-truck-field" label="Supplier-wise Purchase" onClick={() => navigate('/supplier-purchase')} active={location.pathname === '/supplier-purchase'} isSubMenu={true} />
+          </>
+        )}
         
         <div className="mt-auto pt-10">
           <NavItem icon="fa-solid fa-right-from-bracket" label="Logout" className="text-red-500" onClick={() => console.log('Logout')} />

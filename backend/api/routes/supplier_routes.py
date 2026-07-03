@@ -51,7 +51,7 @@ def delete_supplier(supplier_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Supplier deleted successfully"}
 
-# GET Single Supplier & Update (URL path ကို /suppliers/ နဲ့ စအောင်ပြင်ထားပါ)
+# GET Single Supplier & Update 
 @router.get("/suppliers/{supplier_id}")
 def get_single_supplier(supplier_id: int, db: Session = Depends(get_db)):
     supplier = db.query(models.Supplier).filter(models.Supplier.supplier_id == supplier_id).first()

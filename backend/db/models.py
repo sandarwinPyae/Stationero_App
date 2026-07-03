@@ -126,6 +126,7 @@ class PurchaseOrdersHeader(Base):
     po_number = Column(String, unique=True)
     total_amount = Column(Float)
     payment_method = Column(String)
+    purchase_order_status = Column(String, default="Pending")
     purchase_order_date = Column(DateTime, default=func.now())
     supplier = relationship("Supplier",back_populates="purchase_orders")
     details = relationship("PurchaseOrdersDetails",back_populates="purchase_order")

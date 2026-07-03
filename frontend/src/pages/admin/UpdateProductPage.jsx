@@ -5,16 +5,17 @@ import axios from 'axios';
 const UpdateProductPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  
   const [product, setProduct] = useState({
     product_name: '', category_id: '', unit_price: '',
     selling_price: '', current_qty: '', product_description: ''
   });
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [image, setImage] = useState("");
+  const [preview, setPreview] = useState("");
 
   useEffect(() => {
     fetchProduct();
+    fetchCategories();
   }, [id]);
 
   const fetchProduct = async () => {
@@ -26,6 +27,12 @@ const UpdateProductPage = () => {
       console.error("Error fetching product:", error);
     }
   };
+  const fetchCategories = async () => {
+  try {
+    const res = await axios.get("http://localhost:8000/categories"); 
+    setCategories(res.data);
+  } catch (err) { console.error("Error fetching categories:", err); }
+  };
 
   const handleKeyDown = (e) => {
     if (["-", "+", "e", "E"].includes(e.key)) {
@@ -36,7 +43,13 @@ const UpdateProductPage = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    Object.keys(product).forEach(key => formData.append(key, product[key]));
+    formData.append('product_name', product.product_name);
+    formData.append('category_id', Number(product.category_id));
+    formData.append('unit_price', Number(product.unit_price));
+    formData.append('selling_price', Number(product.selling_price));
+    formData.append('current_qty', Number(product.current_qty));
+    formData.append('description', product.product_description); 
+    
     if (image) formData.append('image', image);
 
     try {
@@ -44,10 +57,10 @@ const UpdateProductPage = () => {
       alert("Product updated successfully!");
       navigate('/products');
     } catch (error) {
-      console.error("Error updating product:", error);
+      console.error(error.response.data); 
       alert("Failed to update product.");
     }
-  };
+    };
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
@@ -110,7 +123,7 @@ const UpdateProductPage = () => {
                 min="0"
                 value={product.unit_price} 
                 onChange={e => setProduct({...product, unit_price: e.target.value})}
-                onKeyDown={handleKeyDown} // Function ကို ခေါ်သုံးခြင်း
+                onKeyDown={handleKeyDown} 
                 className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition" 
             />
             </div>
@@ -138,7 +151,21 @@ const UpdateProductPage = () => {
                 className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition" 
             />
             </div>
-
+            <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+            <select 
+                value={product.category_id} 
+                onChange={e => setProduct({...product, category_id: e.target.value})}
+                className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition bg-white"
+            >
+                <option value="">Select a category</option>
+                {categories.map(cat => (
+                <option key={cat.category_id} value={cat.category_id}>
+                    {cat.category_name}
+                </option>
+                ))}
+            </select>
+            </div>
             <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
             <textarea value={product.product_description} onChange={e => setProduct({...product, product_description: e.target.value})} className="w-full p-3.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-pink-500/20 focus:border-pink-500 outline-none transition" rows="4"></textarea>
