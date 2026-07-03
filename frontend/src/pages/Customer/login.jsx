@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const Login = ({ onNavigate, onLoginSuccess }) => {
+const Login = ({ onNavigate }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -22,17 +22,23 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
 
       const data = await response.json();
 
-      // ... inside your successful login response check function block ...
-if (response.ok) {
-  // Sync the live registered customer profile dataset dictionary with your browser cache memory
-  localStorage.setItem('stationero_logged_user', JSON.stringify(data.profile));
-  
-  // ---- FIXED: PASS THE SPECIFIC COMPONENT STRING ROUTING TOKEN EXPLICITLY TO UNFREEZE ----
-  onNavigate('productdetail'); 
-} else {
-  alert(data.message || 'Authentication error: Invalid credentials provided.');
-}
-
+      if (response.ok) {
+        // 1. FIXED: Unified dictionary schema mapping layout structure to prevent Order & Profile drops
+        const userObj = {
+          name: data.customer_name || (data.profile && data.profile.name) || 'Customer',
+          email: email.trim(),
+          phone: (data.profile && data.profile.phone) || '-',
+          address: (data.profile && data.profile.address) || '-',
+          role: data.role || 'customer'
+        };
+        
+        localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
+        
+        // 2. FIXED: Route explicitly to 'productdetail' matching your App.jsx lowercase scheme strings
+        onNavigate('productdetail'); 
+      } else {
+        setErrorMessage(data.message || data.detail || 'Authentication failed.');
+      }
     } catch (error) {
       setErrorMessage('Server connection error. Please try again later.');
     }
@@ -43,11 +49,11 @@ if (response.ok) {
       <header style={styles.navbar}>
         <div style={styles.logo}>Stationero</div>
         <nav style={styles.navLinks}>
-          <span style={styles.link}>Home</span>
-          <span style={styles.link}>About Us</span>
+          <span style={styles.link} onClick={() => onNavigate('productdetail')}>Home</span>
+          <span style={styles.link} onClick={() => onNavigate('productdetail')}>About Us</span>
           <button 
             type="button" 
-            onClick={onNavigate} 
+            onClick={() => onNavigate('login')} 
             onMouseEnter={() => setHoveredBtn('navLogin')}
             onMouseLeave={() => setHoveredBtn(null)}
             style={{...styles.navBtn, ...(hoveredBtn === 'navLogin' ? styles.btnHover : {})}}
@@ -56,7 +62,7 @@ if (response.ok) {
           </button>
           <button 
             type="button" 
-            onClick={onNavigate} 
+            onClick={() => onNavigate('signup')} 
             onMouseEnter={() => setHoveredBtn('navSignup')}
             onMouseLeave={() => setHoveredBtn(null)}
             style={{...styles.navBtn, ...(hoveredBtn === 'navSignup' ? styles.btnHover : {})}}
@@ -82,6 +88,14 @@ if (response.ok) {
           <div style={styles.inputGroup}>
             <label style={styles.label}>Password</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
+            
+            {/* 3. FIXED: ADDED YOUR DYNAMIC FORGOT PASSWORD REDIRECT WITH A SMALL p */}
+            <span 
+              onClick={() => onNavigate('forgotpassword', email)} 
+              style={{ color: '#f25278', cursor: 'pointer', fontSize: '13px', textAlign: 'right', marginTop: '6px', fontWeight: 'bold' }}
+            >
+              Forgot password?
+            </span>
           </div>
 
           <button 
@@ -97,8 +111,9 @@ if (response.ok) {
           
           <p style={styles.footerText}>
             Don't have an account?{' '}
+            {/* 4. FIXED: PASS EXPLICIT ALL-LOWERCASE TARGET STRINGS TO PREVENT WHITE SCREEN BUNDLE DROPS */}
             <span 
-              onClick={onNavigate} 
+              onClick={() => onNavigate('signup')} 
               onMouseEnter={() => setHoveredLink('signupLink')}
               onMouseLeave={() => setHoveredLink(null)}
               style={{...styles.signUpLinkBtn, ...(hoveredLink === 'signupLink' ? { color: '#c0395b' } : {})}}
@@ -106,12 +121,6 @@ if (response.ok) {
               Sign up
             </span>
           </p>
-          <span 
-            onClick={() => onNavigate('forgotpassword')} 
-            style={{ color: '#f25278', cursor: 'pointer', fontSize: '13px', float: 'right' }}
-          >
-            Forgot password?
-          </span>
         </form>
       </main>
     </div>
@@ -132,7 +141,7 @@ const styles = {
   label: { fontSize: '14px', color: '#333' },
   input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none' },
   submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease' },
-  submitBtnHover: { backgroundColor: '#d93a5f' }, // Deeper premium highlight pink
+  submitBtnHover: { backgroundColor: '#d93a5f' }, 
   navBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer', transition: 'background-color 0.2s ease' },
   btnHover: { backgroundColor: '#d93a5f' },
   divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0' },

@@ -26,7 +26,7 @@ const OrderHistoryPage = ({ onNavigate }) => {
     { label: 'Order', action: 'order' },
     { label: 'Returns', action: 'returns' },
     { label: 'History', action: 'history', isHistoryPage: true },
-    { label: 'Profile', action: 'product' },
+    { label: 'Profile', action: 'profile' },
     { label: 'Logout', action: 'login' }
   ];
 

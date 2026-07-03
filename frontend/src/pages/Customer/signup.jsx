@@ -1,40 +1,43 @@
 import React, { useState } from 'react';
 
-const SignUp = ({ onNavigate }) => {
-  const [formData, setFormData] = useState({ name: '', email: '', phoneNumber: '', address: '', password: '' });
-  const [showPassword, setShowPassword] = useState(false);
+const SignUpPage = ({ onNavigate }) => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [address, setAddress] = useState('');
+  const [password, setPassword] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
     try {
       const response = await fetch('http://localhost:8000/api/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          phone_number: formData.phoneNumber,
-          address: formData.address,
-          password: formData.password
+          name: name.trim(),
+          email: email.trim(),
+          phone_number: phone.trim(),
+          address: address.trim(),
+          password: password
         }),
       });
-      
+
       const data = await response.json();
+
       if (response.ok) {
-        alert('Sign up successful! You can now log in.');
-        onNavigate(); 
+        // ---- FIXED: REDIRECTS SILENTLY TO THE LOGIN PAGE MATCHING APP.JSX EXACTLY ----
+        onNavigate('login'); 
       } else {
-        alert(data.detail);
+        setErrorMessage(data.detail || 'Registration failed. Email might already be taken.');
       }
     } catch (error) {
-      console.error('Error:', error);
+      setErrorMessage('Server connection error. Please try again later.');
     }
   };
 
@@ -43,11 +46,11 @@ const SignUp = ({ onNavigate }) => {
       <header style={styles.navbar}>
         <div style={styles.logo}>Stationero</div>
         <nav style={styles.navLinks}>
-          <span style={styles.link}>Home</span>
-          <span style={styles.link}>About Us</span>
+          <span style={styles.link} onClick={() => onNavigate('login')}>Home</span>
+          <span style={styles.link} onClick={() => onNavigate('login')}>About Us</span>
           <button 
             type="button" 
-            onClick={onNavigate} 
+            onClick={() => onNavigate('login')} 
             onMouseEnter={() => setHoveredBtn('navLogin')}
             onMouseLeave={() => setHoveredBtn(null)}
             style={{...styles.navBtn, ...(hoveredBtn === 'navLogin' ? styles.btnHover : {})}}
@@ -56,7 +59,7 @@ const SignUp = ({ onNavigate }) => {
           </button>
           <button 
             type="button" 
-            onClick={onNavigate} 
+            onClick={() => onNavigate('signup')} 
             onMouseEnter={() => setHoveredBtn('navSignup')}
             onMouseLeave={() => setHoveredBtn(null)}
             style={{...styles.navBtn, ...(hoveredBtn === 'navSignup' ? styles.btnHover : {})}}
@@ -67,35 +70,36 @@ const SignUp = ({ onNavigate }) => {
       </header>
 
       <main style={styles.mainContent}>
-        <h2 style={styles.heading}>Sign up</h2>
-        <form onSubmit={handleSubmit} style={styles.formBox}>
+        <h2 style={styles.heading}>Create Account</h2>
+        <form onSubmit={handleSignupSubmit} style={styles.formBox}>
           
+          {errorMessage && (
+            <div style={styles.errorBanner}>{errorMessage}</div>
+          )}
+
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Name</label>
-            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Wony" style={styles.input} required />
+            <label style={styles.label}>Full Name</label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} style={styles.input} required />
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Email</label>
-            <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="wony21@gmail.com" style={styles.input} required />
+            <label style={styles.label}>Email Address</label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} required />
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Phone number</label>
-            <input type="text" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} placeholder="09794056713" style={styles.input} required />
+            <label style={styles.label}>Phone Number</label>
+            <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} style={styles.input} required />
           </div>
 
           <div style={styles.inputGroup}>
-            <label style={styles.label}>Address</label>
-            <textarea name="address" value={formData.address} onChange={handleChange} maxLength="100" style={styles.textarea} required />
+            <label style={styles.label}>Home Address</label>
+            <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} style={styles.input} required />
           </div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Password</label>
-            <div style={styles.passwordWrapper}>
-              <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} style={styles.passwordInput} required />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>👁️</button>
-            </div>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
           </div>
 
           <button 
@@ -104,16 +108,18 @@ const SignUp = ({ onNavigate }) => {
             onMouseLeave={() => setHoveredBtn(null)}
             style={{...styles.submitBtn, ...(hoveredBtn === 'submitSignup' ? styles.submitBtnHover : {})}}
           >
-            Sign Up
+            Sign up
           </button>
+          
+          <hr style={styles.divider} />
           
           <p style={styles.footerText}>
             Already have an account?{' '}
             <span 
-              onClick={onNavigate} 
+              onClick={() => onNavigate('login')} 
               onMouseEnter={() => setHoveredLink('loginLink')}
               onMouseLeave={() => setHoveredLink(null)}
-              style={{...styles.loginLink, ...(hoveredLink === 'loginLink' ? { color: '#c0395b' } : {})}}
+              style={{...styles.signUpLinkBtn, ...(hoveredLink === 'loginLink' ? { color: '#c0395b' } : {})}}
             >
               Log in
             </span>
@@ -130,22 +136,20 @@ const styles = {
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },
   link: { cursor: 'pointer', color: '#333' },
-  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' },
+  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px 20px' },
   heading: { fontSize: '24px', marginBottom: '20px', color: '#111' },
   formBox: { backgroundColor: '#f3f3f3', padding: '40px', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px' },
+  errorBanner: { backgroundColor: '#ffeef0', color: '#d9383a', padding: '10px 15px', borderRadius: '10px', fontSize: '14px', border: '1px solid #fccacf', fontWeight: 'bold', textAlign: 'center' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
   label: { fontSize: '14px', color: '#333' },
-  input: { padding: '12px', borderRadius: '20px', border: '1px solid #ccc', fontSize: '14px', outline: 'none' },
-  textarea: { padding: '12px', borderRadius: '10px', border: '1px solid #ccc', fontSize: '14px', height: '80px', resize: 'none', outline: 'none' },
-  passwordWrapper: { display: 'flex', alignItems: 'center', backgroundColor: '#fff', border: '1px solid #ccc', borderRadius: '20px', paddingRight: '10px' },
-  passwordInput: { flex: 1, padding: '12px', border: 'none', borderRadius: '20px', fontSize: '14px', outline: 'none' },
-  eyeBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px' },
-  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease' },
-  submitBtnHover: { backgroundColor: '#d93a5f' },
+  input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#ffffff' },
+  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease', fontWeight: 'bold' },
+  submitBtnHover: { backgroundColor: '#d93a5f' }, 
   navBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer', transition: 'background-color 0.2s ease' },
   btnHover: { backgroundColor: '#d93a5f' },
-  footerText: { textAlign: 'center', fontSize: '14px', color: '#333', marginTop: '10px' },
-  loginLink: { color: '#f25278', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold', transition: 'color 0.2s ease' }
+  divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0' },
+  footerText: { textAlign: 'center', fontSize: '14px', color: '#555', marginBottom: '5px' },
+  signUpLinkBtn: { color: '#f25278', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold', transition: 'color 0.2s ease' }
 };
 
-export default SignUp;
+export default SignUpPage;

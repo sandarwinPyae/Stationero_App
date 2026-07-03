@@ -26,29 +26,55 @@ const OrderPage = ({ onNavigate }) => {
     { label: 'Logout', action: 'login' }
   ];
 
-  useEffect(() => {
-    const now = new Date();
-    const formattedDate = now.getFullYear() + 
-      String(now.getMonth() + 1).padStart(2, '0') + 
-      String(now.getDate()).padStart(2, '0') + " " + 
-      now.toLocaleTimeString();
-    setSaleDateString(formattedDate);
-
+        useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
-    if (savedProfile) {
+    let activeEmail = '';
+    
+    if (savedProfile && savedProfile !== "undefined") {
       try {
         const parsedUser = JSON.parse(savedProfile);
-        setCustomerProfile({
-          name: parsedUser.name || parsedUser.customer_name || 'Customer',
-          phone: parsedUser.phone || parsedUser.phone_number || '-',
-          email: parsedUser.email || parsedUser.user_email || '',
-          address: parsedUser.address || '-'
-        });
+        activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim();
       } catch (e) {
-        console.error("Session parse error:", e);
+        console.error("Failed to parse local storage profile tokens during return page setup:", e);
       }
     }
 
+    // Security Gate: Kick them back to login page if they are truly logged out
+    if (!savedProfile || savedProfile === "undefined" || !activeEmail) {
+      onNavigate('login');
+      return;
+    }
+
+    // ---- FIXED: FETCH LIVE ACCOUNT DATA DYNAMICALLY FROM THE DATABASE ----
+    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        return res.json();
+      })
+      .then(data => {
+        // FIXED: Maps ONLY the true database fields dynamically for whoever is logged in!
+        setCustomerProfile({
+          name: data.name || data.customer_name,
+          email: data.email || data.customer_email || activeEmail,
+          phone: data.phone || data.phone_number,
+          address: data.address
+        });
+      })
+      .catch(err => {
+        console.error("Profile load failed, keeping basic session:", err);
+      });
+
+    // Fetch dynamic return incremental sequence numbers
+    fetch(`http://localhost:8000/api/order/next-return/${activeEmail}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.return_id) {
+          setReturnId(data.return_id); 
+        }
+      })
+      .catch(err => console.error("Error fetching dynamic return ID strings:", err));
+
+  
     const activeCheckoutData = localStorage.getItem('stationero_active_checkout');
     if (activeCheckoutData) {
       const items = JSON.parse(activeCheckoutData);

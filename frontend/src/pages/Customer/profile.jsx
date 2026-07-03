@@ -10,9 +10,9 @@ const ProfilePage = ({ onNavigate }) => {
   const [address, setAddress] = useState('');
 
   const navItems = [
-    { label: 'Home', action: 'product' },
-    { label: 'About Us', action: 'product' },
-    { label: 'Product', action: 'product' },
+    { label: 'Home', action: 'productdetail' },
+    { label: 'About Us', action: 'productdetail' },
+    { label: 'Product', action: 'productdetail' },
     { label: 'Shopping Cart', action: 'cart' },
     { label: 'Order', action: 'order' },
     { label: 'Returns', action: 'returns' },
@@ -24,22 +24,42 @@ const ProfilePage = ({ onNavigate }) => {
   useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
     let activeEmail = '';
-    if (savedProfile) {
-      const parsed = JSON.parse(savedProfile);
-      activeEmail = parsed.email || parsed.user_email || '';
+    
+    // ---- SAFE TRACKING GATE: PREVENTS THE CRASH ENTIRELY ----
+    if (savedProfile && savedProfile !== "undefined") {
+      try {
+        const parsedUser = JSON.parse(savedProfile);
+        if (parsedUser) {
+          activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim();
+        }
+      } catch (e) {
+        console.error("Failed to parse local storage profile tokens:", e);
+      }
     }
 
-    if (activeEmail) {
-      fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
-        .then(res => res.json())
-        .then(data => {
-          setName(data.name || '');
-          setEmail(data.email || '');
-          setPhone(data.phone || '');
-          setAddress(data.address || '');
-        })
-        .catch(err => console.error("Error pulling database profile info:", err));
+    if (!activeEmail) {
+      onNavigate('login');
+      return; 
     }
+
+    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Profile record not initialized yet");
+        return res.json();
+      })
+      .then(data => {
+        setName(data.name || data.customer_name || 'New Customer');
+        setEmail(data.email || data.customer_email || activeEmail);
+        setPhone(data.phone || data.phone_number || '-');
+        setAddress(data.address || '-');
+      })
+      .catch(err => {
+        console.error("Error pulling database profile info:", err);
+        setName('New Customer');
+        setEmail(activeEmail);
+        setPhone('-');
+        setAddress('-');
+      });
   }, []);
 
   const handleUpdateProfile = async (e) => {
@@ -53,7 +73,6 @@ const ProfilePage = ({ onNavigate }) => {
 
       if (response.ok) {
         setIsEditing(false);
-        // Sync local storage state tokens
         const userObj = { name, email, phone, address, role: 'customer' };
         localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
       } else {
@@ -105,9 +124,8 @@ const ProfilePage = ({ onNavigate }) => {
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Home Address</label>
-              <textarea type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
             </div>
-
             <div style={styles.btnRow}>
               {!isEditing ? (
                 <button type="button" onClick={() => setIsEditing(true)} style={styles.editBtn}>Edit Profile</button>
@@ -118,12 +136,6 @@ const ProfilePage = ({ onNavigate }) => {
                 </>
               )}
             </div>
-            <span 
-                onClick={() => onNavigate('forgotpassword')} 
-                style={{ color: '#f25278', cursor: 'pointer', fontSize: '13px', float: 'right' }}
-                >
-                Forgot password?
-            </span>
           </form>
         </div>
       </main>

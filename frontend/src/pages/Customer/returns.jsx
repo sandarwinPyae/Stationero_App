@@ -23,12 +23,55 @@ const ReturnsPage = ({ onNavigate }) => {
     { label: 'Logout', action: 'login' }
   ];
 
-  useEffect(() => {
+    useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
-    if (savedProfile) {
-      setCustomerProfile(JSON.parse(savedProfile));
+    let activeEmail = '';
+    
+    if (savedProfile && savedProfile !== "undefined") {
+      try {
+        const parsedUser = JSON.parse(savedProfile);
+        activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim();
+      } catch (e) {
+        console.error("Failed to parse local storage profile tokens during return page setup:", e);
+      }
     }
+
+    // Security Gate: Kick them back to login page if they are truly logged out
+    if (!savedProfile || savedProfile === "undefined" || !activeEmail) {
+      onNavigate('login');
+      return;
+    }
+
+    // ---- FIXED: FETCH LIVE ACCOUNT DATA DYNAMICALLY FROM THE DATABASE ----
+    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Failed to fetch profile");
+        return res.json();
+      })
+      .then(data => {
+        // FIXED: Maps ONLY the true database fields dynamically for whoever is logged in!
+        setCustomerProfile({
+          name: data.name || data.customer_name,
+          email: data.email || data.customer_email || activeEmail,
+          phone: data.phone || data.phone_number,
+          address: data.address
+        });
+      })
+      .catch(err => {
+        console.error("Profile load failed, keeping basic session:", err);
+      });
+
+    // Fetch dynamic return incremental sequence numbers
+    fetch(`http://localhost:8000/api/order/next-return/${activeEmail}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data && data.return_id) {
+          setReturnId(data.return_id); 
+        }
+      })
+      .catch(err => console.error("Error fetching dynamic return ID strings:", err));
   }, []);
+
 
   const handleReturnSubmit = async (e) => {
     e.preventDefault();
