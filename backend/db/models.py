@@ -53,7 +53,7 @@ class Product(Base):
 class SaleOrdersHeader(Base):
     __tablename__ = "sale_orders_header"
     sale_order_id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, ForeignKey("customer.customer_id"))
+    customer_email = Column("customer_id", String, ForeignKey("customer.customer_email"))
     invoice_number = Column(String, unique=True)
     total_amount = Column(Float)
     status = Column(String)
