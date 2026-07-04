@@ -163,3 +163,12 @@ class PurchaseReturnDetails(Base):
     purchase_return = relationship("PurchaseReturnHeader",back_populates="details")
     product = relationship("Product",back_populates="purchase_return_details")
     
+class Promotion(Base):
+    __tablename__ = "promotions"
+    promo_id = Column(Integer, primary_key=True, index=True)
+    promo_type = Column(String) # ဥပမာ - "hero", "category", "banner"
+    title = Column(String)
+    subtitle = Column(String, nullable=True)
+    discount_text = Column(String, nullable=True)
+    image_url = Column(String)
+    link_url = Column(String, nullable=True)
