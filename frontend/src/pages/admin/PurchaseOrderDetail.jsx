@@ -53,6 +53,7 @@ const PurchaseOrderDetail = () => {
     };
 
   if (!order) return <div className="p-10 text-center">Loading...</div>;
+  const isConfirmed = order.purchase_order_status === 'Confirmed';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -101,13 +102,13 @@ const PurchaseOrderDetail = () => {
                   <td className="p-3">{item.product_id}</td>
                   <td className="p-3">{item.product_name}</td>
                   <td className="p-3">
-                    <input type="number" className="w-16 border rounded p-1" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} />
+                    <input type="number" disabled={isConfirmed} className="w-16 border rounded p-1 disabled:bg-gray-100" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} />
                   </td>
                   <td className="p-3">
-                    <input type="number" className="w-24 border rounded p-1" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} />
+                    <input type="number" disabled={isConfirmed} className="w-24 border rounded p-1 disabled:bg-gray-100" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} />
                   </td>
                   <td className="p-3">
-                    <input type="number" className="w-24 border rounded p-1" value={item.selling_price || 0} onChange={(e) => handleItemChange(index, 'selling_price', e.target.value)} />
+                    <input type="number" disabled={isConfirmed} className="w-24 border rounded p-1 disabled:bg-gray-100" value={item.selling_price || 0} onChange={(e) => handleItemChange(index, 'selling_price', e.target.value)} />
                   </td>
                   <td className="p-3">{(item.quantity * item.unit_price).toFixed(2)}</td>
                 </tr>
@@ -117,11 +118,14 @@ const PurchaseOrderDetail = () => {
 
           <div className="text-right border-t pt-4">
             <p className="text-xl font-bold mb-4">Total Amount: {calculateTotal().toFixed(2)}</p>
-            <button 
-            onClick={handleUpdateOrder}
-            className="bg-[#F25278] text-white px-8 py-2 rounded-xl hover:bg-pink-600 transition">
-              Confirmed Received
-            </button>
+            {!isConfirmed && (
+              <button 
+                onClick={handleUpdateOrder}
+                className="bg-[#F25278] text-white px-8 py-2 rounded-xl hover:bg-pink-600 transition"
+              >
+                Confirmed Received
+              </button>
+            )}
           </div>
         </div>
       </div>

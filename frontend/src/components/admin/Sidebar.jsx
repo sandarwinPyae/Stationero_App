@@ -69,22 +69,16 @@ const Sidebar = () => {
             setIsPurchaseOpen(!isPurchaseOpen);
           }}
           // active={isActive('purchase-order') || isActive('purchase-return')} 
-          active={location.pathname === '/purchase'} 
+          active={location.pathname === '/purchase' || isActive('purchase/details/') || isActive('purchase/add')} 
         />
         {isPurchaseOpen && (
           <>
-            <NavItem 
-              icon="fa-solid fa-file-invoice" 
-              label="Purchase Order" 
-              onClick={() => navigate('/purchase-order')} 
-              active={isActive('purchase-order')} 
-              isSubMenu={true}
-            />
+            
             <NavItem 
               icon="fa-solid fa-right-left" 
               label="Purchase Return" 
-              onClick={() => navigate('/purchase-return')} 
-              active={isActive('purchase-return')} 
+              onClick={() => navigate('/purchase/returns')} 
+              active={isActive('purchase/returns')} 
               isSubMenu={true}
             />
           </>

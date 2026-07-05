@@ -73,8 +73,7 @@ const ProductList = () => {
 
   const handleDelete = async (id) => {
     try {
-      // 1. method ကို delete နဲ့ပြောင်းပါ
-      // 2. URL ကို backend မှာရေးထားတဲ့အတိုင်း /products/${id} လို့ပြောင်းပါ
+
       await axios.delete(`http://localhost:8000/products/${id}`);
       
       alert("Product moved to deleted list!");

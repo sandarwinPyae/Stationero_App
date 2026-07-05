@@ -101,12 +101,24 @@ const AddPurchaseOrderPage = () => {
     }
   };
 
+
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+    <div className="pt-4 pb-4 bg-gray-50 min-h-screen">
+      <div className="h-16 flex items-center justify-between px-6 bg-[#F8FAFC] border-b border-gray-200 mb-4">
+        <button 
+          onClick={() => navigate('/purchase')}
+          className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
+        >
+          <i className="fa-solid fa-arrow-left mr-2"></i> Back
+        </button>
+        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
+          <i className="fa-solid fa-user text-gray-500"></i>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
         <h2 className="text-xl font-bold mb-6">Create Purchase Order</h2>
         
-        <div className="grid grid-cols-2 gap-6 mb-6">
+        <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Supplier</label>
             <select 
@@ -140,7 +152,7 @@ const AddPurchaseOrderPage = () => {
             + Add Products
           </button>
         ) : (
-          <div className="border rounded-xl overflow-hidden mb-6">
+          <div className="border rounded-xl overflow-hidden mb-4">
             <table className="w-full text-sm text-left">
               <thead className="bg-gray-50">
                 <tr>
@@ -204,7 +216,6 @@ const AddPurchaseOrderPage = () => {
 
         {isFormVisible && (
           <div className="flex gap-4 mt-6">
-            <button type="button" onClick={() => navigate(-1)} className="px-8 py-2 border rounded-lg hover:bg-gray-50">Back</button>
             
             <button type="button" onClick={handleSaveOrder} className="bg-[#F25278] text-white px-8 py-2 rounded-lg font-semibold hover:bg-[#d94165] transition">
               Save Purchase Order

@@ -4,6 +4,7 @@ import axios from 'axios';
 
 const PurchasePage = () => {
   const [orders, setOrders] = useState([]);
+  const [returnedPoIds, setReturnedPoIds] = useState([]);
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -15,6 +16,24 @@ const PurchasePage = () => {
 
   useEffect(() => {
     fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [ordersRes, returnsRes] = await Promise.all([
+          axios.get('http://localhost:8000/purchase-orders'),
+          axios.get('http://localhost:8000/purchase/returns') 
+        ]);
+        
+        setOrders(ordersRes.data);
+        const ids = returnsRes.data.map(r => r.purchase_order_id);
+        setReturnedPoIds(ids);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    };
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -80,7 +99,6 @@ const PurchasePage = () => {
               <option value="">All Status</option>
               <option value="Pending">Pending</option>
               <option value="Confirmed">Confirmed</option>
-              <option value="Canceled">Canceled</option>
             </select>
           </div>
           <div>
@@ -106,30 +124,53 @@ const PurchasePage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {currentRecords.length > 0 ? (
-                currentRecords.map((order) => (
+            {currentRecords.length > 0 ? (
+              currentRecords.map((order) => {
+                const isReturned = returnedPoIds.includes(order.purchase_order_id);
+
+                return (
                   <tr key={order.purchase_order_id} className="hover:bg-gray-50 transition">
                     <td className="p-5 text-gray-700">{order.po_number}</td>
                     <td className="p-5 text-gray-700">{order.supplier?.supplier_name}</td>
-                    <td className="p-5 text-gray-700">{order.purchase_order_status}</td>
+                    <td className="p-5 text-gray-700">
+                      {order.purchase_order_status}
+                      {isReturned && (
+                        <span className="block text-[10px] text-red-500 font-bold uppercase mt-1">
+                          Already Returned
+                        </span>
+                      )}
+                    </td>
                     <td className="p-5 text-gray-700">
                       {new Date(order.purchase_order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     </td>
                     <td className="p-5 flex justify-center items-center gap-4">
-                      <button className="text-[#F25278] underline text-sm hover:text-pink-600">Returns</button>
+                      <button 
+                        className={`text-sm underline transition-colors ${
+                          (order.purchase_order_status === 'Confirmed' && !isReturned)
+                            ? 'text-blue-700 hover:text-blue-900 cursor-pointer' 
+                            : 'text-gray-400 cursor-not-allowed'
+                        }`}
+                        disabled={order.purchase_order_status !== 'Confirmed' || isReturned}
+                        onClick={() => {
+                          navigate(`/purchase/returns/${order.purchase_order_id}`);
+                        }}
+                      >
+                        {isReturned ? 'Returned' : 'Returns'}
+                      </button>
                       <button 
                         onClick={() => navigate(`/purchase/details/${order.purchase_order_id}`)} 
                         className="text-[#405169] hover:text-[#2d3a4d] transition"
                       >
                         <i className="fa-solid fa-eye"></i>
-                      </button>              
+                      </button>             
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr><td colSpan="5" className="p-10 text-center text-gray-500">No Data Found</td></tr>
-              )}
-            </tbody>
+                );
+              })
+            ) : (
+              <tr><td colSpan="5" className="p-10 text-center text-gray-500">No Data Found</td></tr>
+            )}
+          </tbody>
           </table>
         </div>
 

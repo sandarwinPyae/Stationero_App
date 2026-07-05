@@ -1,8 +1,9 @@
 from datetime import datetime
 import os
 import traceback
-from fastapi import APIRouter, Depends, HTTPException, Path
-from sqlalchemy.orm import Session, joinedload
+from fastapi import APIRouter, Depends, HTTPException
+from pathlib import Path
+from sqlalchemy.orm import Session, joinedload, selectinload
 from pydantic import BaseModel
 from typing import List, Optional
 from db.database import get_db
@@ -11,6 +12,26 @@ import subprocess
 import uuid
 
 router = APIRouter()
+
+class OrderItemCreate(BaseModel):
+    product_id: int
+    qty: int
+    unit_price: float
+    selling_price: float
+
+class PurchaseOrderCreateRequest(BaseModel):
+    supplier_id: int
+    payment_method: Optional[str] = "Cash"
+    items: List[OrderItemCreate]
+
+class ReturnItem(BaseModel):
+    product_id: int
+    returned_qty: int
+    unit_price: float
+
+class PurchaseReturnRequest(BaseModel):
+    refund_payment_method: str
+    items: List[ReturnItem]
 
 
 @router.get("/purchase-orders")
@@ -34,16 +55,6 @@ def get_products(db: Session = Depends(get_db)):
 def get_suppliers(db: Session = Depends(get_db)):
     return db.query(models.Supplier).filter(models.Supplier.del_flag == 0).all()
 
-class OrderItemCreate(BaseModel):
-    product_id: int
-    qty: int
-    unit_price: float
-    selling_price: float
-
-class PurchaseOrderCreateRequest(BaseModel):
-    supplier_id: int
-    payment_method: Optional[str] = "Cash"
-    items: List[OrderItemCreate]
 
 @router.post("/purchase-orders")
 def create_purchase_order(
@@ -58,8 +69,6 @@ def create_purchase_order(
         
         cobol_input_text = "\n".join(cobol_input_lines) + "\n"
 
-        # base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        # cobol_exe_path = os.path.join(base_dir, "bin", "CALCPO.exe")
         base_dir = Path(__file__).resolve().parent.parent.parent 
         cobol_exe_path = base_dir / "bin" / "CALCPO.exe"
 
@@ -140,7 +149,7 @@ def get_purchase_order_details(id: int, db: Session = Depends(get_db)):
         
     return {
         "po_number": order.po_number,
-        "purchase_order_date": order.purchase_order_date, # Date ထည့်ပေးလိုက်ပါပြီ
+        "purchase_order_date": order.purchase_order_date,
         "purchase_order_status": order.purchase_order_status,
         "total_amount": order.total_amount,
         "supplier": {
@@ -183,17 +192,119 @@ def confirm_purchase_order(id: int, update_data: dict, db: Session = Depends(get
             detail.qty = item.get('quantity', detail.qty)
             detail.unit_price = item.get('unit_price', detail.unit_price)
             
-            # ၂။ Product table ကို update လုပ်ခြင်း
             product = db.query(models.Product).filter(models.Product.product_id == p_id).first()
             if product:
-                # Stock (Quantity) ပေါင်းထည့်ခြင်း
+                # Stock (Quantity) 
                 product.current_qty = (product.current_qty or 0) + item.get('quantity', 0)
                 
-                # Product table ထဲမှ Price များကို Update လုပ်ခြင်း
-                # သင့် Product model ထဲမှာ column နာမည်တွေက purchase_price / selling_price ဟုတ်မဟုတ် စစ်ပေးပါ
+ 
                 product.selling_price = item.get('selling_price', product.selling_price)
                 
                 product.unit_price = item.get('unit_price', product.unit_price)
                 
     db.commit()
     return {"message": "Order confirmed, Stock and Product Prices updated successfully"}
+
+# for purchase return process
+@router.post("/purchase/return/{id}")
+def confirm_purchase_return(id: int, return_request: PurchaseReturnRequest, db: Session = Depends(get_db)):
+    try:
+        total_refunded = sum([item.returned_qty * item.unit_price for item in return_request.items])
+
+        new_return_header = models.PurchaseReturnHeader(
+            purchase_order_id=id,
+            total_amount=total_refunded,
+            purchase_return_payment_method=return_request.refund_payment_method,
+            purchase_return_date=datetime.now()
+        )
+        db.add(new_return_header)
+        db.flush()  
+        
+        for item in return_request.items:
+            if item.returned_qty > 0:
+                product = db.query(models.Product).filter(models.Product.product_id == item.product_id).first()
+                
+                if product:
+                    base_dir = Path(__file__).resolve().parent.parent.parent
+                    exe_path = base_dir / "bin" / "PROCESS_RETURN.exe"
+                    cobol_input = f"{product.current_qty} {item.returned_qty}\n"
+
+                    try:
+                        process = subprocess.run(
+                            [str(exe_path)],
+                            input=cobol_input,
+                            text=True,
+                            capture_output=True,
+                            check=True
+                        )
+                        
+                        new_qty = int(process.stdout.strip())
+                        print("Input :", cobol_input)
+                        print("Output:", new_qty)
+                        print("Error :", process.stdout)
+                        
+                        product.current_qty = new_qty 
+                        
+                        new_detail = models.PurchaseReturnDetails(
+                            purchase_return_id=new_return_header.purchase_return_id,
+                            product_id=item.product_id,
+                            returned_qty=item.returned_qty,
+                            unit_price=item.unit_price,
+                            returned_amount=item.returned_qty * item.unit_price
+                        )
+
+                        db.add(new_detail)
+                        
+                    except subprocess.CalledProcessError as e:
+                        raise HTTPException(status_code=500, detail=f"Stock Calculation Error: {e.stderr}")
+                else:
+                    raise HTTPException(status_code=404, detail=f"Product {item.product_id} not found")
+        
+        db.commit()
+        return {"status": "success", "message": "Return record created and stock updated."}
+
+    except Exception as e:
+        db.rollback()
+        traceback.print_exc()
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+    
+# for purchase return list page
+@router.get("/purchase/returns")
+def read_purchase_return_header(db: Session = Depends(get_db)):
+    po_returns = (
+        db.query(models.PurchaseReturnHeader)
+        .options(
+            joinedload(models.PurchaseReturnHeader.purchase_order)
+            .joinedload(models.PurchaseOrdersHeader.supplier) 
+        )
+        .order_by(models.PurchaseReturnHeader.purchase_return_id.desc())
+        .all()
+    )
+    if not po_returns:
+        return []
+        
+    return po_returns
+
+# for purchase return details
+@router.get("/purchase/return/details/{id}")
+def get_return_details(id: int, db: Session = Depends(get_db)):
+    return_details = (
+        db.query(models.PurchaseReturnHeader)
+        .options(
+            joinedload(models.PurchaseReturnHeader.purchase_order)
+            .joinedload(models.PurchaseOrdersHeader.supplier),
+            
+            selectinload(models.PurchaseReturnHeader.details)
+            .joinedload(models.PurchaseReturnDetails.product) # Details ထဲက Product ကို ချိတ်ယူခြင်း
+        )
+        .filter(models.PurchaseReturnHeader.purchase_return_id == id)
+        .first()
+    )
+    
+    if not return_details:
+        raise HTTPException(status_code=404, detail="Return not found")
+        
+    return return_details
