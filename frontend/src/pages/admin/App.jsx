@@ -17,6 +17,8 @@ import PurchaseOrderDetail from './PurchaseOrderDetail';
 import PurchaseReturnsPage from './PurchaseReturnsPage';
 import PurchaseReturnList from './PurchaseReturnList';
 import PurchaseReturnDetails from './PurchaseReturnDetails';
+import InventoryStockReport from "./InventoryStockReport";
+import LowStockReport from "./InventoryLowStockReport";
 
 function App() {
   return (
@@ -41,8 +43,9 @@ function App() {
             <Route path="/purchase/details/:id" element={<PurchaseOrderDetail />} />
             <Route path="/purchase/returns/:id" element={<PurchaseReturnsPage />} />   
             <Route path='/purchase/returns' element={<PurchaseReturnList/>} />     
-            <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} />    
-            
+            <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} />   
+            <Route path="/stock-report" element={<InventoryStockReport />} /> 
+            <Route path="/low-stock-report" element={<LowStockReport />} />
           </Routes>
         </div>
       </div>
