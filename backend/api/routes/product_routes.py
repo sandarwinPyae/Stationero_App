@@ -53,7 +53,7 @@ async def add_product(
         selling_price=selling_price,
         current_qty=current_qty,
         product_description=description,
-        product_img_url=file_path # Path ကိုသာ သိမ်းပါ
+        product_img_url=file_path 
     )
     db.add(new_product)
     db.commit()

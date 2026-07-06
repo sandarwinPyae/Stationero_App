@@ -67,10 +67,6 @@ const ProductList = () => {
     }
   };
 
-  // useEffect(() => {
-  //   setCurrentPage(1);
-  // }, [search, selectedCategory, activeTab]);
-
   const handleDelete = async (id) => {
     try {
 

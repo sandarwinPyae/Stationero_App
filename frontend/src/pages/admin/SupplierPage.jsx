@@ -54,7 +54,7 @@ const SupplierPage = () => {
     try {
       await axios.delete(`http://localhost:8000/suppliers/${id}`);
       alert("Supplier deleted successfully!");
-      setIsModalOpen(false); // Modal ပိတ်ရန်
+      setIsModalOpen(false); 
       fetchSuppliers(); 
     } catch (error) {
       console.error("Error deleting supplier:", error);

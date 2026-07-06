@@ -12,7 +12,6 @@ const UpdateSupplierPage = () => {
     supplier_address: ''
   });
 
-  // Page စတက်တာနဲ့ Data ကို ID နဲ့ လှမ်းခေါ်ခြင်း
   useEffect(() => {
     const fetchSupplier = async () => {
       try {

@@ -11,12 +11,11 @@ const AddCategoryPage = () => {
     if (!categoryName.trim()) return alert("Please enter a category name");
 
     try {
-      // Backend route နှင့် ချိတ်ဆက်ပါ
       await axios.post('http://localhost:8000/categories/add', { 
         category_name: categoryName 
       });
       alert("Category added successfully!");
-      navigate('/categories'); // သင်၏ category list page သို့ ပြန်သွားရန်
+      navigate('/categories'); 
     } catch (error) {
       console.error("Error saving category:", error);
       alert("Failed to save category. Please check your backend.");
