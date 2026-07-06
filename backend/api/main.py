@@ -9,6 +9,8 @@ from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc, or_
 from pydantic import BaseModel, EmailStr
+from fastapi import UploadFile, File, Form # 🌟 အပေါ်ဆုံးမှာ ဒါလေးတွေပါအောင် ထည့်ပါ
+from datetime import datetime
 
 # =====================================================================
 # 🌟 PATH CONFIGURATION (Folder Structure အမှန်အတိုင်း အတိအကျ ချိန်ညှိထားခြင်း)
@@ -52,6 +54,12 @@ IMAGE_DIR = os.path.join(BACKEND_DIR, "images")
 if not os.path.exists(IMAGE_DIR):
     os.makedirs(IMAGE_DIR)
 app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
+
+# 🌟 RETURN IMAGES PATH (Return ပုံများအတွက် သီးသန့် Folder အသစ် ဆောက်ခြင်း) 🌟
+RETURN_IMAGE_DIR = os.path.join(BACKEND_DIR, "return_images")
+if not os.path.exists(RETURN_IMAGE_DIR):
+    os.makedirs(RETURN_IMAGE_DIR)
+app.mount("/return-images", StaticFiles(directory=RETURN_IMAGE_DIR), name="return_images")
 
 # --- 3. COBOL CONFIGURATION ---
 # 🌟 COBOL PATH (STATIONERO_APP/backend/cobol/customer_engine.exe သို့ ချိတ်ဆက်ခြင်း)
@@ -198,7 +206,9 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
             
         new_order_header = SaleOrdersHeader(
             customer_email=payload.customer_email, invoice_number=generated_system_invoice,
-            total_amount=payload.net_amount, status="Pending" 
+            total_amount=payload.net_amount, status="Pending",
+            order_date=datetime.now(),
+            payment_method=payload.payment_method
         )
         db.add(new_order_header)
         db.flush() 
@@ -271,13 +281,15 @@ def record_customer_order_return(payload: CustomerReturnEntryRequest, db: Sessio
 @app.get("/api/order/history-logs/{customer_email}")
 def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)):
     try:
-        orders_query = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.customer_email == customer_email).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
+        orders_query = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.customer_email == customer_email).order_by(SaleOrdersHeader.sale_order_id.asc()).all()
         orders_list = []
         for index, o in enumerate(orders_query, start=1):
             orders_list.append({
                 "invoice_number": f"INV{index:05d}", "status": o.status if o.status else "Pending",
-                "total_amount": o.total_amount, "payment_method": "Cash Down", "sale_person": "Hsu Myat",
-                "order_date": o.order_date.strftime("%Y-%m-%d %H:%M:%S") if o.order_date else "2026-07-03 11:45:00"
+                "total_amount": o.total_amount, 
+                "payment_method": getattr(o, 'payment_method', 'Cash Down'), # 🌟 Dynamic
+                "sale_person": getattr(o, 'sale_person', 'Pending Assign'), # 🌟 Dynamic (Hsu Myat အစား)
+                "order_date": o.order_date.strftime("%Y-%m-%d %H:%M:%S") if o.order_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             })
 
         user_order_ids = [o.sale_order_id for o in orders_query]
@@ -287,10 +299,10 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
             for index, r in enumerate(returns_query, start=1):
                 returns_list.append({
                     "invoice_number": f"RTN{index:05d}", "status": "Returned",
-                    "total_amount": r.total_returned_amount if r.total_returned_amount else 3300.0,
+                    "total_amount": r.total_returned_amount if r.total_returned_amount else 0.0, # 🌟 3300.0 အစား 0.0
                     "payment_method": r.sale_return_payment_method if r.sale_return_payment_method else "Cash Down",
-                    "sale_person": "Hsu Myat",
-                    "order_date": r.sale_return_date.strftime("%Y-%m-%d %H:%M:%S") if r.sale_return_date else "2026-07-03 11:55:00"
+                    "sale_person": getattr(r, 'sale_person', 'Pending Assign'), # 🌟 Dynamic
+                    "order_date": r.sale_return_date.strftime("%Y-%m-%d %H:%M:%S") if getattr(r, 'sale_return_date', None) else datetime.now().strftime("%Y-%m-%d %H:%M:%S") # 🌟 Dynamic အချိန်အစစ်
                 })
         return {"orders": orders_list, "returns": returns_list}
     except Exception as e:
@@ -473,3 +485,66 @@ def get_product_detail(product_id: int, db: Session = Depends(get_db)):
         "product_img_url": product.product_img_url
        
     }
+# 🌟 Returns.jsx မှ လှမ်းပို့လိုက်သော Data များကို လက်ခံမည့် API 🌟
+@app.post("/api/order/return-status")
+async def simple_return_status(
+    customer_email: str = Form(...),
+    product_name: str = Form(...),
+    qty: int = Form(...),
+    reason: str = Form(...),
+    payment_method: str = Form(...),
+    file: Optional[UploadFile] = File(None), # 🌟 ပြင်ဆင်ချက်: အနောက်တွင် ကော်မာ ( , ) ထည့်ပေးလိုက်ပါပြီ
+    db: Session = Depends(get_db)
+):
+    try:
+        # ၁။ ရိုက်ထည့်လိုက်သော Product Name ဖြင့် product_id နှင့် စျေးနှုန်းကို ရှာဖွေခြင်း
+        product = db.query(Product).filter(Product.product_name.ilike(f"%{product_name}%"), Product.del_flag == 0).first()
+        if not product:
+            raise HTTPException(status_code=404, detail="Product name not found in inventory.")
+
+        # ၂။ Customer ၏ နောက်ဆုံး Order Header ကို ရှာဖွေခြင်း
+        last_order = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.customer_email == customer_email).order_by(SaleOrdersHeader.sale_order_id.desc()).first()
+        if not last_order:
+            raise HTTPException(status_code=404, detail="No order history found for this customer.")
+
+        # ၃။ ပုံပါလာပါက သီးသန့်ဆောက်ထားသော backend/return_images ဖိုင်တွဲထဲသို့ သွားသိမ်းခြင်း
+        file_name = None
+        file_name = None
+        if file and file.filename: 
+            safe_filename = file.filename.replace(" ", "_")
+            file_name = f"return_{customer_email}_{safe_filename}"
+            file_path = os.path.join(RETURN_IMAGE_DIR, file_name)
+            
+            with open(file_path, "wb") as buffer:
+                buffer.write(await file.read())
+
+        # ၄။ Return Header ကို Database ထဲ သိမ်းခြင်း (ပုံ၏ File Name ပါတွဲသိမ်းမည်)
+        computed_subtotal = qty * product.selling_price
+        new_return_header = SaleReturnHeader(
+            sale_order_id=last_order.sale_order_id,
+            total_returned_amount=computed_subtotal,
+            sale_return_payment_method=payment_method,
+            return_reason=reason,
+            return_img_url=file_name # 🌟 ပုံအမည်ကို DB တွင် သိမ်းဆည်းခြင်း
+        )
+        db.add(new_return_header)
+        db.flush()
+
+        # ၅။ Return Details ထဲသို့ Data သွင်းခြင်း
+        new_return_detail = SaleReturnDetails(
+            sale_return_id=new_return_header.sale_return_id,
+            product_id=product.product_id,
+            qty=qty,
+            selling_price=product.selling_price,
+            sub_total=computed_subtotal
+        )
+        db.add(new_return_detail)
+        db.commit()
+
+        return {"status": "Success", "message": "Return request logged completely for admin review."}
+    except Exception as e:
+        db.rollback()
+        # 🌟 Error အသေးစိတ်ကို Terminal တွင် ပိုမိုရှင်းလင်းစွာ ပြပေးလိမ့်မည်
+        import traceback
+        traceback.print_exc() 
+        raise HTTPException(status_code=500, detail=str(e))

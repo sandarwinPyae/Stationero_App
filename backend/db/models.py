@@ -2,8 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
-import datetime
-
+from datetime import datetime
 class User(Base):
     __tablename__ = "users"
     user_id = Column(Integer, primary_key=True, index=True)
@@ -58,7 +57,8 @@ class SaleOrdersHeader(Base):
     invoice_number = Column(String, unique=True)
     total_amount = Column(Float)
     status = Column(String)
-    order_date = Column(DateTime, default=func.now())
+    order_date = Column(DateTime, default=datetime.now)
+    payment_method = Column(String, default="Cash Down")
     customer = relationship("Customer", back_populates="orders")
     details = relationship("SaleOrdersDetails", back_populates="sale_order")
     payments = relationship("Payment",back_populates="sale_order")
@@ -92,6 +92,7 @@ class SaleReturnHeader(Base):
     sale_return_payment_method = Column(String)
     sale_return_date = Column(DateTime, default=func.now())
     return_reason = Column(String)
+    return_img_url = Column(String, nullable=True)
     sale_order = relationship("SaleOrdersHeader",back_populates="sale_returns")
     details = relationship("SaleReturnDetails",back_populates="sale_return")
     

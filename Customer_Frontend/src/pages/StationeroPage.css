@@ -1,0 +1,623 @@
+/* Base Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  color: #333;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.highlight {
+  color: #F84C7B;
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 25px;
+  padding: 10px 25px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
+}
+
+.btn:hover {
+  opacity: 0.8;
+}
+
+/* Login / Sign Up ခလုတ် ပုံမှန်အချိန် */
+.btn-auth {
+  background-color: #F84C7B;
+  color: #fff;
+  /* စာသားပိုပေါ်အောင် #222 ကနေ #fff အဖြူရောင် ပြောင်းပေးထားတယ် */
+  margin-left: 15px;
+  border-radius: 25px;
+  padding: 10px 25px;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  /* Animation ကို Smooth ဖြစ်အောင် ထည့်ထားတယ် */
+}
+
+/* Mouse ထောက်လိုက်တဲ့အချိန် (Hover) */
+.btn-auth:hover {
+  background-color: #D1355D;
+  /* အရောင် ပိုရင့်သွားမယ် */
+  transform: translateY(-2px);
+  /* အပေါ်ကို နည်းနည်းလေး ကြွတက်လာမယ် */
+  box-shadow: 0 4px 8px rgba(248, 76, 123, 0.3);
+  /* အရိပ်လေး ထွက်လာမယ် */
+}
+
+/* Click နှိပ်လိုက်တဲ့အချိန် (Active) */
+.btn-auth:active {
+  transform: scale(0.95);
+  /* နှိပ်လိုက်ရင် အောက်ကို ချိုင့်ဝင်သွားမယ် */
+  box-shadow: none;
+  /* အရိပ် ပျောက်သွားမယ် */
+}
+
+.btn-shop-outline {
+  background-color: #fff;
+  color: #F84C7B;
+  border: 1.5px solid #F84C7B;
+  border-radius: 25px;
+  padding: 12px 28px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-shop-small {
+  background-color: transparent;
+  color: #F84C7B;
+  border: 1.5px solid #F84C7B;
+  border-radius: 25px;
+  padding: 12px 32px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-shop-small:hover {
+  background-color: #F84C7B;
+  color: #fff;
+}
+
+.btn-shop-small:active {
+  transform: scale(0.95);
+  background-color: #D1355D;
+  border-color: #D1355D;
+}
+
+/* Navbar */
+.navbar {
+  background-color: #fff;
+  padding: 15px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  font-size: 1.8em;
+  font-weight: 800;
+  color: #F84C7B;
+  margin: 0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background-color: #F3F3F3;
+  border: 1px solid #F84C7B;
+  border-radius: 25px;
+  padding: 8px 15px;
+  width: 250px;
+}
+
+.search-icon {
+  width: 16px;
+  height: 16px;
+  color: #F84C7B;
+  margin-right: 8px;
+}
+
+.search-bar input {
+  border: none;
+  background-color: transparent;
+  outline: none;
+  font-size: 0.95em;
+  width: 100%;
+}
+
+.nav-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+}
+
+.nav-links a {
+  font-weight: bold !important;
+  /* 🌟 စာလုံးအထူဖြစ်စေရန် */
+  color: black;
+  /* စာသားအရောင် အမည်း */
+  text-decoration: none;
+}
+
+.nav-links li {
+  margin-left: 30px;
+}
+
+/* Navbar စာသား ပုံမှန်အချိန် */
+.nav-links li a {
+  text-decoration: none;
+  color: #000;
+  font-weight: 500;
+  /* စာလုံးကို နည်းနည်းလေး ပိုထူပေးထားတယ် */
+  font-size: 0.95em;
+  transition: all 0.3s ease;
+  /* အရောင်ရော အရွယ်အစားရော Smooth ဖြစ်အောင် all ပြောင်းထားတယ် */
+  display: inline-block;
+  /* Scale လုပ်ဖို့အတွက် ဒါလေးလိုတယ် */
+}
+
+/* လက်ရှိရောက်နေတဲ့ Page (Active) */
+.nav-links li a.active {
+  color: #F84C7B !important;
+  font-weight: bold;
+}
+
+/* Mouse ထောက်လိုက်တဲ့အချိန် (Hover) */
+.nav-links li a:hover {
+  color: #F84C7B;
+  /* ပန်းရောင် ပြောင်းသွားမယ် */
+  transform: scale(1.1);
+  /* စာသားလေး နည်းနည်း ပိုကြီးသွားမယ် (ပိုသိသာအောင်လို့ပါ) */
+}
+
+/* Click နှိပ်လိုက်တဲ့အချိန် (Active) */
+.nav-links li a:active {
+  transform: scale(0.95);
+  /* နှိပ်လိုက်ရင် သေးသွားမယ် */
+}
+
+/* Hero Section */
+.hero {
+  background-size: cover;
+  background-position: center;
+  height: 550px;
+  display: flex;
+  align-items: center;
+}
+
+.hero-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.hero-content {
+  max-width: 50%;
+  text-align: left;
+}
+
+.hero-title {
+  font-size: 3.5em;
+  font-weight: 900;
+  color: #000;
+  margin-bottom: 15px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 1.1em;
+  color: #000;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+/* Category Offers */
+.category-offers {
+  padding: 60px 0;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 30px;
+  width: 100%;
+}
+
+.offer-card {
+  background-size: cover;
+  background-position: center;
+  height: 250px;
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.offer-content {
+  position: absolute;
+  top: 50%;
+  left: 30px;
+  transform: translateY(-50%);
+  text-align: left;
+  color: #fff;
+}
+
+.offer-title {
+  font-size: 1.8em;
+  font-weight: 800;
+  margin-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.offer-discount {
+  font-size: 1.4em;
+  font-weight: 700;
+  margin: 0;
+}
+
+/* Best Selling Section & Product Grid */
+.best-selling {
+  padding: 40px 0 80px;
+  background-color: #fff;
+}
+
+.best-selling-container {
+  flex-direction: column;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.2em;
+  font-weight: 800;
+  margin-bottom: 15px;
+}
+
+.section-subtitle {
+  font-size: 1em;
+  color: #555;
+  line-height: 1.6;
+}
+
+.product-grid {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  margin-top: 40px;
+  width: 100%;
+}
+
+.product-card {
+  width: 300px;
+  text-align: left;
+  /* အလယ်ကနေ ဘယ်ဘက်ကို ပြောင်းလိုက်ပါပြီ */
+}
+
+/* စာသားတွေ ဘယ်ဘက်ကပ်နေအောင် မargin လေး နည်းနည်းချိန်ပေးပါ */
+.product-name {
+  color: #F84C7B;
+  font-size: 1.2em;
+  font-weight: 700;
+  margin: 10px 0 5px 0;
+  /* အပေါ် margin ထပ်ထည့်ပေးထားပါတယ် */
+}
+
+.product-price-tag {
+  color: #222;
+  font-size: 1.1em;
+  font-weight: 600;
+  margin: 0;
+}
+
+.product-img-box {
+  width: 100%;
+  height: 350px;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+}
+
+.product-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+
+/* Promo Banner Section */
+.promo-banner {
+  padding: 40px 0;
+}
+
+.promo-wrapper {
+  display: flex;
+  align-items: stretch;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.promo-text-side {
+  flex: 1;
+  background-color: #E2E2E3;
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.promo-subtitle {
+  color: #F84C7B;
+  font-size: 1.1em;
+  font-weight: 800;
+  margin: 0 0 15px 0;
+  letter-spacing: 1px;
+}
+
+.promo-title {
+  font-size: 2.2em;
+  font-weight: 900;
+  color: #111;
+  margin: 0 0 15px 0;
+  letter-spacing: 2px;
+}
+
+.squiggly-line {
+  margin-bottom: 40px;
+}
+
+.promo-price {
+  color: #F84C7B;
+  font-size: 1.6em;
+  font-weight: bold;
+  margin: 0 0 30px 0;
+}
+
+.btn-promo-shop {
+  background-color: transparent;
+  color: #F84C7B;
+  border: 1px solid #F84C7B;
+  border-radius: 25px;
+  padding: 10px 30px;
+  font-size: 0.9em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-promo-shop:hover {
+  background-color: #F84C7B;
+  color: #fff;
+}
+
+.promo-image-side {
+  flex: 1;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+.promo-image-side img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Experience Section */
+.experience-section {
+  width: 100%;
+  padding: 40px 0;
+  /* အပေါ်အောက် နေရာအလွတ် */
+  display: flex;
+  justify-content: center;
+}
+
+/* Background ပုံကို ဒီမှာ ထိန်းချုပ်ထားတယ် */
+.experience-wrapper {
+  width: 100%;
+  height: 650px;
+  /* အလျားတိုသွားအောင် height ကို 320px ထိ လျှော့ချထားတယ် */
+  background-size: cover;
+  background-position: left center;
+  /* ဘယ်ဘက်က ခဲတံပုံတွေ မပြတ်သွားအောင် left ကို ကပ်ထားတယ် */
+  background-repeat: no-repeat;
+  background-color: #EFECE9;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  /* စာတွေကို ညာဘက် ကပ်ပေးတယ် */
+  /* UI ပုံစံအတိုင်း ဘေးဘောင်လေးတွေ နည်းနည်း ဝိုင်းချင်ရင် အောက်ကဟာ သုံးပါ */
+  /* border-radius: 8px; */
+}
+
+.exp-content {
+  text-align: center;
+  padding-right: 80px;
+  /* ညာဘက်ဘောင်နဲ့ အရမ်းမကပ်အောင် ချိန်ထားတယ် */
+}
+
+.exp-label {
+  font-size: 0.85em;
+  color: #555;
+  letter-spacing: 0.5px;
+  margin-bottom: 15px;
+}
+
+.exp-title {
+  font-size: 2.4em;
+  color: #222;
+  margin: 0 0 25px 0;
+  line-height: 1.25;
+  font-weight: 600;
+}
+
+/* Button: ပုံမှန်အချိန် ပန်းရောင် */
+/* Button: ပုံမှန်အချိန် (Mouse မထောက်ခင် ဘောင်လေးနဲ့ ပုံစံ) */
+.btn-exp-shop {
+  background-color: transparent;
+  /* နောက်ခံကို အကြည်ထားပါမယ် */
+  color: #F84C7B;
+  /* စာသားကို ပန်းရောင်ထားပါမယ် */
+  border: 1.5px solid #F84C7B;
+  /* ပန်းရောင် ဘောင်ကွပ်ပါမယ် */
+  border-radius: 25px;
+  padding: 10px 28px;
+  font-size: 0.8em;
+  font-weight: bold;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  /* ပြောင်းလဲတဲ့အခါ Smooth ဖြစ်အောင် အချိန်နည်းနည်းဆွဲထားတယ် */
+}
+
+/* Mouse ထောက်လိုက်တဲ့အချိန် (Hover - အရောင်ပြည့်သွားမယ့်ပုံစံ) */
+.btn-exp-shop:hover {
+  background-color: #F84C7B;
+  /* နောက်ခံက ပန်းရောင် ပြည့်သွားမယ် */
+  color: #fff;
+  /* နောက်ခံ ပန်းရောင်ဖြစ်သွားလို့ စာသားကို အဖြူရောင် ပြောင်းလိုက်မယ် */
+}
+
+/* Click နှိပ်လိုက်တဲ့အချိန် (Active) */
+.btn-exp-shop:active {
+  transform: scale(0.95);
+  /* နှိပ်လိုက်ရင် ခလုတ်လေး အောက်ကို ချိုင့်ဝင်သွားမယ် */
+  background-color: #D1355D;
+  /* နှိပ်လိုက်ချိန်မှာ အရောင်ပိုရင့်သွားမယ် */
+  border-color: #D1355D;
+  /* ဘောင်အရောင်ပါ လိုက်ရင့်သွားမယ် */
+}
+
+/* First Order Promotion Section (Background ပုံနဲ့) */
+.first-order-section {
+  background-color: #6BBAB4;
+  /* ပုံမပေါ်လာခဲ့ရင် ပြမယ့် အပြာနုရောင် နောက်ခံ */
+  background-size: cover;
+  background-position: right center;
+  /* ခဲတံပုံက ညာဘက်မှာရှိလို့ ညာဘက်ကို ကပ်ထားတယ် */
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  /* စာတွေကို အလယ်တည့်တည့် ရောက်အောင် */
+  padding: 0 80px;
+  /* ဘယ်ဘက်ကနေ နည်းနည်း ခွာထားတယ် */
+  height: 300px;
+  /* UI နဲ့ အချိုးကျအောင် အမြင့် သတ်မှတ်ထားတယ် */
+  margin-top: 40px;
+}
+
+.first-order-content {
+  color: #111;
+}
+
+.first-order-content h2 {
+  font-size: 2.2em;
+  font-weight: 800;
+  margin: 0 0 5px 0;
+  letter-spacing: 1px;
+}
+
+.first-order-content p {
+  font-size: 1.1em;
+  margin: 0 0 25px 0;
+  color: #222;
+}
+
+/* Sign Up Button (ပုံမှန်အချိန်) */
+.btn-sign-up-offer {
+  background-color: transparent;
+  color: #F84C7B;
+  border: 1.5px solid #F84C7B;
+  border-radius: 25px;
+  padding: 10px 32px;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Mouse ထောက်လိုက်တဲ့အချိန် (Hover - သိသာအောင် လုပ်ထားတယ်) */
+.btn-sign-up-offer:hover {
+  background-color: #F84C7B;
+  color: #fff;
+  transform: translateY(-2px);
+  /* အပေါ်ကို ကြွတက်လာမယ် */
+  box-shadow: 0 4px 8px rgba(248, 76, 123, 0.3);
+  /* အရိပ်လေး ထွက်လာမယ် */
+}
+
+/* Click နှိပ်လိုက်တဲ့အချိန် (Active) */
+.btn-sign-up-offer:active {
+  transform: scale(0.95);
+  /* အောက်ကို ချိုင့်ဝင်သွားမယ် */
+  box-shadow: none;
+  background-color: #D1355D;
+  /* အရောင် ရင့်သွားမယ် */
+  border-color: #D1355D;
+}
+
+
+
+/* လင့်ခ်တွေ အားလုံးကို တစ်တန်းတည်းဖြစ်အောင် စီမယ် */
+.user-nav-links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
+  /* ညာဘက်ကို ကပ်နေအောင် */
+}
+
+/* လင့်ခ်တွေများလို့ တစ်ခုနဲ့တစ်ခု ကြားအကွာအဝေးကို 30px ကနေ 18px ကို လျှော့လိုက်တယ် */
+.user-nav-links li {
+  margin-left: 18px;
+}
+
+/* ပုံမှန်အချိန် စာသားဒီဇိုင်း */
+.user-nav-links li a {
+  font-size: 0.85em;
+  /* နေရာဆံ့အောင် စာလုံး နည်းနည်း သေးလိုက်တယ် */
+  color: #333;
+  font-weight: 600;
+  /* စာလုံးကို နည်းနည်း ထူထားမယ် */
+  text-decoration: none;
+  transition: all 0.3s ease;
+  /* Hover လုပ်တဲ့အခါ Smooth ဖြစ်အောင် */
+  display: inline-block;
+}
+
+/* လက်ရှိရောက်နေတဲ့ Page (Active) */
+.user-nav-links li a.active {
+  color: #F84C7B;
+  font-weight: 800;
+}
+
+/* 🖱️ Mouse ထောက်လိုက်တဲ့အချိန် (Hover Effect) */
+.user-nav-links li a:hover {
+  color: #F84C7B;
+  /* ပန်းရောင် ပြောင်းသွားမယ် */
+  transform: scale(1.1);
+  /* မောက်စ်တင်ရင် စာလုံးလေး နည်းနည်း ကြီးလာမယ် */
+}
+
+/* Click နှိပ်လိုက်တဲ့အချိန် (Active Effect) */
+.user-nav-links li a:active {
+  transform: scale(0.95);
+  /* နှိပ်လိုက်ရင် သေးသွားမယ် */
+}
