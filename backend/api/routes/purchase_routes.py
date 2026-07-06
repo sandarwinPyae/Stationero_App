@@ -3,6 +3,7 @@ import os
 import traceback
 from fastapi import APIRouter, Depends, HTTPException
 from pathlib import Path
+from sqlalchemy import func
 from sqlalchemy.orm import Session, joinedload, selectinload
 from pydantic import BaseModel
 from typing import List, Optional
@@ -308,3 +309,61 @@ def get_return_details(id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Return not found")
         
     return return_details
+
+
+# purchase summary report
+@router.get("/purchase-reports")
+def get_purchase_summary(db: Session = Depends(get_db)):
+    purchases = db.query(models.PurchaseOrdersHeader)\
+                  .options(
+                      joinedload(models.PurchaseOrdersHeader.supplier), 
+                      joinedload(models.PurchaseOrdersHeader.details)   
+                      .joinedload(models.PurchaseOrdersDetails.product)
+                  )\
+                  .order_by(models.PurchaseOrdersHeader.purchase_order_id.desc())\
+                  .all()
+    return purchases
+
+@router.get("/purchase-returns-summary")
+def get_purchase_returns(db: Session = Depends(get_db)):
+    returns = db.query(models.PurchaseReturnHeader)\
+                .options(
+                    joinedload(models.PurchaseReturnHeader.purchase_order),
+                    joinedload(models.PurchaseReturnHeader.details)
+                    .joinedload(models.PurchaseReturnDetails.product)
+                ).all()
+    return returns
+
+@router.get("/supplier-wise")
+def get_supplier_wise_purchase(db: Session = Depends(get_db)):
+    po_subquery = db.query(
+        models.PurchaseOrdersDetails.purchase_order_id,
+        func.sum(models.PurchaseOrdersDetails.qty).label("qty"),
+        func.sum(models.PurchaseOrdersDetails.sub_total).label("amount")
+    ).group_by(models.PurchaseOrdersDetails.purchase_order_id).subquery()
+
+    results = db.query(
+        models.Supplier.supplier_id,
+        models.Supplier.supplier_name,
+        func.count(models.PurchaseOrdersHeader.purchase_order_id).label("total_order"),
+        func.sum(po_subquery.c.qty).label("total_qty"),
+        func.sum(po_subquery.c.amount).label("total_amount")
+    ).join(models.PurchaseOrdersHeader, models.Supplier.supplier_id == models.PurchaseOrdersHeader.supplier_id)\
+     .join(po_subquery, models.PurchaseOrdersHeader.purchase_order_id == po_subquery.c.purchase_order_id)\
+     .filter(models.PurchaseOrdersHeader.purchase_order_status == 'Confirmed')\
+     .group_by(models.Supplier.supplier_id, models.Supplier.supplier_name)\
+     .order_by(func.sum(po_subquery.c.amount).desc())\
+     .all()
+
+    output = [
+        {
+            "supplier_id": row.supplier_id,
+            "supplier_name": row.supplier_name,
+            "total_order": row.total_order,
+            "total_qty": int(row.total_qty) if row.total_qty else 0,
+            "total_amount": float(row.total_amount) if row.total_amount else 0.0
+        }
+        for row in results
+    ]
+    return output
+

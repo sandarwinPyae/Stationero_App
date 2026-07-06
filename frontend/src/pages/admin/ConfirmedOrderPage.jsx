@@ -121,7 +121,15 @@ const ConfirmedOrderPage = () => {
                       <td className="py-4 px-6 font-medium text-gray-800">{order.invoice_number}</td>
                       <td className="py-4 px-6">{order.customer?.customer_name}</td>
                       <td className="py-4 px-6">
-                        <span className="px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-medium border border-green-100">{order.status}</span>
+                        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${
+                          order.status === 'Confirmed' 
+                            ? 'bg-green-50 text-green-700 border-green-100' 
+                            : order.status === 'Pending' 
+                            ? 'bg-yellow-50 text-yellow-700 border-yellow-100' 
+                            : 'bg-gray-50 text-gray-600 border-gray-100'
+                        }`}>
+                          {order.status}
+                        </span>
                       </td>
                       <td className="py-4 px-6 text-gray-600">{new Date(order.order_date).toLocaleString()}</td>
                       <td className="py-4 px-6">
@@ -147,7 +155,7 @@ const ConfirmedOrderPage = () => {
             <div className="flex justify-center mt-8 gap-2">
               <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all"><i className="fa-solid fa-chevron-left"></i></button>
               {[...Array(nPages)].map((_, i) => (
-                <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 border rounded-lg transition-all ${currentPage === i + 1 ? 'bg-blue-600 text-white border-blue-600' : 'bg-white border-gray-200 hover:border-blue-300'}`}>{i + 1}</button>
+                <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 border rounded-lg transition-all ${currentPage === i + 1 ? 'bg-[#F25278] text-white border-[#F25278]' : 'bg-white border-gray-200 hover:border-blue-300'}`}>{i + 1}</button>
               ))}
               <button disabled={currentPage === nPages} onClick={() => setCurrentPage(prev => prev + 1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 transition-all"><i className="fa-solid fa-chevron-right"></i></button>
             </div>

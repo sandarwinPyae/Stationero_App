@@ -8,6 +8,7 @@ from .routes import product_routes
 from .routes import category_routes
 from .routes import purchase_routes
 from .routes import confirm_order_routes
+from .routes import sale_report_routes
 
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
@@ -36,3 +37,4 @@ app.include_router(product_routes.router)
 app.include_router(category_routes.router)
 app.include_router(purchase_routes.router)
 app.include_router(confirm_order_routes.router)
+app.include_router(sale_report_routes.router)

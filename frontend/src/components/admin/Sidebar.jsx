@@ -98,17 +98,17 @@ const Sidebar = () => {
           </>
         )}
         {/* Sale Reports */}
-        <NavItem icon="fa-solid fa-chart-column" label="Sale Reports" onClick={() => { navigate('/sales'); setIsSaleReportOpen(!isSaleReportOpen); }} active={location.pathname === '/sales'} />
+        <NavItem icon="fa-solid fa-chart-column" label="Sale Reports" onClick={() => { navigate('/sale-reports'); setIsSaleReportOpen(!isSaleReportOpen); }} active={location.pathname === '/sale-reports'} />
         {isSaleReportOpen && (
-          <NavItem icon="fa-solid fa-rotate-left" label="Sale Return Report" onClick={() => navigate('/sale-return-report')} active={location.pathname === '/sale-return-report'} isSubMenu={true} />
+          <NavItem icon="fa-solid fa-rotate-left" label="Sale Return Report" onClick={() => navigate('/sale-return-reports')} active={location.pathname === '/sale-return-reports'} isSubMenu={true} />
         )}
         
         {/* Purchase Reports */}
-        <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Reports" onClick={() => { navigate('/purchase-reports'); setIsPurchaseReportOpen(!isPurchaseReportOpen); }} active={location.pathname === '/purchase-reports'} />
+        <NavItem icon="fa-solid fa-clipboard-list" label="Purchase Order Summary Report" onClick={() => { navigate('/purchase-reports'); setIsPurchaseReportOpen(!isPurchaseReportOpen); }} active={location.pathname === '/purchase-reports'} />
         {isPurchaseReportOpen && (
           <>
-            <NavItem icon="fa-solid fa-file-contract" label="Purchase Summary" onClick={() => navigate('/purchase-summary')} active={location.pathname === '/purchase-summary'} isSubMenu={true} />
-            <NavItem icon="fa-solid fa-truck-field" label="Supplier-wise Purchase" onClick={() => navigate('/supplier-purchase')} active={location.pathname === '/supplier-purchase'} isSubMenu={true} />
+            <NavItem icon="fa-solid fa-file-contract" label="Purchase Return Summary" onClick={() => navigate('/purchase-return-summary')} active={location.pathname === '/purchase-return-summary'} isSubMenu={true} />
+            <NavItem icon="fa-solid fa-truck-field" label="Supplier-wise Purchase" onClick={() => navigate('/supplier-wise')} active={location.pathname === '/supplier-wise'} isSubMenu={true} />
           </>
         )}
         

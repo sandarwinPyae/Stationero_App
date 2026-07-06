@@ -19,6 +19,11 @@ import PurchaseReturnList from './PurchaseReturnList';
 import PurchaseReturnDetails from './PurchaseReturnDetails';
 import ConfirmedOrderPage from './ConfirmedOrderPage';
 import ConfirmedOrderDetailsPage from './ConfirmedOrderDetailsPage';
+import PurchaseSummary from './PurchaseSummary';
+import PurchaseReturnSummary from './PurchaseReturnSummary';
+import SupplierWisePurchase from './SupplierWisePurchase';
+import SaleReport from './SaleReport';
+import SaleReturnReport from './SaleReturnReport';
 
 function App() {
   return (
@@ -46,6 +51,11 @@ function App() {
             <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} /> 
             <Route path="/confirm-orders" element={<ConfirmedOrderPage />} />   
             <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage />} />
+            <Route path="/purchase-reports" element={<PurchaseSummary />} />
+            <Route path="/purchase-return-summary" element={<PurchaseReturnSummary />} />
+            <Route path="/supplier-wise" element={<SupplierWisePurchase />} />
+            <Route path='/sale-reports' element={<SaleReport />} />
+            <Route path='/sale-return-reports' element={<SaleReturnReport />} />
              
             
           </Routes>

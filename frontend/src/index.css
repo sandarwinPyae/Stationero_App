@@ -6,7 +6,6 @@
   display: none;
 }
 
-/* Firefox အတွက် */
 html {
   scrollbar-width: none;
 }
