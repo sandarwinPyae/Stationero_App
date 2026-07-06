@@ -17,3 +17,6 @@ uploads/
 
 # Executables
 *.exe
+
+# VS Code
+.vscode/

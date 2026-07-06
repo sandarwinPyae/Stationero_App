@@ -17,6 +17,8 @@ import PurchaseOrderDetail from './PurchaseOrderDetail';
 import PurchaseReturnsPage from './PurchaseReturnsPage';
 import PurchaseReturnList from './PurchaseReturnList';
 import PurchaseReturnDetails from './PurchaseReturnDetails';
+import ConfirmedOrderPage from './ConfirmedOrderPage';
+import ConfirmedOrderDetailsPage from './ConfirmedOrderDetailsPage';
 
 function App() {
   return (
@@ -41,7 +43,10 @@ function App() {
             <Route path="/purchase/details/:id" element={<PurchaseOrderDetail />} />
             <Route path="/purchase/returns/:id" element={<PurchaseReturnsPage />} />   
             <Route path='/purchase/returns' element={<PurchaseReturnList/>} />     
-            <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} />    
+            <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} /> 
+            <Route path="/confirm-orders" element={<ConfirmedOrderPage />} />   
+            <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage />} />
+             
             
           </Routes>
         </div>
