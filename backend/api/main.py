@@ -30,10 +30,10 @@ from backend.db.models import (
     SaleReturnHeader, SaleReturnDetails, Product, Promotion
 )
 
-# Admin နှင့် Customer နှစ်ဖက်စလုံးအတွက် Table များ ဖန်တီးပေးခြင်း
+# Database Tables များကို တည်ဆောက်ခြင်း
 models.Base.metadata.create_all(bind=engine)
 
-# --- 2. ADMIN ROUTERS IMPORTS (သူမ ပြင်ဆင်ထားသော စနစ်သစ်) ---
+# --- 2. ADMIN ROUTERS IMPORTS ---
 from backend.api.routes import (
     supplier_routes, product_routes, category_routes, 
     purchase_routes, confirm_order_routes, sale_report_routes
@@ -50,7 +50,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 🌟 PRODUCT IMAGES & UPLOADS PATHS ---
+# 🌟 PRODUCT IMAGES & UPLOADS STATIC DIRECTORIES ---
 IMAGE_DIR = os.path.join(BACKEND_DIR, "images")
 os.makedirs(IMAGE_DIR, exist_ok=True)
 app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
@@ -59,7 +59,7 @@ RETURN_IMAGE_DIR = os.path.join(BACKEND_DIR, "return_images")
 os.makedirs(RETURN_IMAGE_DIR, exist_ok=True)
 app.mount("/return-images", StaticFiles(directory=RETURN_IMAGE_DIR), name="return_images")
 
-# Admin Dashboard မှ ပုံတင်ပါက သွားသိမ်းမည့် uploads folder
+# Admin Dashboard မှ ပုံတင်ပါက သိမ်းဆည်းမည့် uploads folder
 UPLOAD_DIR = os.path.join(PROJECT_ROOT, "uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
@@ -67,16 +67,8 @@ app.mount("/uploads", StaticFiles(directory=UPLOAD_DIR), name="uploads")
 # --- 4. COBOL CONFIGURATION ---
 COBOL_EXE_PATH = os.path.join(BACKEND_DIR, "cobol", "customer_engine")
 
-# --- 5. INCLUDE ADMIN ROUTERS ---
-app.include_router(supplier_routes.router, prefix="/api")
-app.include_router(product_routes.router, prefix="/api")
-app.include_router(category_routes.router, prefix="/api")
-app.include_router(purchase_routes.router, prefix="/api")
-app.include_router(confirm_order_routes.router, prefix="/api")
-app.include_router(sale_report_routes.router, prefix="/api")
-
 # =====================================================================
-# --- 6. PYDANTIC VALIDATION MODELS (CUSTOMER SIDE) ---
+# --- 5. PYDANTIC VALIDATION MODELS (CUSTOMER SIDE) ---
 # =====================================================================
 class CustomerSignUpRequest(BaseModel):
     name: str
@@ -133,7 +125,7 @@ class ForgotPasswordRequest(BaseModel):
     new_password: str    
 
 # =====================================================================
-# --- 7. CUSTOMER AUTHENTICATION & ORDERS ROUTER (မင်း၏ မူရင်း Code) ---
+# --- 6. CUSTOMER AUTHENTICATION & ORDERS ROUTER (မင်း၏ မူရင်း Code) ---
 # =====================================================================
 
 @app.get("/")
@@ -359,7 +351,7 @@ def forgot_password_reset(payload: ForgotPasswordRequest, db: Session = Depends(
         raise HTTPException(status_code=500, detail=f"Failed resetting secure passwords: {e}")    
 
 # =====================================================================
-# --- 8. PRODUCT & INVENTORY CONTROLLER (DYNAMIC DATA LINK) ---
+# --- 7. PRODUCT & INVENTORY CONTROLLER (DYNAMIC DATA LINK) ---
 # =====================================================================
 @app.get("/api/products", response_model=List[schemas.ProductResponse])
 def get_products(search: Optional[str] = None, sort: Optional[str] = "none", db: Session = Depends(get_db)):
@@ -537,3 +529,13 @@ async def simple_return_status(
         import traceback
         traceback.print_exc() 
         raise HTTPException(status_code=500, detail=str(e))
+
+# =====================================================================
+# --- 8. INCLUDE ADMIN ROUTERS (CONFLICT မဖြစ်အောင် အောက်ဆုံးတွင် ထားခြင်း) ---
+# =====================================================================
+app.include_router(supplier_routes.router, prefix="/api")
+app.include_router(product_routes.router, prefix="/api")
+app.include_router(category_routes.router, prefix="/api")
+app.include_router(purchase_routes.router, prefix="/api")
+app.include_router(confirm_order_routes.router, prefix="/api")
+app.include_router(sale_report_routes.router, prefix="/api")
