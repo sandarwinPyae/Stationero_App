@@ -3,12 +3,13 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const ViewProductDetails = () => {
-  const { id } = useParams(); // URL ထဲက id ကိုဖတ်ယူခြင်း
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
   const [productIdToDelete, setProductIdToDelete] = useState(null);
+  const [productNameToDelete, setProductNameToDelete] = useState("");
 
   useEffect(() => {
     fetchProduct();
@@ -30,7 +31,6 @@ const ViewProductDetails = () => {
       alert("Product deleted successfully!");
       setIsModalOpen(false);
       
-      // List page ကို ပြန်သွားခိုင်းလိုက်ပါ
       navigate('/products'); 
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -45,7 +45,7 @@ const ViewProductDetails = () => {
       {/* Header Section */}
       <div className="h-16 flex justify-between items-center px-8 bg-[#F8FAFC] border-b border-gray-100 shadow-sm">
         <button 
-          onClick={() => navigate('/products')} // /suppliers အစား /products သို့ပြောင်းရန်
+          onClick={() => navigate('/products')} //
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
@@ -103,12 +103,12 @@ const ViewProductDetails = () => {
             <div className="flex gap-4">
               <button 
                 onClick={() => navigate(`/edit-product/${id}`)} 
-                className="flex-1 bg-[#F25278] text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition-all"
+                className="flex-1 bg-[#F25278] text-white py-3 rounded-xl font-semibold"
               >
                 Edit
               </button>
               <button 
-                onClick={() => { setProductIdToDelete(product.product_id); setIsModalOpen(true); }}
+                onClick={() => { setProductIdToDelete(product.product_id);setProductNameToDelete(product.product_name); setIsModalOpen(true); }}
                 className="flex-1 border border-[#F25278] text-[#F25278] py-3 rounded-xl font-semibold hover:bg-pink-50 transition-all"
               >
                 Delete
@@ -121,17 +121,20 @@ const ViewProductDetails = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                   <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                  <p className="mb-6 text-gray-600">This action will delete the product.</p>
+                  <p className="mb-6 text-gray-600">
+                    Are you sure you want to delete <strong>{productNameToDelete}</strong>? 
+                    This action cannot be undone.
+                  </p>
                   <div className="flex justify-end gap-4">
                     <button 
-                      type="button" // အရေးကြီးသည်
+                      type="button" 
                       onClick={() => setIsModalOpen(false)} 
                       className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                     >
                       Cancel
                     </button>
                     <button 
-                      type="button" // အရေးကြီးသည်
+                      type="button" 
                       onClick={() => {
                         handleDelete(productIdToDelete);
                       }} 
