@@ -27,7 +27,7 @@ def read_suppliers(include_deleted: bool = False, db: Session = Depends(get_db))
         query = query.filter(models.Supplier.del_flag == 1)
     else:
         query = query.filter(models.Supplier.del_flag == 0)
-    return query.order_by(models.Supplier.supplier_id.desc()).all()
+    return query.order_by(models.Supplier.updated_date.desc()).all()
 
 @router.post("/suppliers")
 def create_supplier(supplier: SupplierCreate, db: Session = Depends(get_db)):

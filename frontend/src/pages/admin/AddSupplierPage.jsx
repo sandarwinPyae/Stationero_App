@@ -35,7 +35,7 @@ const AddSupplierPage = () => {
     e.preventDefault();
     try {
       await axios.post('http://localhost:8000/suppliers', formData);
-      alert("Supplier added successfully!");
+      // alert("Supplier added successfully!");
       navigate('/suppliers');
     } catch (error) {
       console.error("Error saving data:", error);

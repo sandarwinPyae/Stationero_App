@@ -50,10 +50,10 @@ const SupplierPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async () => {
     try {
-      await axios.delete(`http://localhost:8000/suppliers/${id}`);
-      alert("Supplier deleted successfully!");
+      await axios.delete(`http://localhost:8000/suppliers/${supplierToDelete.id}`);
+      // alert("Supplier deleted successfully!");
       setIsModalOpen(false); 
       fetchSuppliers(); 
     } catch (error) {
@@ -137,7 +137,16 @@ const SupplierPage = () => {
                     <td className="py-4 px-6 font-medium text-gray-800">{s.supplier_name}</td>
                     <td className="py-4 px-6">{s.supplier_phone_no}</td>
                     <td className="py-4 px-6">{s.supplier_email}</td>
-                    <td className="py-4 px-6">{s.created_date}</td>
+                    <td className="py-4 px-6">
+                      {new Date(s.updated_date).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })}
+                    </td>
                     <td className="py-4 px-6">
 
                     {s.del_flag === 0 ? (
@@ -145,7 +154,7 @@ const SupplierPage = () => {
 
                         <button onClick={() => navigate(`/edit-supplier/${s.supplier_id}`)} className="text-blue-600 hover:text-blue-800"><i className="fa-solid fa-pen-to-square"></i></button>
 
-                        <button onClick={() => { setSupplierToDelete(s.supplier_id); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
+                        <button onClick={() => { setSupplierToDelete({ id: s.supplier_id, name: s.supplier_name }); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
 
                       </div>
 
@@ -182,7 +191,10 @@ const SupplierPage = () => {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-6 rounded-lg shadow-xl w-96">
               <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-              <p className="mb-6 text-gray-600">This action will delete the supplier.</p>
+              <p className="mb-6 text-gray-600">
+                This action will delete the supplier 
+                <span className="font-bold text-gray-800">"{supplierToDelete?.name}"</span> ?
+              </p>
               <div className="flex justify-end gap-4">
                 <button 
                   onClick={() => setIsModalOpen(false)} 

@@ -32,7 +32,7 @@ const UpdateSupplierPage = () => {
     e.preventDefault();
     try {
       await axios.put(`http://localhost:8000/suppliers/${id}`, formData);
-      alert("Supplier updated successfully!");
+      // alert("Supplier updated successfully!");
       navigate('/suppliers');
     } catch (error) {
       console.error("Error updating data:", error);
