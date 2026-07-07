@@ -14,7 +14,6 @@ const AddCategoryPage = () => {
       await axios.post('http://localhost:8000/categories/add', { 
         category_name: categoryName 
       });
-      alert("Category added successfully!");
       navigate('/categories'); 
     } catch (error) {
       console.error("Error saving category:", error);

@@ -8,10 +8,8 @@ const UpdateCategoryPage = () => {
   const [categoryName, setCategoryName] = useState("");
 
   useEffect(() => {
-    // Backend ရှိ API URL ကို သေချာစစ်ပါ (သင့် Backend မှာ /category/{id} လား /categories/{id} လား)
     axios.get(`http://localhost:8000/categories/${id}`) 
       .then(res => {
-        // Console မှာ ပေါ်လာတဲ့ data ရဲ့ key နာမည် (ဥပမာ: category_name) နဲ့ တူမှရပါမယ်
         setCategoryName(res.data.category_name); 
       })
       .catch(err => console.error("Error fetching data:", err));
@@ -20,7 +18,6 @@ const UpdateCategoryPage = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     await axios.put(`http://localhost:8000/categories/${id}`, { category_name: categoryName });
-    alert("Updated successfully!");
     navigate('/categories');
   };
 
@@ -29,7 +26,7 @@ const UpdateCategoryPage = () => {
       {/* Navbar */}
       <div className="h-16 flex items-center justify-between px-8 bg-[#F8FAFC] border-b border-gray-200">
         <button 
-          onClick={() => navigate('/products')}
+          onClick={() => navigate('/categories')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back

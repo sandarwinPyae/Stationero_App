@@ -20,7 +20,7 @@ def read_category(include_deleted: bool = False, db: Session = Depends(get_db)):
         query = query.filter(models.Category.del_flag == 1)
     else:
         query = query.filter(models.Category.del_flag == 0)
-    return query.order_by(models.Category.category_id.desc()).all()
+    return query.order_by(models.Category.updated_date.desc()).all()
 
 # category create
 @router.post("/categories/add")
