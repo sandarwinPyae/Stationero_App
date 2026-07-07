@@ -19,6 +19,7 @@ const PurchaseReturnList = () => {
   const fetchReturns = async () => {
     try {
       const res = await axios.get('http://localhost:8000/purchase/returns');
+      console.log("API Response:", res.data);
       setReturns(res.data);
     } catch (err) {
       console.error("Error fetching returns:", err);
@@ -70,25 +71,56 @@ const PurchaseReturnList = () => {
         <h2 className="text-2xl font-bold mb-8 text-gray-800">Purchase Return List</h2>
 
         {/* Filter Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Search</label>
-            <input type="text" placeholder="PO ID or Supplier name" className="w-full px-4 py-2 border rounded-lg outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+        <div className="flex flex-wrap items-end gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex-1 min-w-[200px]">
+            <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">Search</label>
+            <input 
+              type="text" 
+              placeholder="PO ID or Supplier name" 
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-[#F25278] transition" 
+              value={searchTerm} 
+              onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}} 
+            />
           </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Start Date</label>
-            <input type="date" className="w-full px-4 py-2 border rounded-lg text-gray-500" onChange={(e) => setStartDate(e.target.value)} />
+          
+          <div className="min-w-[150px]">
+            <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">Start Date</label>
+            <input 
+              type="date" 
+              value={startDate}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
+              onChange={(e) => {setStartDate(e.target.value); setCurrentPage(1);}} 
+            />
           </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">End Date</label>
-            <input type="date" className="w-full px-4 py-2 border rounded-lg text-gray-500" onChange={(e) => setEndDate(e.target.value)} />
+          
+          <div className="min-w-[150px]">
+            <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">End Date</label>
+            <input 
+              type="date" 
+              value={endDate}
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
+              onChange={(e) => {setEndDate(e.target.value); setCurrentPage(1);}} 
+            />
           </div>
+
+          {/* Reset Button */}
+          <button 
+            onClick={() => {
+              setSearchTerm("");
+              setStartDate("");
+              setEndDate("");
+              setCurrentPage(1);
+            }}
+            className="bg-gray-200 text-gray-700 py-2 px-8 rounded-lg font-semibold hover:bg-gray-300 transition"
+          >
+            Reset Filter
+          </button>
         </div>
 
         {/* Table */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50/50">
+        <div className="">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="p-5 font-semibold text-gray-600">Returned ID</th>
                 <th className="p-5 font-semibold text-gray-600">PO ID</th>
@@ -104,7 +136,20 @@ const PurchaseReturnList = () => {
                     <td className="p-5">RP{String(ret.purchase_return_id).padStart(3, '0')}</td>
                     <td className="p-5">{ret.purchase_order?.po_number || "N/A"}</td>
                     <td className="p-5">{ret.purchase_order?.supplier?.supplier_name || "N/A"}</td>
-                    <td className="p-5">{new Date(ret.purchase_return_date).toLocaleString()}</td>
+                    <td className="p-5">
+                      {ret.purchase_return_date ? (
+                        new Date(ret.purchase_return_date).toLocaleString('en-GB', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })
+                      ) : (
+                        "N/A"
+                      )}
+                    </td>
                     <td className="p-5 text-center">
                     <button onClick={() => navigate(`/purchase/return/details/${ret.purchase_return_id}`)} className="text-[#405169] hover:text-[#405169]">
                         <i className="fa-solid fa-eye"></i>

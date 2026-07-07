@@ -46,7 +46,23 @@ const PurchaseReturnDetails = () => {
           {/* Header Information */}
           <div className="grid grid-cols-2 gap-y-4 mb-8 text-sm">
             <p><span className="text-gray-500">Returned Purchase Order ID:</span> <span className="font-semibold">RP{String(details.purchase_return_id).padStart(3, '0')}</span></p>
-            <p><span className="text-gray-500">Returned Date:</span> <span className="font-semibold">{new Date(details.purchase_return_date).toLocaleDateString()}</span></p>
+            <p>
+              <span className="text-gray-500">Returned Date:</span> 
+              <span className="font-semibold">
+                {details.purchase_return_date ? (
+                        new Date(details.purchase_return_date).toLocaleString('en-GB', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })
+                      ) : (
+                        "N/A"
+                      )}
+              </span>
+            </p>
             <p><span className="text-gray-500">Purchase Order ID:</span> <span className="font-semibold">{details.purchase_order?.po_number}</span></p>
             <p><span className="text-gray-500">Supplier Name:</span> <span className="font-semibold">{details.purchase_order?.supplier?.supplier_name}</span></p>
           </div>

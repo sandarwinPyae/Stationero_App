@@ -93,7 +93,6 @@ const AddPurchaseOrderPage = () => {
 
     try {
       const res = await axios.post('http://localhost:8000/purchase-orders', payload);
-      alert(`Your Purchase Order is Pending.`);
       navigate(-1); 
     } catch (err) {
       console.error("Error creating PO:", err);
@@ -148,7 +147,10 @@ const AddPurchaseOrderPage = () => {
         </div>
 
         {!isFormVisible ? (
-          <button onClick={() => { setIsFormVisible(true); addProductRow(); }} className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg mb-6 hover:bg-gray-200 transition">
+          <button 
+            onClick={() => { setIsFormVisible(true); addProductRow(); }} 
+            className="bg-[#F25278] text-white border  px-6 py-2 rounded-xl mb-6 font-semibold shadow-sm"
+          >
             + Add Products
           </button>
         ) : (
