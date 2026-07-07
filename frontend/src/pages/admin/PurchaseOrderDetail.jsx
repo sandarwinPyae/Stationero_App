@@ -44,7 +44,6 @@ const PurchaseOrderDetail = () => {
         }))
         });
         
-        alert("Purchase Order Confirmed Successfully!");
         navigate('/purchase'); 
     } catch (err) {
         console.error("Update failed:", err);
@@ -78,7 +77,21 @@ const PurchaseOrderDetail = () => {
           {/* Order Info Grid */}
           <div className="grid grid-cols-2 gap-y-4 gap-x-8 mb-8 bg-gray-100 p-6 rounded-2xl">
             <p><strong>Purchase Order ID:</strong> : {order.po_number}</p>
-            <p><strong>Order Date:</strong> : {new Date(order.purchase_order_date).toLocaleDateString()}</p>
+            <p>
+              <strong>Order Date:</strong> : 
+              {order.purchase_order_date ? (
+                        new Date(order.purchase_order_date).toLocaleString('en-GB', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })
+                      ) : (
+                        "N/A"
+                      )}
+            </p>
             <p><strong>Supplier Name:</strong> : {order.supplier?.supplier_name}</p>
             <p><strong>Supplier Email:</strong> : {order.supplier?.supplier_email || 'N/A'}</p>
             <p><strong>Phone No:</strong> : {order.supplier?.supplier_phone_no || 'N/A'}</p>

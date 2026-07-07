@@ -65,6 +65,13 @@ const PurchasePage = () => {
   const currentRecords = filteredOrders.slice(indexOfFirstRecord, indexOfLastRecord);
   const nPages = Math.ceil(filteredOrders.length / recordsPerPage);
 
+  const resetFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('');
+    setStartDate('');
+    setEndDate('');
+    setCurrentPage(1);
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -88,33 +95,66 @@ const PurchasePage = () => {
         </div>
 
         {/* Filter Bar */}
-        <div className="flex items-end gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex-1">
-            <label className="text-xs text-gray-500 mb-1 block">Search</label>
-            <input type="text" placeholder="PO ID or Supplier name" className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Status</label>
-            <select className="px-4 py-2 border border-gray-200 rounded-lg text-gray-500 bg-white" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-              <option value="">All Status</option>
-              <option value="Pending">Pending</option>
-              <option value="Confirmed">Confirmed</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">Start Date</label>
-            <input type="date" className="px-4 py-2 border border-gray-200 rounded-lg text-gray-500" onChange={(e) => setStartDate(e.target.value)} />
-          </div>
-          <div>
-            <label className="text-xs text-gray-500 mb-1 block">End Date</label>
-            <input type="date" className="px-4 py-2 border border-gray-200 rounded-lg text-gray-500" onChange={(e) => setEndDate(e.target.value)} />
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+            
+            {/* Search */}
+            <div className="lg:col-span-1">
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Search</label>
+              <input 
+                type="text" 
+                placeholder="PO number / Supplier" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md outline-none text-sm focus:border-gray-400" 
+                value={searchTerm} 
+                onChange={(e) => setSearchTerm(e.target.value)} 
+              />
+            </div>
+
+            {/* Status */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Status</label>
+              <select 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white outline-none focus:border-gray-400" 
+                value={statusFilter} 
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">All</option>
+                <option value="Pending">Pending</option>
+                <option value="Confirmed">Confirmed</option>
+              </select>
+            </div>
+
+            {/* Start Date */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">Start Date</label>
+              <input 
+                type="date" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-500 outline-none focus:border-gray-400" 
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)} 
+              />
+            </div>
+
+            {/* End Date */}
+            <div>
+              <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">End Date</label>
+              <input 
+                type="date" 
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-500 outline-none focus:border-gray-400" 
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)} 
+              />
+            </div>
+
+            {/* Reset Button */}
+            <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
           </div>
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-50/50">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="p-5 font-semibold text-gray-600">Purchase Order ID</th>
                 <th className="p-5 font-semibold text-gray-600">Supplier Name</th>
@@ -133,7 +173,15 @@ const PurchasePage = () => {
                     <td className="p-5 text-gray-700">{order.po_number}</td>
                     <td className="p-5 text-gray-700">{order.supplier?.supplier_name}</td>
                     <td className="p-5 text-gray-700">
-                      {order.purchase_order_status}
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                        order.purchase_order_status === 'Confirmed' 
+                        ? 'bg-green-100 text-green-700' 
+                        : order.purchase_order_status === 'Pending' 
+                        ? 'bg-yellow-100 text-yellow-700' 
+                        : 'bg-gray-100 text-gray-600'
+                        }`}>
+                        {order.purchase_order_status}
+                      </span>
                       {isReturned && (
                         <span className="block text-[10px] text-red-500 font-bold uppercase mt-1">
                           Already Returned
@@ -141,7 +189,7 @@ const PurchasePage = () => {
                       )}
                     </td>
                     <td className="p-5 text-gray-700">
-                      {new Date(order.purchase_order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}
+                      {new Date(order.purchase_order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     </td>
                     <td className="p-5 flex justify-center items-center gap-4">
                       <button 

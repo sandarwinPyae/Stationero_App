@@ -40,7 +40,7 @@ def read_purchase_orders(db: Session = Depends(get_db)):
     orders = (
         db.query(models.PurchaseOrdersHeader)
         .options(joinedload(models.PurchaseOrdersHeader.supplier)) 
-        .order_by(models.PurchaseOrdersHeader.purchase_order_id.desc())
+        .order_by(models.PurchaseOrdersHeader.purchase_order_date.desc())
         .all()
     )
     if not orders:
