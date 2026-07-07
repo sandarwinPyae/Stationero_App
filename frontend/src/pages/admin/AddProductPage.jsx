@@ -15,6 +15,18 @@ const AddProductPage = () => {
     description: ''        
   });
 
+  const isFormValid =
+  formData.product_name.trim() !== "" &&
+  formData.category_id !== "" &&
+  formData.unit_price !== "" &&
+  Number(formData.unit_price) >= 0 &&
+  formData.selling_price !== "" &&
+  Number(formData.selling_price) >= 0 &&
+  formData.current_qty !== "" &&
+  Number(formData.current_qty) >= 0 &&
+  formData.product_img_url;
+
+
   useEffect(() => {
     const fetchCategories = async () => {
         try {
@@ -27,14 +39,25 @@ const AddProductPage = () => {
     fetchCategories();
     }, []);
 
+    useEffect(() => {
+      console.log(formData);
+      console.log("Valid:", isFormValid);
+    }, [formData, isFormValid]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
   const handleFileChange = (e) => {
-    setFormData({ ...formData, product_img_url: e.target.files[0] });
+    if (e.target.files && e.target.files.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        product_img_url: e.target.files[0]
+      }));
+    }
   };
+
 
   const handleSubmit = async (e) => {
   e.preventDefault();
@@ -50,11 +73,11 @@ const AddProductPage = () => {
     data.append("image", formData.product_img_url); 
   }
 
+
   try {
     await axios.post('http://localhost:8000/products/add', data, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
-    alert('Product added successfully!');
     navigate('/products');
   } catch (error) {
     console.error("Error details:", error.response?.data || error.message);
@@ -185,12 +208,18 @@ const AddProductPage = () => {
             </div>
             
             <div className="mt-10 flex">
-                <button 
+              
+              <button 
                 type="submit" 
-                className="bg-[#F25278] hover:bg-pink-600 text-white px-10 py-3.5 rounded-xl font-bold shadow-lg shadow-pink-200 transition-all transform hover:scale-105"
-                >
+                disabled={!isFormValid} 
+                className={`px-10 py-3.5 rounded-xl font-bold shadow-lg transition-all transform 
+                  ${!isFormValid 
+                    ? "bg-gray-300 cursor-not-allowed" 
+                    : "bg-[#F25278] hover:bg-pink-600 shadow-pink-200 hover:scale-105 text-white"
+                  }`}
+              >
                 Add Product
-                </button>
+            </button>
             </div>
             </form>
       </div>

@@ -24,7 +24,7 @@ def read_suppliers(include_deleted: bool = False, db: Session = Depends(get_db))
         query = query.filter(models.Product.del_flag == 1)
     else:
         query = query.filter(models.Product.del_flag == 0)
-    return query.order_by(models.Product.product_id.desc()).all()
+    return query.order_by(models.Product.updated_date.desc()).all()
 
 
 @router.post("/products/add")

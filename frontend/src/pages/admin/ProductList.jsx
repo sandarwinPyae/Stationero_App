@@ -15,6 +15,7 @@ const ProductList = () => {
   const itemsPerPage = 5;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [productIdToDelete, setProductIdToDelete] = useState(null);
+  const [productNameToDelete, setProductNameToDelete] = useState("");
 
     // Search Filter Logic
   const filteredProducts = products.filter(p => {
@@ -72,7 +73,6 @@ const ProductList = () => {
 
       await axios.delete(`http://localhost:8000/products/${id}`);
       
-      alert("Product moved to deleted list!");
       setIsModalOpen(false);
       fetchProducts(); 
     } catch (error) {
@@ -99,7 +99,7 @@ const ProductList = () => {
             <h2 className="text-2xl font-bold text-gray-800">Product List</h2>
             <button 
               onClick={() => navigate('/add-product')} 
-              className="bg-[#F25278] text-white px-6 py-2 rounded-lg font-semibold hover:bg-pink-600 transition"
+              className="bg-[#F25278] text-white px-6 py-2 rounded-lg font-semibold"
             >
               + Add New Product
             </button>
@@ -132,7 +132,7 @@ const ProductList = () => {
                   key={tab.value} 
                   type="button"
                   onClick={() => setActiveTab(tab.value)} 
-                  className={`px-6 py-2 rounded-md font-semibold transition-all ${
+                  className={`px-6 py-2 rounded-md transition-all ${
                     activeTab === tab.value 
                       ? 'bg-white text-[#F25278] shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
@@ -184,14 +184,14 @@ const ProductList = () => {
                               {/* Edit Button */}
                               <button 
                                 onClick={() => navigate(`/edit-product/${p.product_id}`)}
-                                className="text-green-600 hover:text-green-800 transition"
+                                className="text-blue-600 hover:text-blue-800 transition"
                               >
-                                <i className="fa-solid fa-pen"></i>
+                                <i className="fa-solid fa-pen-to-square"></i>
                               </button>
 
                               {/* Delete Button */}
                               <button 
-                                onClick={() => { setProductIdToDelete(p.product_id); setIsModalOpen(true); }}
+                                onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }}
                                 className="text-red-600 hover:text-red-800 transition"
                               >
                                 <i className="fa-solid fa-trash"></i>
@@ -226,7 +226,8 @@ const ProductList = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                   <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                  <p className="mb-6 text-gray-600">This action will delete the product.</p>
+                  <p className="mb-6 text-gray-600">Are you sure you want to delete <strong>{productNameToDelete}</strong>? 
+                    This action cannot be undone.</p>
                   <div className="flex justify-end gap-4">
                     <button 
                       type="button" 

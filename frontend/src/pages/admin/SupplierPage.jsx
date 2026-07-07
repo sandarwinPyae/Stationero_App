@@ -131,38 +131,36 @@ const SupplierPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {currentRecords.map((s) => (
-                  <tr key={s.supplier_id} className="hover:bg-gray-50/50">
-                    <td className="py-4 px-6">{s.supplier_id}</td>
-                    <td className="py-4 px-6 font-medium text-gray-800">{s.supplier_name}</td>
-                    <td className="py-4 px-6">{s.supplier_phone_no}</td>
-                    <td className="py-4 px-6">{s.supplier_email}</td>
-                    <td className="py-4 px-6">
-                      {new Date(s.updated_date).toLocaleString('en-GB', {
-                        day: '2-digit',
-                        month: '2-digit',
-                        year: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit'
-                      })}
+                {currentRecords.length > 0 ? (
+                  currentRecords.map((s) => (
+                    <tr key={s.supplier_id} className="hover:bg-gray-50/50">
+                      <td className="py-4 px-6">{s.supplier_id}</td>
+                      <td className="py-4 px-6 font-medium text-gray-800">{s.supplier_name}</td>
+                      <td className="py-4 px-6">{s.supplier_phone_no}</td>
+                      <td className="py-4 px-6">{s.supplier_email}</td>
+                      <td className="py-4 px-6">
+                        {new Date(s.updated_date).toLocaleString('en-GB', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit', second: '2-digit'
+                        })}
+                      </td>
+                      <td className="py-4 px-6">
+                        {s.del_flag === 0 ? (
+                          <div className="flex gap-4">
+                            <button onClick={() => navigate(`/edit-supplier/${s.supplier_id}`)} className="text-blue-600 hover:text-blue-800"><i className="fa-solid fa-pen-to-square"></i></button>
+                            <button onClick={() => { setSupplierToDelete({ id: s.supplier_id, name: s.supplier_name }); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
+                          </div>
+                        ) : <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="6" className="py-10 text-center text-gray-500">
+                       No suppliers found matching your search.
                     </td>
-                    <td className="py-4 px-6">
-
-                    {s.del_flag === 0 ? (
-                      <div className="flex gap-4">
-
-                        <button onClick={() => navigate(`/edit-supplier/${s.supplier_id}`)} className="text-blue-600 hover:text-blue-800"><i className="fa-solid fa-pen-to-square"></i></button>
-
-                        <button onClick={() => { setSupplierToDelete({ id: s.supplier_id, name: s.supplier_name }); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
-
-                      </div>
-
-                    ) : <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>}
-
-                  </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>

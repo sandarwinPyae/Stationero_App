@@ -28,7 +28,7 @@ const Sidebar = () => {
   return (
     <div className="w-64 bg-[#F8FAFC] min-h-screen border-r border-gray-200 shadow-sm flex flex-col">
       <div className="p-6">
-        <h1 className="text-2xl font-bold text-[#F25278]">Stationero</h1>
+        <h1 className=" font-azeret text-2xl font-bold text-[#F25278]">Stationero</h1>
       </div>
       
       <nav className="mt-4 px-3 space-y-1 flex-1">

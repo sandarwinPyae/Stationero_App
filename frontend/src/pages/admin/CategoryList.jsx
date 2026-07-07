@@ -34,9 +34,8 @@ const CategoryList = () => {
   const handleDelete = async (id) => {
   try {
     await axios.delete(`http://localhost:8000/categories/${id}`);
-    alert("Category deleted successfully!");
     setIsModalOpen(false);
-    fetchCategories(); // စာရင်းကို refresh လုပ်ရန်
+    fetchCategories(); 
   } catch (err) {
     console.error("Error deleting category:", err);
     alert("Failed to delete category.");
@@ -96,14 +95,14 @@ const CategoryList = () => {
         </div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-left">
-            <thead className="bg-gray-50/50">
+            <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
               <tr>
-                <th className="p-5 font-semibold text-gray-600">Category Id</th>
-                <th className="p-5 font-semibold text-gray-600">Category Name</th>
-                <th className="p-5 font-semibold text-gray-600">Created Date</th>
-                <th className="p-5 font-semibold text-gray-600 text-center">Action</th>
+                <th className="py-4 px-6">Category Id</th>
+                <th className="py-4 px-6">Category Name</th>
+                <th className="py-4 px-6">Created Date</th>
+                <th className="py-4 px-6">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -112,20 +111,37 @@ const CategoryList = () => {
                 <tr key={c.category_id} className="hover:bg-gray-50/50 transition">
                     <td className="p-5 text-gray-700">{c.category_id}</td>
                     <td className="p-5 font-medium text-gray-800">{c.category_name}</td>
-                    <td className="p-5 text-gray-500">{c.created_date}</td>
+                    <td className="p-5 text-gray-500">
+                      {new Date(c.updated_date).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit'
+                      })}
+                    </td>
                     <td className="p-5 flex justify-center gap-3">
-                    <button 
-                        onClick={() => navigate(`/categories/${c.category_id}`)} 
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition"
-                    >
-                        <i className="fa-solid fa-pen text-sm"></i>
-                    </button>
-                    <button 
-                        onClick={() => { setCategoryToDelete(c.category_id); setIsModalOpen(true); }} 
-                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition"
-                    >
-                        <i className="fa-solid fa-trash text-sm"></i>
-                    </button>
+
+                      {c.del_flag === 0 ? (
+                      <div className="flex gap-4">
+
+                        <button 
+                          onClick={() => navigate(`/categories/${c.category_id}`)} 
+                          className="text-blue-600 hover:text-blue-800">
+                            <i className="fa-solid fa-pen-to-square"></i>
+                        </button>
+
+                        <button 
+                          onClick={() => { setCategoryToDelete({ id: c.category_id, name: c.category_name }); setIsModalOpen(true); }}
+                          className="text-[#F25278] hover:text-red-700">
+                            <i className="fa-solid fa-trash"></i>
+                        </button>
+
+                      </div>
+
+                    ) : <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>}
+                    
                     </td>
                 </tr>
                 ))
@@ -160,7 +176,10 @@ const CategoryList = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                 <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                <p className="mb-6 text-gray-600">This action will delete the category.</p>
+                <p className="mb-6 text-gray-600">This action will delete the category
+                  <span className="font-bold text-gray-800"> "{categoryToDelete?.name}"</span>?
+                </p>
+                
                 <div className="flex justify-end gap-4">
                     <button 
                     onClick={() => setIsModalOpen(false)} 
@@ -169,7 +188,7 @@ const CategoryList = () => {
                     Cancel
                     </button>
                     <button 
-                    onClick={() => handleDelete(categoryToDelete)} 
+                    onClick={() => handleDelete(categoryToDelete.id)} 
                     className="px-4 py-2 bg-[#F25278] text-white rounded-md"
                     >
                     Yes, Delete
