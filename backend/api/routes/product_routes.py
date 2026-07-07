@@ -115,3 +115,62 @@ async def edit_product(
     
     db.commit()
     return {"message": "Product updated successfully"}
+
+
+@router.get("/stock-report") # <-- FIX: Changed path from "/stock-report" to "/products/stock-report"
+def get_admin_full_stock_report(db: Session = Depends(get_db)):
+    try:
+        # FIX: Changed Product to models.Product
+        products = db.query(models.Product).all() 
+        report_list = []
+        for p in products:
+            p_id = f"P{p.product_id:03d}" if p.product_id else "P001"
+            p_name = p.product_name if p.product_name else "Unnamed Product"
+            p_qty = p.current_qty if p.current_qty is not None else 0
+            
+            p_category = "General"
+            if p.category_id:
+                # FIX: Changed Category to models.Category
+                category_row = db.query(models.Category).filter(models.Category.category_id == p.category_id).first()
+                if category_row and category_row.category_name:
+                    p_category = category_row.category_name
+
+            report_list.append({
+                "product_id": p_id,
+                "product_name": p_name,
+                "category": p_category,
+                "qty": p_qty
+            })
+        return {"status": "Success", "inventory": report_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+
+
+# ---- 2. FIXED LOW STOCK ENDPOINT ----
+@router.get("/low-stock-report") # <-- FIX: Changed path to match frontend expectations
+def get_admin_low_stock_report(db: Session = Depends(get_db)):
+    try:
+        # FIX: Changed Product to models.Product
+        products = db.query(models.Product).filter(models.Product.current_qty <= 10).all()
+        report_list = []
+        for p in products:
+            p_id = f"P{p.product_id:03d}" if p.product_id else "P001"
+            p_name = p.product_name if p.product_name else "Unnamed Product"
+            p_qty = p.current_qty if p.current_qty is not None else 0
+            
+            p_category = "General"
+            if p.category_id:
+                # FIX: Changed Category to models.Category
+                category_row = db.query(models.Category).filter(models.Category.category_id == p.category_id).first()
+                if category_row and category_row.category_name:
+                    p_category = category_row.category_name
+
+            report_list.append({
+                "product_id": p_id,
+                "product_name": p_name,
+                "category": p_category,
+                "qty": p_qty
+            })
+        return {"status": "Success", "inventory": report_list}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")

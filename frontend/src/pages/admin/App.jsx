@@ -17,6 +17,7 @@ import PurchaseOrderDetail from './PurchaseOrderDetail';
 import PurchaseReturnsPage from './PurchaseReturnsPage';
 import PurchaseReturnList from './PurchaseReturnList';
 import PurchaseReturnDetails from './PurchaseReturnDetails';
+<<<<<<< HEAD
 import ConfirmedOrderPage from './ConfirmedOrderPage';
 import ConfirmedOrderDetailsPage from './ConfirmedOrderDetailsPage';
 import PurchaseSummary from './PurchaseSummary';
@@ -24,6 +25,10 @@ import PurchaseReturnSummary from './PurchaseReturnSummary';
 import SupplierWisePurchase from './SupplierWisePurchase';
 import SaleReport from './SaleReport';
 import SaleReturnReport from './SaleReturnReport';
+=======
+import InventoryStockReport from "./InventoryStockReport";
+import LowStockReport from "./InventoryLowStockReport";
+>>>>>>> add-inventory-report
 
 function App() {
   return (
@@ -48,6 +53,7 @@ function App() {
             <Route path="/purchase/details/:id" element={<PurchaseOrderDetail />} />
             <Route path="/purchase/returns/:id" element={<PurchaseReturnsPage />} />   
             <Route path='/purchase/returns' element={<PurchaseReturnList/>} />     
+<<<<<<< HEAD
             <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} /> 
             <Route path="/confirm-orders" element={<ConfirmedOrderPage />} />   
             <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage />} />
@@ -58,6 +64,11 @@ function App() {
             <Route path='/sale-return-reports' element={<SaleReturnReport />} />
              
             
+=======
+            <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} />   
+            <Route path="/stock-report" element={<InventoryStockReport />} /> 
+            <Route path="/low-stock-report" element={<LowStockReport />} />
+>>>>>>> add-inventory-report
           </Routes>
         </div>
       </div>
