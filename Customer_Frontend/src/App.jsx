@@ -2,9 +2,9 @@ import React, { useContext } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
 
-// ==========================================
-// 🌟 1. CUSTOMER PAGE IMPORTS (မင်း၏ Code)
-// ==========================================
+// =====================================================================
+// 🌟 1. CUSTOMER PAGE IMPORTS (မင်း၏ မူလလမ်းကြောင်းများ)
+// =====================================================================
 import StationeroPage from './pages/StationeroPage';
 import AboutUs from './pages/AboutUs';
 import ProductPage from './pages/ProductPage';
@@ -18,63 +18,62 @@ import OrderHistoryPage from './pages/history';
 import ReturnsPage from './pages/returns';
 import ProfilePage from './pages/profile';
 
-// ==========================================
-// 🌟 2. ADMIN PAGE IMPORTS (Team Leader ၏ Code)
-// ==========================================
-import Sidebar from '../../components/admin/Sidebar';
-import SupplierPage from './supplierPage';
-import AddSupplierPage from './AddSupplierPage';
-import UpdateSupplierPage from './UpdateSupplierPage';
-import ProductList from './ProductList'; 
-import AddProductPage from './AddProductPage';
-import ViewProductDetails from './ViewProductDetails';
-import UpdateProductPage from './UpdateProductPage';
-import CategoryList from './CategoryList';
-import AddCategoryPage from './AddCategoryPage';
-import UpdateCategoryPage from './UpdateCategoryPage';
-import PurchasePage from './PurchasePage';
-import AddPurchaseOrderPage from './AddPurchaseOrderPage';
-import PurchaseOrderDetail from './PurchaseOrderDetail';
-import PurchaseReturnsPage from './PurchaseReturnsPage';
-import PurchaseReturnList from './PurchaseReturnList';
-import PurchaseReturnDetails from './PurchaseReturnDetails';
+// =====================================================================
+// 🌟 2. ADMIN PAGE & COMPONENT IMPORTS (Folder Structure အသစ်အတိုင်း ချိတ်ဆက်ခြင်း)
+// =====================================================================
+import Sidebar from './components/admin/Sidebar';
+import SupplierPage from './pages/admin/supplierPage';
+import AddSupplierPage from './pages/admin/AddSupplierPage';
+import UpdateSupplierPage from './pages/admin/UpdateSupplierPage';
+import ProductList from './pages/admin/ProductList'; 
+import AddProductPage from './pages/admin/AddProductPage';
+import ViewProductDetails from './pages/admin/ViewProductDetails';
+import UpdateProductPage from './pages/admin/UpdateProductPage';
+import CategoryList from './pages/admin/CategoryList';
+import AddCategoryPage from './pages/admin/AddCategoryPage';
+import UpdateCategoryPage from './pages/admin/UpdateCategoryPage';
+import PurchasePage from './pages/admin/PurchasePage';
+import AddPurchaseOrderPage from './pages/admin/AddPurchaseOrderPage';
+import PurchaseOrderDetail from './pages/admin/PurchaseOrderDetail';
+import PurchaseReturnsPage from './pages/admin/PurchaseReturnsPage';
+import PurchaseReturnList from './pages/admin/PurchaseReturnList';
+import PurchaseReturnDetails from './pages/admin/PurchaseReturnDetails';
 
-// --- Conflict ရှင်းလင်းပြီးသား Admin Reports များ ---
-import ConfirmedOrderPage from './ConfirmedOrderPage';
-import ConfirmedOrderDetailsPage from './ConfirmedOrderDetailsPage';
-import PurchaseSummary from './PurchaseSummary';
-import PurchaseReturnSummary from './PurchaseReturnSummary';
-import SupplierWisePurchase from './SupplierWisePurchase';
-import SaleReport from './SaleReport';
-import SaleReturnReport from './SaleReturnReport';
-import InventoryStockReport from "./InventoryStockReport";
-import LowStockReport from "./InventoryLowStockReport";
+// Reports & Inventory Pages
+import ConfirmedOrderPage from './pages/admin/ConfirmedOrderPage';
+import ConfirmedOrderDetailsPage from './pages/admin/ConfirmedOrderDetailsPage';
+import PurchaseSummary from './pages/admin/PurchaseSummary';
+import PurchaseReturnSummary from './pages/admin/PurchaseReturnSummary';
+import SupplierWisePurchase from './pages/admin/SupplierWisePurchase';
+import SaleReport from './pages/admin/SaleReport';
+import SaleReturnReport from './pages/admin/SaleReturnReport';
+import InventoryStockReport from "./pages/admin/InventoryStockReport";
+import LowStockReport from "./pages/admin/InventoryLowStockReport";
 
-// ==========================================
-// 🌟 3. AUTHENTICATION & LAYOUTS
-// ==========================================
-
-// Customer ပိုင်းအတွက် Protected Route Logic (မင်း၏ မူလ Code)
+// =====================================================================
+// 🌟 3. AUTHENTICATION & LAYOUT MANAGEMENT
+// =====================================================================
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useContext(AuthContext);
   return isLoggedIn ? children : <Navigate to="/login" />;
 };
 
-// Admin ပိုင်းအတွက် သီးသန့် Layout (Sidebar ပါဝင်မည်)
+// Admin Pages များအတွက်သာ Sidebar သီးသန့် ပြသပေးမည့် Layout
 const AdminLayout = () => {
   return (
-    <div className="flex">
+    <div className="flex bg-gray-50 min-h-screen">
+      {/* 🌟 Sidebar ကြီး အမြဲတမ်း ဘေးတွင် ပေါ်နေစေရန် သတ်မှတ်ခြင်း */}
       <Sidebar />
-      <div className="flex-1">
-        <Outlet /> {/* ဒီနေရာမှာ Admin Routes တွေ အလုပ်လုပ်ပါမယ် */}
+      <div className="flex-1 p-6">
+        <Outlet /> 
       </div>
     </div>
   );
 };
 
-// ==========================================
-// 🌟 4. MAIN APP COMPONENT
-// ==========================================
+// =====================================================================
+// 🌟 4. MAIN APP ROUTING ENGINE
+// =====================================================================
 function App() {
   return (
     <AuthProvider>
@@ -99,11 +98,13 @@ function App() {
           <Route path="/returns" element={<ProtectedRoute><ReturnsPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
 
-
           {/* ---------------------------------------------------- */}
-          {/* 🔸 ADMIN ROUTES (Sidebar အမြဲပေါ်နေမည့် စာမျက်နှာများ) 🔸 */}
+          {/* 🔸 ADMIN ROUTES (Sidebar အမြဲတမ်း ပေါ်နေမည့် စာမျက်နှာများ) 🔸 */}
           {/* ---------------------------------------------------- */}
           <Route element={<AdminLayout />}>
+            {/* 🌟 /admin ဟု ခေါ်ပါက No Route Matched မဖြစ်စေဘဲ Category List သို့ တိုက်ရိုက် Auto-Redirect လုပ်ပေးခြင်း */}
+            <Route path="/admin" element={<Navigate to="/categories" replace />} />
+            
             <Route path="/suppliers" element={<SupplierPage />} />
             <Route path="/add-supplier" element={<AddSupplierPage />} />
             <Route path="/edit-supplier/:id" element={<UpdateSupplierPage />} />
@@ -121,7 +122,7 @@ function App() {
             <Route path='/purchase/returns' element={<PurchaseReturnList/>} />     
             <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} /> 
             
-            {/* Merged Reports & Inventory */}
+            {/* Reports & Inventory Control Panel */}
             <Route path="/confirm-orders" element={<ConfirmedOrderPage />} />   
             <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage />} />
             <Route path="/purchase-reports" element={<PurchaseSummary />} />

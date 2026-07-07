@@ -17,13 +17,13 @@ const ProductList = () => {
   const [productIdToDelete, setProductIdToDelete] = useState(null);
   const [productNameToDelete, setProductNameToDelete] = useState("");
 
-    // Search Filter Logic
+  // Search Filter Logic
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.product_name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === "" || p.category_id.toString() === selectedCategory;
-    
+
     const matchesTab = activeTab === 'active' ? p.del_flag === 0 : p.del_flag === 1;
-    
+
     return matchesSearch && matchesCategory && matchesTab;
   });
 
@@ -72,9 +72,9 @@ const ProductList = () => {
     try {
 
       await axios.delete(`http://localhost:8000/products/${id}`);
-      
+
       setIsModalOpen(false);
-      fetchProducts(); 
+      fetchProducts();
     } catch (error) {
       console.error("Error deleting product:", error);
       alert("Failed to delete product.");
@@ -84,7 +84,7 @@ const ProductList = () => {
   return (
     <div className="flex w-full min-h-screen overflow-x-hidden bg-gray-50">
       {/* <Sidebar /> */}
-      
+
       <div className="flex-1 flex flex-col w-full overflow-x-hidden">
         {/* Header Section */}
         <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full">
@@ -97,26 +97,26 @@ const ProductList = () => {
         <div className="p-8">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Product List</h2>
-            <button 
-              onClick={() => navigate('/add-product')} 
+            <button
+              onClick={() => navigate('/add-product')}
               className="bg-[#F25278] text-white px-6 py-2 rounded-lg font-semibold"
             >
               + Add New Product
             </button>
-        </div>
+          </div>
 
           {/* Search Bar */}
           <div className="flex gap-4 mb-6 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
-            <input 
-              type="text" 
-              placeholder="Enter Product ID or Product Name" 
+            <input
+              type="text"
+              placeholder="Enter Product ID or Product Name"
               className="flex-1 p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F25278]"
               onChange={(e) => setSearch(e.target.value)}
             />
-            <select 
+            <select
               className="p-3 border border-gray-200 rounded-lg w-40 focus:outline-none"
-              value={selectedCategory} 
-              onChange={(e) => setSelectedCategory(e.target.value)} 
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
             >
               <option value="">All Categories</option>
               {categories.map((cat) => (
@@ -125,18 +125,17 @@ const ProductList = () => {
                 </option>
               ))}
             </select>
-           
+
             <div className="flex bg-gray-200 rounded-lg p-1">
-              {[{label: 'Active', value: 'active'}, {label: 'Deleted', value: 'deleted'}].map((tab) => (
-                <button 
-                  key={tab.value} 
+              {[{ label: 'Active', value: 'active' }, { label: 'Deleted', value: 'deleted' }].map((tab) => (
+                <button
+                  key={tab.value}
                   type="button"
-                  onClick={() => setActiveTab(tab.value)} 
-                  className={`px-6 py-2 rounded-md transition-all ${
-                    activeTab === tab.value 
-                      ? 'bg-white text-[#F25278] shadow-sm' 
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`px-6 py-2 rounded-md transition-all ${activeTab === tab.value
+                      ? 'bg-white text-[#F25278] shadow-sm'
                       : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
@@ -159,63 +158,63 @@ const ProductList = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                  {currentItems.length > 0 ? (
-                    currentItems.map((p) => (
-                      <tr key={p.product_id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 font-medium text-gray-700">{p.product_id}</td>
-                        <td className="px-6 py-4 text-gray-600">{p.product_name}</td>
-                        <td className="px-6 py-4 text-gray-600">
-                          {categoryMap[p.category_id] || "Unknown"}
-                        </td>
-                        <td className="px-6 py-4 text-right text-gray-600">{p.unit_price}</td>
-                        <td className="px-6 py-4 text-center text-gray-600">{p.current_qty}</td>
-                        <td className="px-6 py-4 text-right text-gray-600">{p.selling_price}</td>
-                        <td className="px-6 py-4 flex justify-center gap-3">
-                          {p.del_flag === 0 ? (
-                            <>
-                              {/* View Button */}
-                              <button 
-                                onClick={() => navigate(`/view-product/${p.product_id}`)}
-                                className="text-[#405169] hover:text-[#2d3a4d] transition"
-                              >
-                                <i className="fa-solid fa-eye"></i>
-                              </button>
+                {currentItems.length > 0 ? (
+                  currentItems.map((p) => (
+                    <tr key={p.product_id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 font-medium text-gray-700">{p.product_id}</td>
+                      <td className="px-6 py-4 text-gray-600">{p.product_name}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {categoryMap[p.category_id] || "Unknown"}
+                      </td>
+                      <td className="px-6 py-4 text-right text-gray-600">{p.unit_price}</td>
+                      <td className="px-6 py-4 text-center text-gray-600">{p.current_qty}</td>
+                      <td className="px-6 py-4 text-right text-gray-600">{p.selling_price}</td>
+                      <td className="px-6 py-4 flex justify-center gap-3">
+                        {p.del_flag === 0 ? (
+                          <>
+                            {/* View Button */}
+                            <button
+                              onClick={() => navigate(`/view-product/${p.product_id}`)}
+                              className="text-[#405169] hover:text-[#2d3a4d] transition"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
 
-                              {/* Edit Button */}
-                              <button 
-                                onClick={() => navigate(`/edit-product/${p.product_id}`)}
-                                className="text-blue-600 hover:text-blue-800 transition"
-                              >
-                                <i className="fa-solid fa-pen-to-square"></i>
-                              </button>
+                            {/* Edit Button */}
+                            <button
+                              onClick={() => navigate(`/edit-product/${p.product_id}`)}
+                              className="text-blue-600 hover:text-blue-800 transition"
+                            >
+                              <i className="fa-solid fa-pen-to-square"></i>
+                            </button>
 
-                              {/* Delete Button */}
-                              <button 
-                                onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }}
-                                className="text-red-600 hover:text-red-800 transition"
-                              >
-                                <i className="fa-solid fa-trash"></i>
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">
-                              Removed
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="px-6 py-10 text-center text-gray-500">
-                        <p>No products found matching your search.</p>
+                            {/* Delete Button */}
+                            <button
+                              onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }}
+                              className="text-red-600 hover:text-red-800 transition"
+                            >
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">
+                            Removed
+                          </span>
+                        )}
                       </td>
                     </tr>
-                  )}
-                </tbody>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-10 text-center text-gray-500">
+                      <p>No products found matching your search.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
 
-            <Pagination 
+            <Pagination
               totalItems={filteredProducts.length}
               itemsPerPage={itemsPerPage}
               currentPage={currentPage}
@@ -226,21 +225,21 @@ const ProductList = () => {
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
                 <div className="bg-white p-6 rounded-lg shadow-xl w-96">
                   <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                  <p className="mb-6 text-gray-600">Are you sure you want to delete <strong>{productNameToDelete}</strong>? 
+                  <p className="mb-6 text-gray-600">Are you sure you want to delete <strong>{productNameToDelete}</strong>?
                     This action cannot be undone.</p>
                   <div className="flex justify-end gap-4">
-                    <button 
-                      type="button" 
-                      onClick={() => setIsModalOpen(false)} 
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
                       className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
                     >
                       Cancel
                     </button>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => {
                         handleDelete(productIdToDelete);
-                      }} 
+                      }}
                       className="px-4 py-2 bg-[#F25278] text-white rounded-md hover:bg-pink-600"
                     >
                       Yes, Delete
@@ -253,7 +252,7 @@ const ProductList = () => {
         </div>
       </div>
 
-      
+
     </div>
   );
 };
