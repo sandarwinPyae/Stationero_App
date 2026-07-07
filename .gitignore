@@ -11,3 +11,12 @@ app.db
 # Node.js / React
 node_modules/
 dist/
+
+# img
+uploads/
+
+# Executables
+*.exe
+
+# VS Code
+.vscode/
