@@ -96,7 +96,7 @@ const ViewProductDetails = () => {
             {/* Description Section */}
             <div className="mb-8">
               <h3 className="font-semibold text-gray-700 mb-2">Description</h3>
-              <p className="text-gray-600 leading-relaxed text-sm">{product.product_description || "No description provided."}</p>
+              <p className="text-gray-600 leading-relaxed text-sm">{product.description || "No description provided."}</p>
             </div>
             
             {/* Action Buttons */}

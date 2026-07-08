@@ -38,7 +38,7 @@ async def add_product(
     image: UploadFile = File(...), 
     db: Session = Depends(get_db)
 ):
-    upload_dir = "uploads"
+    upload_dir = "images"
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
         
@@ -52,7 +52,7 @@ async def add_product(
         unit_price=unit_price,
         selling_price=selling_price,
         current_qty=current_qty,
-        product_description=description,
+        description=description,
         product_img_url=file_path 
     )
     db.add(new_product)
@@ -101,7 +101,7 @@ async def edit_product(
     product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
     
     if image:
-        upload_dir = "uploads"
+        upload_dir = "images"
         file_path = os.path.join(upload_dir, image.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
@@ -112,7 +112,7 @@ async def edit_product(
     product.unit_price = unit_price
     product.selling_price = selling_price
     product.current_qty = current_qty + new_qty
-    product.product_description = description
+    product.description = description
     
     db.commit()
     return {"message": "Product updated successfully"}

@@ -7,12 +7,12 @@ const UpdateProductPage = () => {
   const navigate = useNavigate();
   const [product, setProduct] = useState({
     product_name: '', category_id: '', unit_price: '',
-    selling_price: '', current_qty: '', product_description: ''
+    selling_price: '', current_qty: '', description: ''
   });
   const [categories, setCategories] = useState([]);
   const [image, setImage] = useState("");
   const [preview, setPreview] = useState("");
-  const [addedQty, setAddedQty] = useState(0); // Stock အသစ်ထည့်ရန် State
+  const [addedQty, setAddedQty] = useState(0); 
 
   useEffect(() => {
     fetchProduct();
@@ -43,7 +43,7 @@ const UpdateProductPage = () => {
     formData.append('selling_price', Number(product.selling_price));
     formData.append('current_qty', Number(product.current_qty));
     formData.append('new_qty', Number(addedQty)); 
-    formData.append('description', product.product_description);
+    formData.append('description', product.description);
     if (image) formData.append('image', image);
 
     try {
@@ -53,7 +53,6 @@ const UpdateProductPage = () => {
   };
 
   const handleKeyDown = (e) => {
-    // '-', '+', 'e', 'E' များကို ပိတ်ထားသည်
     if (["-", "+", "e", "E"].includes(e.key)) {
       e.preventDefault();
     }
@@ -63,7 +62,7 @@ const UpdateProductPage = () => {
     <div className="min-h-screen bg-slate-50 py-10 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
-          <h2 className="text-3xl font-extrabold text-slate-800">Edit Product</h2>
+          <h2 className="text-2xl font-extrabold text-slate-800">Edit Product</h2>
           <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-[#F25278] font-medium">← Back</button>
         </div>
 
@@ -122,12 +121,12 @@ const UpdateProductPage = () => {
 
             <div className="md:col-span-2">
               <label className="block text-sm font-bold text-slate-700 mb-2">Description</label>
-              <textarea rows="4" value={product.product_description} onChange={e => setProduct({...product, product_description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none"></textarea>
+              <textarea rows="4" value={product.description} onChange={e => setProduct({...product, description: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none"></textarea>
             </div>
           </div>
 
           <div className="flex gap-4 mt-10">
-            <button type="button" onClick={() => navigate(-1)} className="flex-1 py-4 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition">Cancel</button>
+            <button type="button" onClick={() => navigate(-1)} className="flex-1 py-4 rounded-xl font-bold text-slate-600 border hover:bg-slate-100 transition">Cancel</button>
             <button type="submit" className="flex-1 py-4 bg-[#F25278] text-white rounded-xl font-bold shadow-lg shadow-pink-200 transition">Save Changes</button>
           </div>
         </form>

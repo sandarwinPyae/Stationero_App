@@ -43,7 +43,7 @@ class Product(Base):
     selling_price = Column(Float)
     current_qty = Column(Integer)
     product_img_url = Column(String)
-    product_description = Column(String , nullable=True)
+    description = Column(String , nullable=True)
     del_flag = Column(Integer,default=0)
     created_date = Column(DateTime, default=lambda: datetime.now(yangon_tz))
     updated_date = Column(DateTime, default=lambda: datetime.now(yangon_tz), onupdate=lambda: datetime.now(yangon_tz))

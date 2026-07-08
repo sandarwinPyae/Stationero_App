@@ -17,13 +17,11 @@ const ProductList = () => {
   const [productIdToDelete, setProductIdToDelete] = useState(null);
   const [productNameToDelete, setProductNameToDelete] = useState("");
 
-    // Search Filter Logic
+  // Search Filter Logic
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.product_name.toLowerCase().includes(search.toLowerCase());
     const matchesCategory = selectedCategory === "" || p.category_id.toString() === selectedCategory;
-    
     const matchesTab = activeTab === 'active' ? p.del_flag === 0 : p.del_flag === 1;
-    
     return matchesSearch && matchesCategory && matchesTab;
   });
 
@@ -57,7 +55,6 @@ const ProductList = () => {
     }
   };
 
-
   const fetchProducts = async (tab = activeTab) => {
     try {
       const isDeleted = tab === 'deleted';
@@ -70,9 +67,7 @@ const ProductList = () => {
 
   const handleDelete = async (id) => {
     try {
-
       await axios.delete(`http://localhost:8000/products/${id}`);
-      
       setIsModalOpen(false);
       fetchProducts(); 
     } catch (error) {
@@ -83,7 +78,7 @@ const ProductList = () => {
 
   return (
     <div className="flex w-full min-h-screen overflow-x-hidden bg-gray-50">
-      {/* <Sidebar /> */}
+      {/* Sidebar (If needed) */}
       
       <div className="flex-1 flex flex-col w-full overflow-x-hidden">
         {/* Header Section */}
@@ -103,7 +98,7 @@ const ProductList = () => {
             >
               + Add New Product
             </button>
-        </div>
+          </div>
 
           {/* Search Bar */}
           <div className="flex gap-4 mb-6 bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
@@ -125,7 +120,7 @@ const ProductList = () => {
                 </option>
               ))}
             </select>
-           
+            
             <div className="flex bg-gray-200 rounded-lg p-1">
               {[{label: 'Active', value: 'active'}, {label: 'Deleted', value: 'deleted'}].map((tab) => (
                 <button 
@@ -144,7 +139,7 @@ const ProductList = () => {
             </div>
           </div>
 
-          {/* Product Table */}
+          {/* Product Table Container */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
@@ -159,101 +154,98 @@ const ProductList = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                  {currentItems.length > 0 ? (
-                    currentItems.map((p) => (
-                      <tr key={p.product_id} className="hover:bg-gray-50 transition">
-                        <td className="px-6 py-4 font-medium text-gray-700">{p.product_id}</td>
-                        <td className="px-6 py-4 text-gray-600">{p.product_name}</td>
-                        <td className="px-6 py-4 text-gray-600">
-                          {categoryMap[p.category_id] || "Unknown"}
-                        </td>
-                        <td className="px-6 py-4 text-right text-gray-600">{p.unit_price}</td>
-                        <td className="px-6 py-4 text-center text-gray-600">{p.current_qty}</td>
-                        <td className="px-6 py-4 text-right text-gray-600">{p.selling_price}</td>
-                        <td className="px-6 py-4 flex justify-center gap-3">
-                          {p.del_flag === 0 ? (
-                            <>
-                              {/* View Button */}
-                              <button 
-                                onClick={() => navigate(`/view-product/${p.product_id}`)}
-                                className="text-[#405169] hover:text-[#2d3a4d] transition"
-                              >
-                                <i className="fa-solid fa-eye"></i>
-                              </button>
-
-                              {/* Edit Button */}
-                              <button 
-                                onClick={() => navigate(`/edit-product/${p.product_id}`)}
-                                className="text-blue-600 hover:text-blue-800 transition"
-                              >
-                                <i className="fa-solid fa-pen-to-square"></i>
-                              </button>
-
-                              {/* Delete Button */}
-                              <button 
-                                onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }}
-                                className="text-red-600 hover:text-red-800 transition"
-                              >
-                                <i className="fa-solid fa-trash"></i>
-                              </button>
-                            </>
-                          ) : (
-                            <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">
-                              Removed
-                            </span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="7" className="px-6 py-10 text-center text-gray-500">
-                        <p>No products found matching your search.</p>
+                {currentItems.length > 0 ? (
+                  currentItems.map((p) => (
+                    <tr key={p.product_id} className="hover:bg-gray-50 transition">
+                      <td className="px-6 py-4 font-medium text-gray-700">{p.product_id}</td>
+                      <td className="px-6 py-4 text-gray-600">{p.product_name}</td>
+                      <td className="px-6 py-4 text-gray-600">
+                        {categoryMap[p.category_id] || "Unknown"}
+                      </td>
+                      <td className="px-6 py-4 text-right text-gray-600">{p.unit_price}</td>
+                      <td className="px-6 py-4 text-center text-gray-600">{p.current_qty}</td>
+                      <td className="px-6 py-4 text-right text-gray-600">{p.selling_price}</td>
+                      <td className="px-6 py-4 flex justify-center gap-3">
+                        {p.del_flag === 0 ? (
+                          <>
+                            <button 
+                              onClick={() => navigate(`/view-product/${p.product_id}`)}
+                              className="text-[#405169] hover:text-[#2d3a4d] transition"
+                            >
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
+                            <button 
+                              onClick={() => navigate(`/edit-product/${p.product_id}`)}
+                              className="text-blue-600 hover:text-blue-800 transition"
+                            >
+                              <i className="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button 
+                              onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }}
+                              className="text-red-600 hover:text-red-800 transition"
+                            >
+                              <i className="fa-solid fa-trash"></i>
+                            </button>
+                          </>
+                        ) : (
+                          <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">
+                            Removed
+                          </span>
+                        )}
                       </td>
                     </tr>
-                  )}
-                </tbody>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-10 text-center text-gray-500">
+                      <p>No products found matching your search.</p>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
             </table>
+          </div>
 
+          {/* Pagination (Moved out of table div) */}
+          <div className="mt-6">
             <Pagination 
               totalItems={filteredProducts.length}
               itemsPerPage={itemsPerPage}
               currentPage={currentPage}
               onPageChange={(page) => setCurrentPage(page)}
             />
-
-            {isModalOpen && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                  <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                  <p className="mb-6 text-gray-600">Are you sure you want to delete <strong>{productNameToDelete}</strong>? 
-                    This action cannot be undone.</p>
-                  <div className="flex justify-end gap-4">
-                    <button 
-                      type="button" 
-                      onClick={() => setIsModalOpen(false)} 
-                      className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
-                    >
-                      Cancel
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => {
-                        handleDelete(productIdToDelete);
-                      }} 
-                      className="px-4 py-2 bg-[#F25278] text-white rounded-md hover:bg-pink-600"
-                    >
-                      Yes, Delete
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
 
-      
+      {/* Modal (Moved out of content div) */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+            <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
+            <p className="mb-6 text-gray-600">Are you sure you want to delete <strong>{productNameToDelete}</strong>? 
+              This action cannot be undone.</p>
+            <div className="flex justify-end gap-4">
+              <button 
+                type="button" 
+                onClick={() => setIsModalOpen(false)} 
+                className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button 
+                type="button" 
+                onClick={() => {
+                  handleDelete(productIdToDelete);
+                }} 
+                className="px-4 py-2 bg-[#F25278] text-white rounded-md hover:bg-pink-600"
+              >
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

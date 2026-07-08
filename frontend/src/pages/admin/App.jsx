@@ -26,6 +26,8 @@ import SaleReport from './SaleReport';
 import SaleReturnReport from './SaleReturnReport';
 import InventoryStockReport from "./InventoryStockReport";
 import LowStockReport from "./InventoryLowStockReport";
+import AdminDashboard from './Admin_Dashboard';
+import CustomerPage from './CustomerPage';
 
 
 function App() {
@@ -63,6 +65,9 @@ function App() {
             <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} />   
             <Route path="/stock-report" element={<InventoryStockReport />} /> 
             <Route path="/low-stock-report" element={<LowStockReport />} />
+            <Route path="/dashboard" element={<AdminDashboard />} />
+            <Route path="/customers" element={<CustomerPage />} />
+
           </Routes>
         </div>
       </div>
