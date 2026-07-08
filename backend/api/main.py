@@ -35,7 +35,7 @@ app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 # Unified CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origin_regex=r"http://localhost:\d+|http://127\.0\.0\.1:\d+",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -99,6 +99,7 @@ def get_customers(
         "current_page": page,
         "limit": limit,
     }
+
 @app.delete("/api/v1/customers/{customer_id}")
 def delete_customer(customer_id: str):
     global DB_CUSTOMERS

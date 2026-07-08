@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Pagination from './components/Pagination';
 
-
+// Ensure this is exactly "export default function Customers()"
 export default function Customers() {
   const [searchQuery, setSearchQuery] = useState('');
   const [customers, setCustomers] = useState([]);
@@ -16,18 +16,22 @@ export default function Customers() {
     if (searchQuery) targetUrl += `&search=${encodeURIComponent(searchQuery)}`;
 
     fetch(targetUrl)
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error("Network response error");
+        return res.json();
+      })
       .then(data => {
         setCustomers(data.items || []);
         setTotalPages(data.total_pages || 5);
         setIsLoading(false);
       })
       .catch(() => {
+        // Fallback state if server drops connection
         setCustomers([
-          { id: "SLD00001", name: "Hsu Myat", address: "Insein, Yangon", email: "hsu@gmai.com", phone: "09876543211" },
+          { id: "SLD00001", name: "Hsu Myat", address: "Insein, Yangon", email: "hsu@gmail.com", phone: "09876543211" },
           { id: "SLD00002", name: "Meeni", address: "Insein, Yangon", email: "meeni@gamil.com", phone: "09876543211" },
           { id: "SLD00003", name: "Win War", address: "Insein, Yangon", email: "winwar@gmail.com", phone: "09876543211" },
-          { id: "SLD00004", name: "Kaung", address: "Insein, Yangon", email: "kaungh@gmail.com", phone: "09876543211" },
+          { id: "SLD00004", name: "Kaung", address: "Insein, Yangon", email: "kaung@gmail.com", phone: "09876543211" },
           { id: "SLD00005", name: "Pyae", address: "Insein, Yangon", email: "pyae5@gmail.com", phone: "09876543211" }
         ]);
         setIsLoading(false);
@@ -45,7 +49,10 @@ export default function Customers() {
   const handleDelete = (id) => {
     if (window.confirm(`Are you sure you want to delete record ${id}?`)) {
       fetch(`http://127.0.0.1:8000/api/v1/customers/${id}`, { method: 'DELETE' })
-        .then(() => refreshCustomers())
+        .then(res => {
+          if (!res.ok) throw new Error("Delete failed");
+          refreshCustomers();
+        })
         .catch(err => console.error("Error executing delete:", err));
     }
   };
@@ -104,7 +111,6 @@ export default function Customers() {
           </table>
         </div>
 
-        {/* 2. Replaced old markup block with cleaner shared component instance */}
         <Pagination 
           totalItems={totalPages * PAGE_LIMIT} 
           itemsPerPage={PAGE_LIMIT} 
