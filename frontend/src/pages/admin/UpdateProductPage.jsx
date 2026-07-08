@@ -42,7 +42,7 @@ const UpdateProductPage = () => {
     formData.append('unit_price', Number(product.unit_price));
     formData.append('selling_price', Number(product.selling_price));
     formData.append('current_qty', Number(product.current_qty));
-    formData.append('new_qty', Number(addedQty)); // Backend သို့ ပို့မည့် အရေအတွက်
+    formData.append('new_qty', Number(addedQty)); 
     formData.append('description', product.product_description);
     if (image) formData.append('image', image);
 

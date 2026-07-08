@@ -120,7 +120,21 @@ const PurchaseReturnsPage = () => {
         {order && (
           <div className="grid grid-cols-2 gap-y-4 gap-x-12 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-100">
             <p><strong className="text-gray-600">PO ID:</strong> {order.po_number}</p>
-            <p><strong className="text-gray-600">Order Date:</strong> {new Date(order.purchase_order_date).toLocaleDateString()}</p>
+            <p>
+              <strong className="text-gray-600">Order Date:</strong> 
+              {order.purchase_order_date ? (
+                        new Date(order.purchase_order_date).toLocaleString('en-GB', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })
+                      ) : (
+                        "N/A"
+                      )}
+            </p>
             <p><strong className="text-gray-600">Supplier:</strong> {order.supplier?.supplier_name}</p>
             <p><strong className="text-gray-600">PO Status:</strong> {order.purchase_order_status}</p>
             <p><strong className="text-gray-600">Supplier Email:</strong> {order.supplier?.supplier_email || 'N/A'}</p>
