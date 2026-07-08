@@ -10,24 +10,22 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
       const navigate = useNavigate();
 
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-
       const [navSearchQuery, setNavSearchQuery] = useState("");
 
       const handleLogin = () => {
-            navigate('/login'); // 🌟 Navbar က Login ခလုတ်ကို နှိပ်ရင် Login Page ကို သွားအောင် ပြင်ထားပါတယ်
+            navigate('/login'); 
       };
 
       const handleLogout = (e) => {
             e.preventDefault();
             setIsLoggedIn(false);
-            localStorage.removeItem('stationero_logged_user'); // Logout လုပ်ရင် Storage ပါ ရှင်းထုတ်မယ်
+            localStorage.removeItem('stationero_logged_user'); 
             navigate('/');
       };
 
       const handleSearchSubmit = async (e) => {
             if (e.key === 'Enter' && navSearchQuery.trim() !== "") {
                   const query = navSearchQuery.trim().toLowerCase();
-
                   try {
                         const resBest = await fetch("http://127.0.0.1:8000/api/products/best-selling");
                         const bestProducts = await resBest.json();
@@ -80,7 +78,6 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
             <nav className="navbar">
                   <div className="container">
                         <h1 className="logo">Stationero</h1>
-
                         {isLoggedIn ? (
                               <>
                                     {renderSearchBar()}
@@ -104,7 +101,6 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                           <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
                                           <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
                                     </ul>
-
                                     <div className="auth-btns">
                                           <button className="btn btn-auth" onClick={handleLogin}>Login</button>
                                           <button className="btn btn-auth" onClick={() => navigate('/signup')}>Sign Up</button>
@@ -116,10 +112,8 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
       );
 };
 
-// 🌟 HeroSection component နေရာတွင် အစားထိုးရန်
 const HeroSection = () => {
-      const navigate = useNavigate(); // Navigation အတွက် ထည့်သွင်းခြင်း
-
+      const navigate = useNavigate();
       return (
             <section className="hero" style={{ backgroundImage: `url(http://127.0.0.1:8000/images/heroBg.jpg)` }}>
                   <div className="hero-container">
@@ -132,11 +126,7 @@ const HeroSection = () => {
                                     Stationero makes it so that in everything we do, the<br />
                                     support we provide can help and educate you.
                               </p>
-                              {/* 🌟 ခလုတ်နှိပ်လျှင် /product သို့ ရောက်သွားစေမည့် onClick ကို ထည့်ထားပါသည် */}
-                              <button
-                                    className="btn btn-shop-outline"
-                                    onClick={() => navigate('/product')}
-                              >
+                              <button className="btn btn-shop-outline" onClick={() => navigate('/product')}>
                                     SHOP NOW &gt;
                               </button>
                         </div>
@@ -145,17 +135,14 @@ const HeroSection = () => {
       );
 };
 
-// 🌟 OfferCard ကို Login ဝင်/မဝင် စစ်ဆေးနိုင်ရန် ပြင်ဆင်ခြင်း
 const OfferCard = ({ image, title, discount, productId }) => {
-      const navigate = useNavigate(); // Navigation အတွက်
-      const { isLoggedIn } = useContext(AuthContext); // Login အခြေအနေစစ်ရန်
+      const navigate = useNavigate();
+      const { isLoggedIn } = useContext(AuthContext);
 
       const handleShopClick = () => {
-            if (isLoggedIn) {
-                  // Login ဝင်ထားရင် သတ်မှတ်ထားတဲ့ Product Detail ကိုသွားမယ်
+            if (isLoggedIn && productId) {
                   navigate(`/product/${productId}`);
-            } else {
-                  // Guest ဆိုရင် Login Page ကိုသွားမယ်
+            } else if (!isLoggedIn) {
                   navigate('/login');
             }
       };
@@ -165,7 +152,6 @@ const OfferCard = ({ image, title, discount, productId }) => {
                   <div className="offer-content">
                         <h3 className="offer-title">{title}</h3>
                         <p className="offer-discount">{discount}</p>
-                        {/* 🌟 ခလုတ်နှိပ်လျှင် handleShopClick ကို အလုပ်လုပ်စေမည် */}
                         <button className="btn btn-shop-small" onClick={handleShopClick}>
                               SHOP NOW &gt;
                         </button>
@@ -174,30 +160,43 @@ const OfferCard = ({ image, title, discount, productId }) => {
       );
 };
 
-// 🌟 CategoryOffers တွင် သက်ဆိုင်ရာ Product ID များ ထည့်ပေးခြင်း
+// 🌟 100% Dynamic ဖြစ်အောင် ပြင်ဆင်ထားသော CategoryOffers
 const CategoryOffers = () => {
+      const [products, setProducts] = useState([]);
+      
+      useEffect(() => {
+            fetch("http://127.0.0.1:8000/api/products")
+                  .then(res => res.json())
+                  .then(data => setProducts(data))
+                  .catch(err => console.error("Error fetching for category offers:", err));
+      }, []);
+
+      // Database ထဲက နာမည်တွေနဲ့ တိုက်စစ်ပြီး ID တွေကို Dynamic ဆွဲထုတ်ပါမည်
+      const notebookId = products.find(p => p.product_name.toLowerCase().includes("notebook"))?.product_id;
+      const tapeId = products.find(p => p.product_name.toLowerCase() === "tape")?.product_id;
+      const correctionTapeId = products.find(p => p.product_name.toLowerCase().includes("correction tape"))?.product_id;
+
       return (
             <section className="category-offers">
                   <div className="container">
                         <div className="category-grid">
-                              {/* ⚠️ productId နေရာတွင် Database ထဲက အမှန်တကယ်သွားချင်သော ပစ္စည်း၏ ID ကို ပြင်ထည့်ပေးပါ ⚠️ */}
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/notebookOffer.jpg"
                                     title="NOTEBOOKS"
                                     discount="25% OFF"
-                                    productId={15} /* <--- ဥပမာ: Notebook ၏ Product ID */
+                                    productId={notebookId || 1}
                               />
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/tapeOffer.jpg"
                                     title="ALL TAPES"
                                     discount="25% OFF"
-                                    productId={11} /* <--- ဥပမာ: Tapes ၏ Product ID */
+                                    productId={tapeId || 1}
                               />
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/correctionTapeOffer.jpg"
                                     title="CORRECTION TAPES"
                                     discount="25% OFF"
-                                    productId={13} /* <--- ဥပမာ: Correction Tapes ၏ Product ID */
+                                    productId={correctionTapeId || 1}
                               />
                         </div>
                   </div>
@@ -205,7 +204,6 @@ const CategoryOffers = () => {
       );
 };
 
-// 🌟 ပစ္စည်းနှိပ်လျှင် အလုပ်လုပ်မည့် ProductCard အသစ်
 const ProductCard = ({ product, onProductClick }) => {
       return (
             <div className="product-card" onClick={() => onProductClick(product.product_id)} style={{ cursor: 'pointer' }}>
@@ -230,7 +228,6 @@ const SectionTitle = () => {
       );
 };
 
-// 🌟 BestSellingGrid ကို Click function နှင့်ချိတ်ဆက်ခြင်း
 const BestSellingGrid = ({ searchQuery }) => {
       const [products, setProducts] = useState([]);
       const navigate = useNavigate();
@@ -259,8 +256,8 @@ const BestSellingGrid = ({ searchQuery }) => {
                               {filtered.map(p => (
                                     <ProductCard
                                           key={p.product_id}
-                                          product={p} // 🌟 Product Object အပြည့်ပို့ပါမည်
-                                          onProductClick={handleProductClick} // 🌟 Click Function ပို့ပါမည်
+                                          product={p}
+                                          onProductClick={handleProductClick}
                                     />
                               ))}
                         </div>
@@ -269,7 +266,6 @@ const BestSellingGrid = ({ searchQuery }) => {
       );
 };
 
-// 🌟 NewArrivalsGrid ကို Click function နှင့်ချိတ်ဆက်ခြင်း
 const NewArrivalsGrid = ({ searchQuery }) => {
       const [products, setProducts] = useState([]);
       const navigate = useNavigate();
@@ -280,6 +276,7 @@ const NewArrivalsGrid = ({ searchQuery }) => {
                   .then(res => res.json())
                   .then(data => setProducts(data));
       }, []);
+      
       const filtered = products.filter(p => p.product_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const handleProductClick = (productId) => {
@@ -300,8 +297,8 @@ const NewArrivalsGrid = ({ searchQuery }) => {
                               {filtered.map(p => (
                                     <ProductCard
                                           key={p.product_id}
-                                          product={p} // 🌟 Product Object အပြည့်ပို့ပါမည်
-                                          onProductClick={handleProductClick} // 🌟 Click Function ပို့ပါမည်
+                                          product={p}
+                                          onProductClick={handleProductClick}
                                     />
                               ))}
                         </div>
@@ -310,20 +307,27 @@ const NewArrivalsGrid = ({ searchQuery }) => {
       );
 };
 
-// 🌟 PromoBanner ကို Login ဝင်/မဝင် စစ်ဆေးနိုင်ရန် ပြင်ဆင်ခြင်း
+// 🌟 100% Dynamic ဖြစ်အောင် ပြင်ဆင်ထားသော PromoBanner
 const PromoBanner = () => {
       const navigate = useNavigate();
       const { isLoggedIn } = useContext(AuthContext);
+      const [promoProduct, setPromoProduct] = useState(null);
 
-      // ⚠️ ဒီ Yellow Pack ပစ္စည်းအတွက် Database ထဲက အမှန်တကယ် ID ကို ပြင်ထည့်ပေးရန် ⚠️
-      const promoProductId = 2;
+      useEffect(() => {
+            fetch("http://127.0.0.1:8000/api/products")
+                  .then(res => res.json())
+                  .then(data => {
+                        // Promotion အတွက် Desk Organizer သို့မဟုတ် ရှိတဲ့ပစ္စည်းကို Dynamic ဆွဲတင်ပါမည်
+                        const targetPromo = data.find(p => p.product_name === "Desk Organizer") || data[0];
+                        setPromoProduct(targetPromo);
+                  })
+                  .catch(err => console.error("Error fetching promo product:", err));
+      }, []);
 
       const handlePromoClick = () => {
-            if (isLoggedIn) {
-                  // Login ဝင်ထားရင် သတ်မှတ်ထားတဲ့ Product Detail ကိုသွားမယ်
-                  navigate(`/product/${promoProductId}`);
-            } else {
-                  // Guest ဆိုရင် Login Page ကိုသွားမယ်
+            if (isLoggedIn && promoProduct) {
+                  navigate(`/product/${promoProduct.product_id}`);
+            } else if (!isLoggedIn) {
                   navigate('/login');
             }
       };
@@ -339,13 +343,13 @@ const PromoBanner = () => {
                                     <path d="M0,10 Q15,0 31.25,10 T62.5,10 T93.75,10 T125,10 T156.25,10 T187.5,10 T218.75,10 T250,10" fill="none" stroke="#555" strokeWidth="1.5" />
                               </svg>
 
-                              <p className="promo-price">25,000 MMK</p>
-                              {/* 🌟 ခလုတ်နှိပ်လျှင် handlePromoClick ကို အလုပ်လုပ်စေမည် */}
+                              {/* Database ထဲက ဈေးနှုန်းအတိုင်း အမှန်တကယ် ပြသပေးပါမည် */}
+                              <p className="promo-price">{promoProduct ? promoProduct.display_price : "Loading..."}</p>
+                              
                               <button className="btn btn-promo-shop" onClick={handlePromoClick}>
                                     SHOP NOW &gt;
                               </button>
                         </div>
-
                         <div className="promo-image-side">
                               <img src="http://127.0.0.1:8000/images/yellowPack.jpg" alt="Yellow Pack Back" />
                         </div>
@@ -356,17 +360,13 @@ const PromoBanner = () => {
 
 const NewExperienceSection = () => {
       const navigate = useNavigate();
-
       return (
             <section className="experience-section">
                   <div className="container experience-wrapper" style={{ backgroundImage: `url(http://127.0.0.1:8000/images/experienceBg.jpg)` }}>
                         <div className="exp-content">
                               <p className="exp-label">100% STATIONERY PRODUCT</p>
                               <h2 className="exp-title">Open Up To<br />A New Experience.</h2>
-                              <button
-                                    className="btn btn-exp-shop"
-                                    onClick={() => navigate('/product')}
-                              >
+                              <button className="btn btn-exp-shop" onClick={() => navigate('/product')}>
                                     ALL PRODUCTS&gt;
                               </button>
                         </div>
@@ -375,23 +375,14 @@ const NewExperienceSection = () => {
       );
 };
 
-// 🌟 FirstOrderOffer component နေရာတွင် အစားထိုးရန်
 const FirstOrderOffer = () => {
-      const navigate = useNavigate(); // Navigation အတွက် ထည့်သွင်းခြင်း
-
+      const navigate = useNavigate();
       return (
-            <section
-                  className="first-order-section"
-                  style={{ backgroundImage: `url(http://127.0.0.1:8000/images/firstOrderBg.jpg)` }}
-            >
+            <section className="first-order-section" style={{ backgroundImage: `url(http://127.0.0.1:8000/images/firstOrderBg.jpg)` }}>
                   <div className="first-order-content">
                         <h2>10% OFF YOUR FIRST ORDER</h2>
                         <p>Welcome Offer</p>
-                        {/* 🌟 ခလုတ်နှိပ်လျှင် /signup သို့ ရောက်သွားစေမည့် onClick ကို ထည့်ထားပါသည် */}
-                        <button
-                              className="btn-sign-up-offer"
-                              onClick={() => navigate('/signup')}
-                        >
+                        <button className="btn-sign-up-offer" onClick={() => navigate('/signup')}>
                               Sign up
                         </button>
                   </div>

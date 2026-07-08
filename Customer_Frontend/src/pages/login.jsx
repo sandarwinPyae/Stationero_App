@@ -2,7 +2,7 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ကို Import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext'; // 🌟 AuthContext ကို Import လုပ်ပါ
 
-const Login = () => { // 🌟 onNavigate prop ကို ဖယ်လိုက်ပါပြီ
+const Login = () => { 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -41,8 +41,13 @@ const Login = () => { // 🌟 onNavigate prop ကို ဖယ်လိုက်
         // 🌟 1. Global Authentication State ကို True ပြောင်းပေးခြင်း
         setIsLoggedIn(true);
 
-        // 🌟 2. Login အောင်မြင်ပါက Product စာမျက်နှာ (သို့) Home သို့ သွားခြင်း
-        navigate('/product');
+        // 🌟 2. Role ပေါ်မူတည်ပြီး လမ်းကြောင်းခွဲပေးခြင်း (Admin vs Customer)
+        if (data.role === 'admin') {
+          navigate('/admin'); // Admin ဆိုရင် Admin Dashboard ကိုသွားမယ်
+        } else {
+          navigate('/product'); // Customer ဆိုရင် Product Page ကိုသွားမယ်
+        }
+        
       } else {
         setErrorMessage(data.message || data.detail || 'Authentication failed.');
       }

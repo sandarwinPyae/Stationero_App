@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ထည့်သွင်းထားသည်
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 
 const ProfilePage = () => {
-  const navigate = useNavigate(); // 🌟 navigate ပြောင်းလဲထားသည်
+  const navigate = useNavigate();
 
   const [hoveredLink, setHoveredLink] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -39,16 +40,14 @@ const ProfilePage = () => {
     }
 
     if (!activeEmail) {
-      navigate('/login'); // 🌟 navigate သို့ ပြင်ဆင်ထားသည်
+      navigate('/login');
       return; 
     }
 
-    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
+    // 🌟 Profile Data ကို Axios ဖြင့် ခေါ်ယူခြင်း
+    axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`)
       .then(res => {
-        if (!res.ok) throw new Error("Profile record not initialized yet");
-        return res.json();
-      })
-      .then(data => {
+        const data = res.data; // 🌟 res.json() မလိုတော့ပါ
         setName(data.name || data.customer_name || 'New Customer');
         setEmail(data.email || data.customer_email || activeEmail);
         setPhone(data.phone || data.phone_number || '-');
@@ -66,21 +65,22 @@ const ProfilePage = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:8000/api/customer/profile/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name, phone_number: phone, address }),
+      // 🌟 Profile Update ကို Axios ဖြင့် ပို့ဆောင်ခြင်း (Headers, JSON.stringify မလိုတော့ပါ)
+      const response = await axios.post('http://localhost:8000/api/customer/profile/update', { 
+        email, 
+        name, 
+        phone_number: phone, 
+        address 
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         setIsEditing(false);
         const userObj = { name, email, phone, address, role: 'customer' };
         localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
-      } else {
-        alert('Failed updating profile parameters.');
       }
     } catch (error) {
       console.error(error);
+      alert('Failed updating profile parameters.');
     }
   };
 
@@ -92,7 +92,7 @@ const ProfilePage = () => {
           {navItems.map((item, index) => (
             <span
               key={index}
-              onClick={() => navigate(item.path)} // 🌟 navigate ဖြင့် ချိတ်ဆက်ထားသည်
+              onClick={() => navigate(item.path)}
               onMouseEnter={() => setHoveredLink(index)}
               onMouseLeave={() => setHoveredLink(null)}
               style={{

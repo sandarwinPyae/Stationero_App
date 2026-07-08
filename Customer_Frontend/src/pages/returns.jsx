@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ထည့်သွင်းထားသည်
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 
 const ReturnsPage = () => {
-  const navigate = useNavigate(); // 🌟 navigate ပြောင်းလဲထားသည်
+  const navigate = useNavigate();
 
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
   const [hoveredSubmitBtn, setHoveredSubmitBtn] = useState(false);
-  const [productName, setProductName] = useState('Enter Your Product Name');
-  const [quantity, setQuantity] = useState('0');
-  const [reason, setReason] = useState('Enter the Reason');
+  
+  const [productName, setProductName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [reason, setReason] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('Cash Down');
   const [selectedFile, setSelectedFile] = useState(null);
   const [customerProfile, setCustomerProfile] = useState({ phone: '-', email: '', address: '-' });
-  const [returnId, setReturnId] = useState(''); // 🌟 Error မတက်ရန် ထပ်ဖြည့်ထားသည်
+  const [returnId, setReturnId] = useState('');
 
   const navItems = [
     { label: 'Home', path: '/' },
@@ -44,12 +46,10 @@ const ReturnsPage = () => {
       return;
     }
 
-    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
+    // 🌟 Profile ကို Axios ဖြင့် ခေါ်ယူခြင်း
+    axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`)
       .then(res => {
-        if (!res.ok) throw new Error("Failed to fetch profile");
-        return res.json();
-      })
-      .then(data => {
+        const data = res.data; // res.json() မလိုတော့ပါ
         setCustomerProfile({
           name: data.name || data.customer_name,
           email: data.email || data.customer_email || activeEmail,
@@ -61,9 +61,10 @@ const ReturnsPage = () => {
         console.error("Profile load failed, keeping basic session:", err);
       });
 
-    fetch(`http://localhost:8000/api/order/next-return/${activeEmail}`)
-      .then(res => res.json())
-      .then(data => {
+    // 🌟 Next Return ID ကို Axios ဖြင့် ခေါ်ယူခြင်း
+    axios.get(`http://localhost:8000/api/order/next-return/${activeEmail}`)
+      .then(res => {
+        const data = res.data;
         if (data && data.return_id) {
           setReturnId(data.return_id);
         }
@@ -74,7 +75,6 @@ const ReturnsPage = () => {
   const handleReturnSubmit = async (e) => {
     e.preventDefault();
     try {
-      // 🌟 JSON အစား FormData ကို သုံးပြီး ပုံရော စာသားရော တွဲပို့ပါမည်
       const formData = new FormData();
       formData.append('customer_email', customerProfile.email);
       formData.append('product_name', productName);
@@ -83,24 +83,25 @@ const ReturnsPage = () => {
       formData.append('payment_method', paymentMethod);
 
       if (selectedFile) {
-        formData.append('file', selectedFile); // 🌟 ရွေးချယ်ထားသော ပုံကို ထည့်သွင်းခြင်း
+        formData.append('file', selectedFile);
       }
 
-      const response = await fetch('http://localhost:8000/api/order/return-status', {
-        method: 'POST',
-        // Note: FormData သုံးလျှင် Content-Type Header သတ်မှတ်ပေးရန် မလိုပါ
-        body: formData,
+      // 🌟 FormData ကို Axios ဖြင့် ပို့ဆောင်ခြင်း
+      const response = await axios.post('http://localhost:8000/api/order/return-status', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data' // file တွေပါရင် ဒီ header လေး ထည့်ပေးရပါတယ်
+        }
       });
 
-      if (response.ok) {
+      if (response.status === 200 || response.status === 201) {
         navigate('/history');
-      } else {
-        alert('Return submission failed.');
       }
     } catch (error) {
-      console.error(error);
+      console.error("Return submission failed:", error);
+      alert('Return submission failed. Please try again.');
     }
   };
+
   return (
     <div style={styles.container}>
       <header style={styles.navbar}>
@@ -109,7 +110,7 @@ const ReturnsPage = () => {
           {navItems.map((item, index) => (
             <span
               key={index}
-              onClick={() => navigate(item.path)} // 🌟 navigate ချိတ်ဆက်ထားသည်
+              onClick={() => navigate(item.path)}
               onMouseEnter={() => setHoveredLink(index)}
               onMouseLeave={() => setHoveredLink(null)}
               style={{
@@ -144,18 +145,39 @@ const ReturnsPage = () => {
               </div>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Product Name</label>
-                <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} style={styles.inputField} required />
+                <input 
+                  type="text" 
+                  value={productName} 
+                  onChange={(e) => setProductName(e.target.value)} 
+                  placeholder="Enter Your Product Name" 
+                  style={styles.inputField} 
+                  required 
+                />
               </div>
             </div>
 
             <div style={styles.formColumn}>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Quantity</label>
-                <input type="number" value={quantity} onChange={(e) => setQuantity(e.target.value)} style={styles.inputField} required />
+                <input 
+                  type="number" 
+                  value={quantity} 
+                  onChange={(e) => setQuantity(e.target.value)} 
+                  placeholder="0" 
+                  style={styles.inputField} 
+                  required 
+                />
               </div>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Reason For Return</label>
-                <input type="text" value={reason} onChange={(e) => setReason(e.target.value)} style={styles.inputField} required />
+                <input 
+                  type="text" 
+                  value={reason} 
+                  onChange={(e) => setReason(e.target.value)} 
+                  placeholder="Enter the Reason" 
+                  style={styles.inputField} 
+                  required 
+                />
               </div>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Item Condition</label>
@@ -221,4 +243,5 @@ const styles = {
   },
   submitReturnBtnHover: { backgroundColor: '#e04167', boxShadow: '0 4px 15px rgba(242,82,120,0.3)' },
 };
+
 export default ReturnsPage;

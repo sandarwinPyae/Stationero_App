@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -18,28 +19,27 @@ const SignUpPage = () => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          email: email.trim(),
-          phone_number: phone.trim(),
-          address: address.trim(),
-          password: password
-        }),
+      // 🌟 fetch အစား axios.post ကို အသုံးပြုထားသည်
+      // axios က Content-Type နဲ့ JSON ပြောင်းတာတွေကို အလိုအလျောက် လုပ်ပေးပါတယ်
+      const response = await axios.post('http://localhost:8000/api/signup', {
+        name: name.trim(),
+        email: email.trim(),
+        phone_number: phone.trim(),
+        address: address.trim(),
+        password: password
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        // ---- FIXED: REDIRECTS SILENTLY TO THE LOGIN PAGE MATCHING APP.JSX EXACTLY ----
+      // Axios မှာ 2xx status ဆိုရင် အောင်မြင်တယ်လို့ သတ်မှတ်ပြီး ဒီလိုင်းကို ရောက်လာပါတယ်
+      if (response.status === 201 || response.status === 200) {
         navigate('/login');
-      } else {
-        setErrorMessage(data.detail || 'Registration failed. Email might already be taken.');
       }
     } catch (error) {
-      setErrorMessage('Server connection error. Please try again later.');
+      // 🌟 Error handling ကို axios ပုံစံဖြင့် ပြင်ဆင်ထားသည်
+      if (error.response && error.response.data && error.response.data.detail) {
+        setErrorMessage(error.response.data.detail);
+      } else {
+        setErrorMessage('Server connection error. Please try again later.');
+      }
     }
   };
 
@@ -48,7 +48,6 @@ const SignUpPage = () => {
       <header style={styles.navbar}>
         <div style={styles.logo}>Stationero</div>
         <nav style={styles.navLinks}>
-          {/* 🌟 onNavigate အစား navigate ကို အသုံးပြု၍ လမ်းကြောင်းများ မှန်ကန်စွာ ချိတ်ဆက်ထားပါသည် */}
           <span style={styles.link} onClick={() => navigate('/')}>Home</span>
           <span style={styles.link} onClick={() => navigate('/about')}>About Us</span>
           <button
@@ -119,7 +118,7 @@ const SignUpPage = () => {
           <p style={styles.footerText}>
             Already have an account?{' '}
             <span
-              onClick={() => navigate('/login')} // 🌟 ဤနေရာတွင်လည်း navigate သို့ ပြင်ဆင်ထားပါသည်
+              onClick={() => navigate('/login')}
               onMouseEnter={() => setHoveredLink('loginLink')}
               onMouseLeave={() => setHoveredLink(null)}
               style={{ ...styles.signUpLinkBtn, ...(hoveredLink === 'loginLink' ? { color: '#c0395b' } : {}) }}

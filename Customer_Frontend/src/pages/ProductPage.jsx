@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext';
 import { StationeroNavbar } from './StationeroPage';
 import './ProductPage.css';
@@ -9,7 +10,6 @@ const ProductCard = ({ product, onProductClick }) => {
       return (
             <div className="product-card" onClick={() => onProductClick(product.product_id)} style={{ cursor: 'pointer' }}>
                   <div className="product-img-box">
-                        {/* 🌟 127.0.0.1 အစား localhost ဖြင့် ပြင်ဆင်ထားသည် */}
                         <img src={`http://localhost:8000/images/${product.product_img_url}`} alt={product.product_name} />
                   </div>
                   <h3 className="product-name">{product.product_name}</h3>
@@ -37,23 +37,20 @@ const ProductPage = () => {
             }
       };
 
+      // 🌟 Axios သုံးပြီး အဓိက ပြင်ဆင်ထားသော fetchProducts
       const fetchProducts = async () => {
             setLoading(true);
             try {
-                  // 🌟 127.0.0.1 အစား localhost ဖြင့် ပြင်ဆင်ထားသည်
-                  let url = `http://localhost:8000/api/products?sort=${sortOrder}`;
-                  if (searchQuery.trim() !== "") {
-                        url += `&search=${encodeURIComponent(searchQuery.trim())}`;
-                  }
-                  const response = await fetch(url);
-                  if (response.ok) {
-                        const data = await response.json();
-                        setProducts(data);
-                  } else {
-                        console.error("Failed to fetch products from backend.");
-                  }
+                  const response = await axios.get("http://localhost:8000/api/products", {
+                        params: {
+                              sort: sortOrder,
+                              search: searchQuery.trim() !== "" ? searchQuery.trim() : undefined
+                        }
+                  });
+                  // axios သည် response.data ထဲတွင် data အားလုံးကို တန်းထည့်ပေးသည်
+                  setProducts(response.data);
             } catch (error) {
-                  console.error("Error fetching products:", error);
+                  console.error("Error fetching products with axios:", error);
             } finally {
                   setLoading(false);
             }
@@ -126,7 +123,6 @@ const ProductPage = () => {
                                     </div>
                               )}
                         </div>
-
                   </section>
                   <Footer />
             </div>

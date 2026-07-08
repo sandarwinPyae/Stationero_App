@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext';
 
 const ProductDetail = () => {
@@ -20,9 +21,9 @@ const ProductDetail = () => {
 
   const fetchProductDetail = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/api/products/${id}`);
-      const data = await response.json();
-      setProduct(data);
+      // 🌟 fetch အစား axios.get ကို အသုံးပြုထားသည်
+      const response = await axios.get(`http://localhost:8000/api/products/${id}`);
+      setProduct(response.data); // response.json() မလိုတော့ပါ
     } catch (error) {
       console.error("Error fetching product:", error);
     }
