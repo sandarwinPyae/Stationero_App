@@ -28,80 +28,83 @@ const SupplierWisePurchase = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="h-16 flex justify-end items-center px-6 bg-white border-b border-gray-200">
-        <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
+      {/* Header */}
+      <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full mb-8">
+        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500"></i>
         </div>
       </header>
 
-      <div className="p-6">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Supplier-wise Purchase Report</h2>
+      <div className="px-8 pb-8">
+        <h2 className="text-2xl font-bold mb-8 text-gray-800">Supplier-wise Purchase Report</h2>
 
         {/* Search Bar */}
-        <div className="mb-4 bg-white p-3 rounded-lg shadow-sm border border-gray-100">
+        <div className="mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
           <input 
             type="text" 
             placeholder="Search Supplier Name or ID..." 
-            className="w-full p-2 border rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F25278]/20"
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
           />
         </div>
 
         {/* Table Section */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           {currentRecords.length > 0 ? (
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b">
+            <table className="w-full text-left">
+              <thead className="bg-gray-200 text-gray-600">
                 <tr>
-                  <th className="p-3">Supplier ID</th>
-                  <th className="p-3">Supplier Name</th>
-                  <th className="p-3">Total Order</th>
-                  <th className="p-3">Total Quantity</th>
-                  <th className="p-3">Total Amount (Ks)</th>
+                  <th className="p-5">Supplier ID</th>
+                  <th className="p-5">Supplier Name</th>
+                  <th className="p-5">Total Order</th>
+                  <th className="p-5">Total Quantity</th>
+                  <th className="p-5">Total Amount (Ks)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y">
+              <tbody className="divide-y divide-gray-100">
                 {currentRecords.map((item) => (
                   <tr key={item.supplier_id} className="hover:bg-gray-50 transition">
-                    <td className="p-3">{item.supplier_id}</td>
-                    <td className="p-3 font-medium">{item.supplier_name}</td>
-                    <td className="p-3">{item.total_order}</td>
-                    <td className="p-3">{item.total_qty}</td>
-                    <td className="p-3 font-bold text-gray-800">{item.total_amount.toLocaleString()}</td>
+                    <td className="p-5 font-medium text-gray-700">{item.supplier_id}</td>
+                    <td className="p-5 font-medium text-gray-800">{item.supplier_name}</td>
+                    <td className="p-5">{item.total_order}</td>
+                    <td className="p-5">{item.total_qty}</td>
+                    <td className="p-5 font-bold text-gray-800">{item.total_amount.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            <div className="p-8 text-center text-gray-500 text-sm">No data found</div>
+            <div className="p-10 text-center text-gray-500 font-medium">No data found</div>
           )}
         </div>
 
         {/* Pagination */}
         {nPages > 1 && (
-          <div className="flex justify-center mt-6 gap-2">
+          <div className="flex justify-center mt-8 gap-2">
             <button 
               disabled={currentPage === 1} 
               onClick={() => setCurrentPage(prev => prev - 1)} 
-              className="px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 text-xs"
+              className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
-              <i className="fa-solid fa-chevron-left"></i>
+              <i className="fa-solid fa-chevron-left text-sm"></i>
             </button>
+            
             {[...Array(nPages)].map((_, i) => (
               <button 
                 key={i} 
                 onClick={() => setCurrentPage(i + 1)} 
-                className={`px-3 py-1.5 border rounded-md text-xs ${currentPage === i + 1 ? 'bg-[#F25278] text-white border-[#F25278]' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
+                className={`px-4 py-2 border rounded-lg ${currentPage === i + 1 ? 'bg-[#F25278] text-white border-[#F25278]' : 'bg-white border-gray-200 hover:bg-gray-50'}`}
               >
                 {i + 1}
               </button>
             ))}
+
             <button 
               disabled={currentPage === nPages} 
               onClick={() => setCurrentPage(prev => prev + 1)} 
-              className="px-3 py-1.5 bg-white border border-gray-200 rounded-md hover:bg-gray-50 disabled:opacity-50 text-xs"
+              className="px-4 py-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50"
             >
-              <i className="fa-solid fa-chevron-right"></i>
+              <i className="fa-solid fa-chevron-right text-sm"></i>
             </button>
           </div>
         )}

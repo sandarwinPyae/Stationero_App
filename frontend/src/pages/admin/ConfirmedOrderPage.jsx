@@ -38,20 +38,19 @@ const ConfirmedOrderPage = () => {
   }, [searchTerm, statusFilter, startDate, endDate]);
 
   const filteredOrders = orders.filter((order) => {
-    const invoiceNum = order.invoice_number || '';
-    const customerName = order.customer?.customer_name || '';
+    const invoiceNum = order.invoice_number?.toString() || '';
+    const customerName = order.customer?.customer_name?.toLowerCase() || '';
 
     const matchesSearch =
       invoiceNum.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      customerName.toLowerCase().includes(searchTerm.toLowerCase());
+      customerName.includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === '' || order.status === statusFilter;
 
-    const orderDate = new Date(order.order_date).setHours(0, 0, 0, 0);
-    const start = startDate ? new Date(startDate).getTime() : null;
-    const end = endDate ? new Date(endDate).getTime() : null;
+    const orderDateStr = order.order_date ? order.order_date.split('T')[0] : ''; 
 
-    const matchesDate = (!start || orderDate >= start) && (!end || orderDate <= end);
+    const matchesDate = (!startDate || orderDateStr >= startDate) && 
+                        (!endDate || orderDateStr <= endDate);
 
     return matchesSearch && matchesStatus && matchesDate;
   });
@@ -80,32 +79,67 @@ const ConfirmedOrderPage = () => {
 
           {/* Filter Bar */}
           <div className="flex items-end gap-4 mb-6 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-            <div className="flex-1">
-              <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Search</label>
-              <input type="text" placeholder="Invoice ID or Customer name" className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 transition-all" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Status</label>
-              <select className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 bg-white focus:ring-2 focus:ring-blue-100" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-                <option value="">All Status</option>
-                <option value="Pending">Pending</option>
-                <option value="Confirmed">Confirmed</option>
-              </select>
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Start Date</label>
-              <input type="date" className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" onChange={(e) => setStartDate(e.target.value)} />
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">End Date</label>
-              <input type="date" className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" onChange={(e) => setEndDate(e.target.value)} />
-            </div>
+          <div className="flex-1">
+            <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Search</label>
+            <input 
+              type="text" 
+              placeholder="Invoice ID or Customer name" 
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-blue-100 transition-all" 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
+          </div>
+          
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Status</label>
+            <select 
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 bg-white focus:ring-2 focus:ring-blue-100" 
+              value={statusFilter} 
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Confirmed">Confirmed</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">Start Date</label>
+            <input 
+              type="date" 
+              value={startDate}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" 
+              onChange={(e) => setStartDate(e.target.value)} 
+            />
+          </div>
+          
+          <div>
+            <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">End Date</label>
+            <input 
+              type="date" 
+              value={endDate}
+              className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" 
+              onChange={(e) => setEndDate(e.target.value)} 
+            />
           </div>
 
+          {/* Reset Filter Button */}
+          <button 
+            onClick={() => {
+              setSearchTerm("");
+              setStatusFilter("");
+              setStartDate("");
+              setEndDate("");
+            }}
+            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg transition-all"
+          >
+            Reset Filter
+          </button>
+        </div>
           {/* Data Table */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
                   <th className="py-4 px-6 font-semibold">Invoice ID</th>
                   <th className="py-4 px-6 font-semibold">Customer Name</th>
@@ -131,7 +165,16 @@ const ConfirmedOrderPage = () => {
                           {order.status}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-gray-600">{new Date(order.order_date).toLocaleString()}</td>
+                      <td className="py-4 px-6 text-gray-600">
+                        {new Date(order.order_date).toLocaleString('en-GB', { 
+                          year: 'numeric', 
+                          month: '2-digit', 
+                          day: '2-digit', 
+                          hour: '2-digit', 
+                          minute: '2-digit', 
+                          second: '2-digit' 
+                        })}
+                      </td>
                       <td className="py-4 px-6">
                         <button 
                           onClick={() => navigate(`/confirm-orders/details/${order.sale_order_id}`)}

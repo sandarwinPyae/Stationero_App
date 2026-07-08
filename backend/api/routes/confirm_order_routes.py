@@ -48,6 +48,7 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
             "invoice_number": order.invoice_number,
             "order_date": order.order_date,
             "status": order.status,
+            "discount": order.discount,
             "total_amount": order.total_amount,
             "customer": {
                 "customer_name": order.customer.customer_name if order.customer else "N/A",

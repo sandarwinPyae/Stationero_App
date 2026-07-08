@@ -102,7 +102,7 @@ const PurchaseSummary = () => {
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
             {currentRecords.length > 0 ? (
                 <table className="w-full text-left">
-                <thead className="bg-gray-50">
+                <thead className="bg-gray-200">
                     <tr>
                     <th className="p-5">PO Number</th>
                     <th className="p-5">Supplier</th>

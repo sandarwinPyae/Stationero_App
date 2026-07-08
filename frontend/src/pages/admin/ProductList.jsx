@@ -148,7 +148,7 @@ const ProductList = () => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-gray-50 text-gray-600 text-sm uppercase">
+                <tr className="bg-gray-200 text-gray-600 text-sm uppercase">
                   <th className="px-6 py-4">Product ID</th>
                   <th className="px-6 py-4">Product Name</th>
                   <th className="px-6 py-4">Category</th>

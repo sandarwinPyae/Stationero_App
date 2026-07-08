@@ -84,7 +84,11 @@ const ConfirmedOrderDetailsPage = () => {
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-500">Invoice ID : <span className="font-semibold text-gray-800">{order.header.invoice_number}</span></p>
-              <p className="text-sm text-gray-500">Sale Date : <span className="font-semibold text-gray-800">{new Date(order.header.order_date).toLocaleString()}</span></p>
+              <p className="text-sm text-gray-500">Sale Date : 
+                <span className="font-semibold text-gray-800">
+                  {new Date(order.header.order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                </span>
+              </p>
             </div>
           </div>
 
@@ -130,9 +134,14 @@ const ConfirmedOrderDetailsPage = () => {
           {/* Totals */}
           <div className="w-full flex justify-end">
             <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between"><span>Total Amount :</span> <span className="font-bold">{order.payments[0]?.amount_paid}</span></div>
-              <div className="flex justify-between"><span>Discount :</span> <span className="font-bold">{order.total_discount}</span></div>
-              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.payments[0]?.amount_paid}</span></div>
+              <div className="flex justify-between"><span>Total Amount :</span> <span className="font-bold">{order.header.total_amount}</span></div>
+              {order.header.discount > 0 && (
+                <div className="flex justify-between">
+                  <span>Discount :</span> 
+                  <span className="font-bold">{order.header.discount}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.header.total_amount - order.header.discount}</span></div>
             </div>
           </div>
 

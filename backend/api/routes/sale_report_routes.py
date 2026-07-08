@@ -15,7 +15,8 @@ def get_sale_reports(db: Session = Depends(get_db)):
         models.Customer.customer_name,
         models.SaleOrdersHeader.order_date,
         models.SaleOrdersHeader.status,
-        models.SaleOrdersHeader.total_amount
+        models.SaleOrdersHeader.total_amount,
+        models.SaleOrdersHeader.discount
     ).join(models.Customer, models.SaleOrdersHeader.customer_id == models.Customer.customer_id)\
      .all()
 
@@ -32,6 +33,7 @@ def get_sale_reports(db: Session = Depends(get_db)):
             "order_date": row.order_date,
             "status": row.status,
             "total_amount": row.total_amount,
+            "discount" : row.discount,
             "details": [
                 {
                     "product_name": d.product_name,

@@ -35,7 +35,7 @@ const SaleReport = () => {
     const matchesStatus = statusFilter === "" || s.status === statusFilter;
 
 
-    const itemDateStr = s.order_date.substring(0, 10); // "2026-07-05" ဖြစ်သွားပါမယ်
+    const itemDateStr = s.order_date.substring(0, 10); 
 
     const matchesStartDate = !startDate || itemDateStr >= startDate;
     const matchesEndDate = !endDate || itemDateStr <= endDate;
@@ -92,13 +92,15 @@ const SaleReport = () => {
         <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
           {currentRecords.length > 0 ? (
             <table className="w-full text-left">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
-                  <th className="p-5">Invoice</th>
-                  <th className="p-5">Customer</th>
-                  <th className="p-5">Amount (Ks)</th>
-                  <th className="p-5">Status</th>
-                  <th className="p-5">Date</th>
+                  <th className="py-4 px-6 font-semibold">Invoice</th>
+                  <th className="py-4 px-6 font-semibold">Customer</th>
+                  <th className="py-4 px-6 font-semibold">Total Amount (Ks)</th>
+                  <th className="py-4 px-6 font-semibold">Discount Amount (Ks)</th>
+                  <th className="py-4 px-6 font-semibold">Net Amount (Ks)</th>
+                  <th className="py-4 px-6 font-semibold">Status</th>
+                  <th className="py-4 px-6 font-semibold">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -107,15 +109,19 @@ const SaleReport = () => {
                     <tr className="cursor-pointer hover:bg-gray-50 border-b" onClick={() => setSelectedId(selectedId === s.sale_order_id ? null : s.sale_order_id)}>
                       <td className="p-5 font-medium">{s.invoice_number}</td>
                       <td className="p-5">{s.customer_name}</td>
-                      <td className="p-5">{s.total_amount.toLocaleString()}</td>
+                      <td className="p-5">{s.total_amount}</td>
+                      <td className="p-5">{s.discount}</td>
+                      <td className="p-5">{s.total_amount - s.discount}</td>
                       <td className="p-5">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${s.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{s.status}</span>
                       </td>
-                      <td className="p-5">{new Date(s.order_date).toLocaleDateString()}</td>
+                      <td className="p-5">
+                        {new Date(s.order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </td>
                     </tr>
                     {selectedId === s.sale_order_id && (
                       <tr>
-                        <td colSpan="5" className="p-4 bg-gray-50">
+                        <td colSpan="7" className="p-4 bg-gray-50">
                           <table className="w-full text-sm bg-white rounded-xl shadow-sm border">
                             <thead className="bg-gray-100"><tr className="text-gray-600"><th className="p-3">Product</th><th className="p-3 text-center">Qty</th><th className="p-3 text-right">Price</th><th className="p-3 text-right">Subtotal</th></tr></thead>
                             <tbody className="divide-y">{s.details.map((d, i) => (

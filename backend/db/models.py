@@ -60,6 +60,7 @@ class SaleOrdersHeader(Base):
     invoice_number = Column(String, unique=True)
     total_amount = Column(Float)
     status = Column(String)
+    discount = Column(Float, default=0.0, nullable=False)
     order_date = Column(DateTime, default=lambda: datetime.now(yangon_tz))
     customer = relationship("Customer", back_populates="orders")
     details = relationship("SaleOrdersDetails", back_populates="sale_order")

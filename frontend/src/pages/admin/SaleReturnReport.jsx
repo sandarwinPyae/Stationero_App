@@ -52,7 +52,7 @@ const SaleReturnReport = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="h-16 flex justify-end items-center px-8 bg-white border-b border-gray-200">
+      <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-200">
         <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500"></i>
         </div>
@@ -82,13 +82,13 @@ const SaleReturnReport = () => {
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           {currentRecords.length > 0 ? (
             <table className="w-full text-left text-sm">
-              <thead className="bg-gray-50 border-b">
+              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
-                  <th className="p-4">Invoice</th>
-                  <th className="p-4">Return Amount (Ks)</th>
-                  <th className="p-4">Payment Method</th>
-                  <th className="p-4">Reason</th>
-                  <th className="p-4">Date</th>
+                  <th className="py-4 px-6 font-semibold">Invoice</th>
+                  <th className="py-4 px-6 font-semibold">Return Amount (Ks)</th>
+                  <th className="py-4 px-6 font-semibold">Payment Method</th>
+                  <th className="py-4 px-6 font-semibold">Reason</th>
+                  <th className="py-4 px-6 font-semibold">Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -119,7 +119,9 @@ const SaleReturnReport = () => {
                                 <td className="p-3">{d.product_name}</td>
                                 <td className="p-3">{d.selling_price}</td>
                                 <td className="p-3 text-center">{d.qty}</td>
-                                <td className="p-3 text-right font-bold">{d.sub_total.toLocaleString()}</td>
+                                <td className="p-3 text-right font-bold">
+                                  {d.sub_total.toLocaleString()}
+                                </td>
                             </tr>
                             ))}</tbody>
                           </table>

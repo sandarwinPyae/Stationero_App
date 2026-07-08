@@ -119,7 +119,7 @@ const SupplierPage = () => {
           {/* TABLE */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <table className="w-full text-left">
-              <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
                   <th className="py-4 px-6">ID</th>
                   <th className="py-4 px-6">Name</th>

@@ -56,7 +56,7 @@ const CategoryList = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-10">
-      <header className="h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm mb-8">
+      <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-100 shadow-sm mb-8">
         <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border border-gray-200">
           <i className="fa-solid fa-user text-gray-500"></i>
         </div>
@@ -97,7 +97,7 @@ const CategoryList = () => {
         {/* Table Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
           <table className="w-full text-left">
-            <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="py-4 px-6">Category Id</th>
                 <th className="py-4 px-6">Category Name</th>

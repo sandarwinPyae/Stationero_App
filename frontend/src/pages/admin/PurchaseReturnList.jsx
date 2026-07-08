@@ -120,7 +120,7 @@ const PurchaseReturnList = () => {
         {/* Table */}
         <div className="">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 text-gray-600 text-sm uppercase">
+            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="p-5 font-semibold text-gray-600">Returned ID</th>
                 <th className="p-5 font-semibold text-gray-600">PO ID</th>

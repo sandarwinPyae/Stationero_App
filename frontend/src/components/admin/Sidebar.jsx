@@ -88,12 +88,12 @@ const Sidebar = () => {
         <NavItem 
           icon="fa-solid fa-chart-pie" 
           label="Inventory Reports" 
-          onClick={() => { navigate('/inventory'); setIsInventoryOpen(!isInventoryOpen); }}
-          active={location.pathname === '/inventory'} 
+          onClick={() => { navigate('/stock-report'); setIsInventoryOpen(!isInventoryOpen); }}
+          active={location.pathname === '/stock-report'} 
         />
         {isInventoryOpen && (
           <>
-            <NavItem icon="fa-solid fa-layer-group" label="Stock Report" onClick={() => navigate('/stock-report')} active={location.pathname === '/stock-report'} isSubMenu={true} />
+            {/* <NavItem icon="fa-solid fa-layer-group" label="Stock Report" onClick={() => navigate('/stock-report')} active={location.pathname === '/stock-report'} isSubMenu={true} /> */}
             <NavItem icon="fa-solid fa-exclamation-triangle" label="Low Stock Report" onClick={() => navigate('/low-stock-report')} active={location.pathname === '/low-stock-report'} isSubMenu={true} />
           </>
         )}
