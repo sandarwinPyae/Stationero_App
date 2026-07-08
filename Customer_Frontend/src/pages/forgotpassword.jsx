@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios'; // 🌟 axios import လုပ်ပါ
 const ForgotPasswordPage = () => {
   const navigate = useNavigate(); const [hoveredBtn, setHoveredBtn] = useState(false);
   const [email, setEmail] = useState('');
@@ -16,25 +17,20 @@ const ForgotPasswordPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/api/customer/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: email.trim(),
-          new_password: newPassword
-        }),
+      // 🌟 axios.post သို့ ပြောင်းလဲခြင်း
+      const response = await axios.post('http://localhost:8000/api/customer/forgot-password', {
+        email: email.trim(),
+        new_password: newPassword
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        navigate('/login'); // Redirects the customer back to the login screen immediately
-      } else {
-        alert(`Reset Failed: ${data.detail || 'Email address not found.'}`);
+      // 🌟 axios တွင် response.status ကို စစ်ခြင်း
+      if (response.status === 200) {
+        navigate('/login');
       }
     } catch (error) {
-      console.error(error);
-      alert('Network error reaching backend server.');
+      // 🌟 Error message ကို axios မှတဆင့် ယူခြင်း
+      const msg = error.response?.data?.detail || 'Email address not found.';
+      alert(`Reset Failed: ${"Network error reaching backend server."}`);
     }
   };
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-
+import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -53,17 +53,22 @@ const OrderPage = () => {
       return;
     }
 
-    fetch(`http://localhost:8000/api/customer/profile/${activeEmail}`)
-      .then(res => res.json())
-      .then(data => {
+    // 🌟 ဒီနေရာမှာ async function အသစ်ဆောက်ပြီး ခေါ်ပါမယ် 🌟
+    const fetchProfile = async () => {
+      try {
+        const { data } = await axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`);
         setCustomerProfile({
           name: data.name || data.customer_name,
           email: data.email || activeEmail,
           phone: data.phone,
           address: data.address
         });
-      })
-      .catch(err => console.error(err));
+      } catch (err) {
+        console.error("Profile fetch error:", err);
+      }
+    };
+
+    fetchProfile();
 
     // CHECKOUT LOGIC
     const activeCheckoutData = localStorage.getItem('stationero_active_checkout');
@@ -85,7 +90,6 @@ const OrderPage = () => {
       setPricingSummary({ total: 0, discount: 0, net: 0 });
     }
   }, [navigate, location.state]);
-
   const handleConfirmOrder = async () => {
     try {
       const itemsPayload = checkoutItems.map(item => ({
@@ -95,34 +99,24 @@ const OrderPage = () => {
         sub_total: item.amount
       }));
 
-      const response = await fetch('http://localhost:8000/api/order/confirm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          net_amount: pricingSummary.net,
-          total_qty: checkoutItems.reduce((sum, item) => sum + item.qty, 0),
-          customer_email: customerProfile.email,
-          payment_method: paymentMethod,
-          items: itemsPayload
-        }),
+      // 🌟 axios.post သို့ ပြောင်းလဲခြင်း
+      const response = await axios.post('http://localhost:8000/api/order/confirm', {
+        net_amount: pricingSummary.net,
+        total_qty: checkoutItems.reduce((sum, item) => sum + item.qty, 0),
+        customer_email: customerProfile.email,
+        payment_method: paymentMethod,
+        items: itemsPayload
       });
 
-      if (response.ok) {
-        const checkoutSource = localStorage.getItem('checkout_source');
-        if (checkoutSource === 'cart') {
-          const savedProfile = localStorage.getItem('stationero_logged_user');
-          let userEmail = 'guest';
-          try {
-            const parsed = JSON.parse(savedProfile);
-            userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
-          } catch (e) { }
-          localStorage.removeItem(`stationero_cart_${userEmail}`);
-        }
+      if (response.status === 201) { // axios မှာ status 201 ကို စစ်ရပါတယ်
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
         navigate('/history');
       }
-    } catch (error) { console.error(error); }
+    } catch (error) {
+      console.error("Order confirmation error:", error);
+      alert("Order confirmation failed!");
+    }
   };
 
   return (

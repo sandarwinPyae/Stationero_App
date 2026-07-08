@@ -1,8 +1,8 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ကို Import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext'; // 🌟 AuthContext ကို Import လုပ်ပါ
-
-const Login = () => { 
+import axios from 'axios';
+const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -19,15 +19,16 @@ const Login = () => {
     setErrorMessage('');
 
     try {
-      const response = await fetch('http://localhost:8000/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+      // 🌟 axios.post သို့ ပြောင်းလဲခြင်း
+      const response = await axios.post('http://localhost:8000/api/login', {
+        email: email,
+        password: password
       });
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
+      // 🌟 axios တွင် response.ok အစား status ကို စစ်ရပါမည်
+      if (response.status === 200) {
         const userObj = {
           name: data.customer_name || (data.profile && data.profile.name) || 'Customer',
           email: email.trim(),
@@ -37,24 +38,25 @@ const Login = () => {
         };
 
         localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
-
-        // 🌟 1. Global Authentication State ကို True ပြောင်းပေးခြင်း
         setIsLoggedIn(true);
 
-        // 🌟 2. Role ပေါ်မူတည်ပြီး လမ်းကြောင်းခွဲပေးခြင်း (Admin vs Customer)
         if (data.role === 'admin') {
-          navigate('/admin'); // Admin ဆိုရင် Admin Dashboard ကိုသွားမယ်
+          navigate('/admin');
         } else {
-          navigate('/product'); // Customer ဆိုရင် Product Page ကိုသွားမယ်
+          navigate('/product');
         }
-        
-      } else {
-        setErrorMessage(data.message || data.detail || 'Authentication failed.');
+
       }
     } catch (error) {
-      setErrorMessage('Server connection error. Please try again later.');
+      // 🌟 Error message ကို axios မှတဆင့် ယူခြင်း
+      const msg = error.response?.data?.message || error.response?.data?.detail || 'Authentication failed.';
+      setErrorMessage("Server connection error. Please try again later.");
     }
   };
+
+
+
+
 
   return (
     <div style={styles.container}>

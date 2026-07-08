@@ -52,8 +52,8 @@ async def add_product(
         unit_price=unit_price,
         selling_price=selling_price,
         current_qty=current_qty,
-        description=description,   
-        product_img_url=file_path 
+        description = description,
+        product_img_url=image.filename 
     )
     db.add(new_product)
     db.commit()
@@ -78,13 +78,26 @@ def get_product_by_id(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
-# update product infos
+# Theingi Change
 @router.get("/products/{product_id}")
-def get_product(product_id: int, db: Session = Depends(get_db)):
+def get_product_by_id(product_id: int, db: Session = Depends(get_db)):
     product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
-    return product
-
-
+    if not product:
+        raise HTTPException(status_code=404, detail="Product မတွေ့ပါ။")
+    
+    # 🌟 ဒီ Condition လေးကို စစ်ပါ (Description မရှိရင် Default စာသား ထည့်ပေးလိုက်ပါ)
+    product_data = {
+        "product_id": product.product_id,
+        "product_name": product.product_name,
+        "selling_price": int(product.selling_price),
+        "display_price": f"{int(product.selling_price):,} MMK",
+        "current_qty": product.current_qty,
+        "product_img_url": product.product_img_url,
+        "description": product.description if product.description else "No description provided."
+    }
+    
+    return product_data
+#Theingi Change
 @router.put("/products/edit/{product_id}")
 async def edit_product(
     product_id: int,
@@ -100,18 +113,18 @@ async def edit_product(
     product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
     
     if image:
-        upload_dir = "uploads"
+        upload_dir = "images"
         file_path = os.path.join(upload_dir, image.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
-        product.product_img_url = file_path
+        product.product_img_url = image.filename
 
     product.product_name = product_name
     product.category_id = category_id
     product.unit_price = unit_price
     product.selling_price = selling_price
     product.current_qty = current_qty
-    product.product_description = description
+    product.description = description
     
     db.commit()
     return {"message": "Product updated successfully"}

@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 from typing import List, Optional
-from backend.api import product_routes, category_routes, purchase_routes, confirm_order_routes
+
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -37,8 +37,7 @@ from backend.db.models import (
 )
 
 models.Base.metadata.create_all(bind=database.engine)
-
-# --- 2. FASTAPI SETUP & CORS MIDDLEWARE ---
+from api.routes import product_routes, category_routes, purchase_routes, confirm_order_routes
 app = FastAPI(title="Unified E-Commerce API Engine")
 app.include_router(product_routes.router)
 app.include_router(category_routes.router)
@@ -57,7 +56,7 @@ app.add_middleware(
 IMAGE_DIR = os.path.join(BACKEND_DIR, "images")
 if not os.path.exists(IMAGE_DIR):
     os.makedirs(IMAGE_DIR)
-app.mount("/images", StaticFiles(directory=IMAGE_DIR), name="images")
+app.mount("/images", StaticFiles(directory="images"), name="images")
 
 # 🌟 RETURN IMAGES PATH (Return ပုံများအတွက် သီးသန့် Folder အသစ် ဆောက်ခြင်း) 🌟
 RETURN_IMAGE_DIR = os.path.join(BACKEND_DIR, "return_images")
@@ -472,6 +471,7 @@ def get_new_arrivals(db: Session = Depends(get_db)):
 def get_promotions(db: Session = Depends(get_db)):
     promos = db.query(Promotion).all()
     return promos
+#Theingi Change
 @app.get("/api/products/{product_id}", response_model=schemas.ProductResponse)
 def get_product_detail(product_id: int, db: Session = Depends(get_db)):
     product = db.query(Product).filter(Product.product_id == product_id, Product.del_flag == 0).first()
@@ -486,7 +486,8 @@ def get_product_detail(product_id: int, db: Session = Depends(get_db)):
         "selling_price": price_int,
         "display_price": f"{price_int:,} MMK",
         "current_qty": product.current_qty,
-        "product_img_url": product.product_img_url
+        "product_img_url": product.product_img_url,
+        "description": product.description
        
     }
 # 🌟 Returns.jsx မှ လှမ်းပို့လိုက်သော Data များကို လက်ခံမည့် API 🌟

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ထည့်သွင်းထားသည်
-
+import axios from 'axios';
 const OrderHistoryPage = () => {
   const navigate = useNavigate(); // 🌟 navigate သို့ ပြောင်းလဲထားသည်
 
@@ -48,15 +48,22 @@ const OrderHistoryPage = () => {
       return;
     }
 
-    if (activeEmail) {
-      fetch(`http://localhost:8000/api/order/history-logs/${activeEmail}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.orders) setOrders(data.orders);
-          if (data.returns) setReturns(data.returns);
-        })
-        .catch(err => console.error(err));
-    }
+
+
+
+    // 🌟 Axios သုံးပြီး Data ဆွဲထုတ်ခြင်း
+    const fetchHistory = async () => {
+      try {
+        const response = await axios.get(`http://localhost:8000/api/order/history-logs/${activeEmail}`);
+        if (response.data.orders) setOrders(response.data.orders);
+        if (response.data.returns) setReturns(response.data.returns);
+      } catch (err) {
+        console.error("History fetch error:", err)
+      }
+    };
+
+
+    fetchHistory();
   }, [navigate]);
 
   const handleTabChange = (tabName) => {
@@ -86,7 +93,7 @@ const OrderHistoryPage = () => {
       const lowerSearch = activeSearch.toLowerCase().trim();
       const lowerInvoiceId = (record.invoice_number || '').toString().toLowerCase();
       const lowerStatus = (record.status || '').toString().toLowerCase();
-      
+
       matchesSearch = lowerInvoiceId.includes(lowerSearch) || lowerStatus.includes(lowerSearch);
     }
     // 🌟 Date Filter
