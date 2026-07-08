@@ -12,6 +12,7 @@ import {
   Cell,
   LineChart,
   Line,
+  ReferenceLine,
 } from "recharts";
 
 const AdminDashboard = () => {
@@ -54,20 +55,25 @@ const AdminDashboard = () => {
 
             {/* Current Sales Line Chart */}
             <div className="bg-white rounded-2xl shadow-sm p-5">
-              <p className="text-gray-400 text-sm">Current Sales</p>
-              <h2 className="text-xl font-bold">86%</h2>
-              <div className="h-16 mt-2">
-                <ResponsiveContainer>
-                  <LineChart data={dashboardData.lineData}>
-                    <Line
-                      dataKey="value"
-                      stroke="#3366ff"
-                      strokeWidth={3}
-                      dot={false}
-                    />
-                  </LineChart>
+            <p className="text-gray-400 text-sm">Current Sales</p>
+            
+            <h2 className="text-xl font-bold">{dashboardData.performance}%</h2>
+            
+            <div className="h-16 mt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={dashboardData.lineData}>
+                        {/* Target 100% ကို ပြတဲ့ မျဉ်းလေး */}
+                        <ReferenceLine y={100} stroke="red" strokeDasharray="3 3" />
+                        
+                        <Line
+                            dataKey="value"
+                            stroke="#3366ff"
+                            strokeWidth={3}
+                            dot={false}
+                        />
+                    </LineChart>
                 </ResponsiveContainer>
-              </div>
+            </div>
             </div>
           </div>
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func, desc
-from datetime import datetime, timedelta
+from datetime import datetime, time, timedelta
 from pydantic import BaseModel
 from typing import List
 
@@ -31,12 +31,11 @@ class DashboardResponse(BaseModel):
     pieData: List[PieData]
     barData: List[BarData]
     lineData: List[LineData]
+    performanceLineData: List[LineData]
+    performance: float
 
-# ==========================================
-# ROUTE
-# ==========================================
 
-@router.get("/dashboard", response_model=DashboardResponse)
+@router.get("/dashboard" , response_model=DashboardResponse)
 def get_dashboard_data(db: Session = Depends(get_db)):
     try:
         # 1. Total Sales
@@ -62,6 +61,33 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         )
         top_product_name = top_product.product_name if top_product else "-"
 
+        # for current sale calculation
+        today = datetime.now()
+        start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        current_month_sales = (
+            db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0))
+            .filter(models.Payment.pay_date >= start_of_month)
+            .scalar()
+        )
+
+        TARGET_SALES = 500000
+        percentage = (current_month_sales / TARGET_SALES) * 100 if TARGET_SALES > 0 else 0
+        final_percentage = min(round(percentage, 1), 100)
+
+        DAILY_TARGET = TARGET_SALES / 30  
+        
+        performance_line_data = []
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+            total = (
+                db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0))
+                .filter(func.date(models.Payment.pay_date) == day.date())
+                .scalar()
+            )
+            
+            daily_perf = (float(total) / DAILY_TARGET) * 100 if DAILY_TARGET > 0 else 0
+            performance_line_data.append({"value": round(daily_perf, 1)})
+        
         # 4. Pie Chart Data
         pie_query = (
             db.query(models.Product.product_name.label("name"), func.sum(models.SaleOrdersDetails.qty).label("value"))
@@ -74,17 +100,25 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         pie_data = [{"name": item.name, "value": item.value} for item in pie_query]
 
         # 5. Bar Chart Data (Last 5 Weeks)
-        today = datetime.now()
         bar_data = []
-        for i in range(5):
-            start = today - timedelta(days=(35 - (i * 7)))
-            end = start + timedelta(days=6)
+
+        for i in range(6, -1, -1):
+            day = today - timedelta(days=i)
+
+            start_of_day = datetime.combine(day.date(), time.min)
+            end_of_day = datetime.combine(day.date(), time.max)
+
             total = (
                 db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0))
-                .filter(models.Payment.pay_date >= start, models.Payment.pay_date <= end)
+                .filter(models.Payment.pay_date >= start_of_day)
+                .filter(models.Payment.pay_date <= end_of_day)
                 .scalar()
             )
-            bar_data.append({"week": f"{start.strftime('%b %d')}-{end.strftime('%d')}", "sales": float(total)})
+
+            bar_data.append({
+                "week": day.strftime("%b %d"),
+                "sales": float(total)
+            })
 
         # 6. Line Chart Data (Last 7 Days)
         line_data = []
@@ -106,6 +140,8 @@ def get_dashboard_data(db: Session = Depends(get_db)):
             "pieData": pie_data,
             "barData": bar_data,
             "lineData": line_data,
+            "performanceLineData": performance_line_data,
+            "performance": final_percentage
         }
 
     except Exception as e:
