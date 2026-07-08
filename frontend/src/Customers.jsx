@@ -112,10 +112,10 @@ export default function Customers() {
         </div>
 
         <Pagination 
-          totalItems={totalPages * PAGE_LIMIT} 
+          totalItems={totalPages > 1 ? totalPages * PAGE_LIMIT : PAGE_LIMIT + 1} 
           itemsPerPage={PAGE_LIMIT} 
           currentPage={currentPage} 
-          onPageChange={(page) => setCurrentPage(page)} 
+          onPageChange={(page) => setCurrentPage(page)}
         />
       </div>
     </main>
