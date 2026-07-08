@@ -21,10 +21,6 @@ DB_CUSTOMERS = [
     {"id": "SLD00003", "name": "Win War", "address": "Insein, Yangon", "email": "winwar@gmail.com", "phone": "09876543211"},
     {"id": "SLD00004", "name": "Kaung", "address": "Insein, Yangon", "email": "kaung@gmail.com", "phone": "09876543211"},
     {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
-    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
-    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
-    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
-    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
 ]
 
 @app.get("/")
