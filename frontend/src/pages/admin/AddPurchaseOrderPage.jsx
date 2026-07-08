@@ -219,7 +219,7 @@ const AddPurchaseOrderPage = () => {
         {isFormVisible && (
           <div className="flex gap-4 mt-6">
             
-            <button type="button" onClick={handleSaveOrder} className="bg-[#F25278] text-white px-8 py-2 rounded-lg font-semibold hover:bg-[#d94165] transition">
+            <button type="button" onClick={handleSaveOrder} className="bg-[#F25278] text-white px-8 py-2 rounded-lg font-semibold">
               Save Purchase Order
             </button>
           </div>

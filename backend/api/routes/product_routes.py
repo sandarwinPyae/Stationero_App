@@ -93,6 +93,7 @@ async def edit_product(
     unit_price: float = Form(...),
     selling_price: float = Form(...),
     current_qty: int = Form(...),
+    new_qty: int = Form(0),
     description: str = Form(None),
     image: UploadFile = File(None), 
     db: Session = Depends(get_db)
@@ -110,7 +111,7 @@ async def edit_product(
     product.category_id = category_id
     product.unit_price = unit_price
     product.selling_price = selling_price
-    product.current_qty = current_qty
+    product.current_qty = current_qty + new_qty
     product.product_description = description
     
     db.commit()

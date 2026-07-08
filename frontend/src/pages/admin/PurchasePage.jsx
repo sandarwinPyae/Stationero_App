@@ -88,7 +88,7 @@ const PurchasePage = () => {
           <h2 className="text-2xl font-bold text-gray-800">Purchase Page</h2>
           <button 
             onClick={() => navigate('/purchase/add')} 
-            className="bg-[#F25278] text-white px-6 py-2.5 rounded-xl font-semibold hover:bg-pink-600 transition"
+            className="bg-[#F25278] text-white px-6 py-2.5 rounded-xl font-semibold"
           >
             + Add New Purchase Order
           </button>
