@@ -1,0 +1,22 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CALC-STOCK.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-INPUT-LINE    PIC X(50).
+       01 WS-CURRENT-QTY   PIC 9(10).
+       01 WS-RETURN-QTY    PIC 9(10).
+       01 WS-RESULT        PIC 9(10).
+
+       PROCEDURE DIVISION.
+           ACCEPT WS-INPUT-LINE.
+           UNSTRING WS-INPUT-LINE DELIMITED BY SPACE 
+               INTO WS-CURRENT-QTY, WS-RETURN-QTY.
+           
+           SUBTRACT WS-RETURN-QTY
+           FROM WS-CURRENT-QTY
+           GIVING WS-RESULT.
+           
+           DISPLAY WS-RESULT.
+           STOP RUN.
+           

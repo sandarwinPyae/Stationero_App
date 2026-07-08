@@ -1,20 +1,47 @@
 import os
-import subprocess
 import math
-from fastapi import FastAPI, Query, HTTPException, status
+import subprocess
+from fastapi import FastAPI, Query, HTTPException, Depends, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from sqlalchemy.orm import Session
+from sqlalchemy import desc
 
+# Database connections and model imports
+from db.database import SessionLocal, engine, get_db 
+from db import models 
+
+# Route imports
+from .routes import supplier_routes
+from .routes import product_routes
+from .routes import category_routes
+from .routes import purchase_routes
+from .routes import confirm_order_routes
+from .routes import sale_report_routes
+
+# Initialize database metadata and upload directories
+models.Base.metadata.create_all(bind=engine)
+
+if not os.path.exists("uploads"):
+    os.makedirs("uploads")
+
+# Unified FastAPI App Initialization
 app = FastAPI(title="Stationero Backend API", version="1.0.0")
 
+# Static assets mounting
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+# Unified CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Active Live Database State Layer
+# Active Live Database State Layer (Fallback Mock Data)
 DB_CUSTOMERS = [
     {"id": "SLD00001", "name": "Hsu Myat", "address": "Insein, Yangon", "email": "hsu@gmail.com", "phone": "09876543211"},
     {"id": "SLD00002", "name": "Meeni", "address": "Insein, Yangon", "email": "meeni@gamil.com", "phone": "09876543211"},
@@ -23,6 +50,7 @@ DB_CUSTOMERS = [
     {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
 ]
 
+# Base Routes
 @app.get("/")
 def read_root():
     return {"message": "Database and Stationero API are ready!"}
@@ -52,7 +80,6 @@ def get_customers(
     page: int = Query(1, ge=1), 
     limit: int = Query(5, ge=1)
 ):
-    
     filtered = DB_CUSTOMERS
     if search:
         q = search.lower()
@@ -60,7 +87,6 @@ def get_customers(
     
     total_records = len(filtered)
     total_pages = math.ceil(total_records / limit) or 1
-    
     
     start_offset = (page - 1) * limit
     end_offset = start_offset + limit
@@ -71,9 +97,8 @@ def get_customers(
         "total_records": total_records,
         "total_pages": total_pages,
         "current_page": page,
-        "limit": limit
+        "limit": limit,
     }
-
 @app.delete("/api/v1/customers/{customer_id}")
 def delete_customer(customer_id: str):
     global DB_CUSTOMERS
@@ -82,3 +107,12 @@ def delete_customer(customer_id: str):
     if len(DB_CUSTOMERS) == initial_length:
         raise HTTPException(status_code=404, detail="Customer record missing")
     return {"success": True, "deleted_id": customer_id}
+
+
+# Include Routers
+app.include_router(supplier_routes.router)
+app.include_router(product_routes.router)
+app.include_router(category_routes.router)
+app.include_router(purchase_routes.router)
+app.include_router(confirm_order_routes.router)
+app.include_router(sale_report_routes.router)

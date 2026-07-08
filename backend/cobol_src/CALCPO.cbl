@@ -1,0 +1,34 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CALCPO.
+       AUTHOR. STATIONERO.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 ITEM-COUNT           PIC 9(4) VALUE 0.
+       01 I                    PIC 9(4) VALUE 1.
+       01 INPUT-BUFFER         PIC X(50).
+       
+       01 ITEM-QTY             PIC 9(6)V99 VALUE 0.
+       01 ITEM-PRICE           PIC 9(8)V99 VALUE 0.
+       01 LINE-TOTAL           PIC 9(10)V99 VALUE 0.
+       01 GRAND-TOTAL          PIC 9(12)V99 VALUE 0.
+
+       PROCEDURE DIVISION.
+       MAIN-LOGIC.
+           ACCEPT INPUT-BUFFER.
+           MOVE FUNCTION NUMVAL(INPUT-BUFFER) TO ITEM-COUNT.
+
+           PERFORM VARYING I FROM 1 BY 1 UNTIL I > ITEM-COUNT
+               ACCEPT INPUT-BUFFER
+               MOVE FUNCTION NUMVAL(INPUT-BUFFER) TO ITEM-QTY
+               
+               ACCEPT INPUT-BUFFER
+               MOVE FUNCTION NUMVAL(INPUT-BUFFER) TO ITEM-PRICE
+               
+               COMPUTE LINE-TOTAL = ITEM-QTY * ITEM-PRICE
+               ADD LINE-TOTAL TO GRAND-TOTAL
+           END-PERFORM.
+
+           DISPLAY GRAND-TOTAL.
+           STOP RUN.
+           
