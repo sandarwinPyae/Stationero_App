@@ -2,7 +2,7 @@ import os
 import sys
 import subprocess
 from typing import List, Optional
-
+from backend.api import product_routes, category_routes, purchase_routes, confirm_order_routes
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -40,6 +40,10 @@ models.Base.metadata.create_all(bind=database.engine)
 
 # --- 2. FASTAPI SETUP & CORS MIDDLEWARE ---
 app = FastAPI(title="Unified E-Commerce API Engine")
+app.include_router(product_routes.router)
+app.include_router(category_routes.router)
+app.include_router(purchase_routes.router)
+app.include_router(confirm_order_routes.router)
 
 app.add_middleware(
     CORSMiddleware,

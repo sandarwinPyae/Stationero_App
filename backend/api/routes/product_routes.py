@@ -38,7 +38,7 @@ async def add_product(
     image: UploadFile = File(...), 
     db: Session = Depends(get_db)
 ):
-    upload_dir = "uploads"
+    upload_dir = "images"
     if not os.path.exists(upload_dir):
         os.makedirs(upload_dir)
         
@@ -52,7 +52,7 @@ async def add_product(
         unit_price=unit_price,
         selling_price=selling_price,
         current_qty=current_qty,
-        product_description=description,
+        description=description,   
         product_img_url=file_path 
     )
     db.add(new_product)
