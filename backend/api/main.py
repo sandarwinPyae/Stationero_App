@@ -16,10 +16,14 @@ app.add_middleware(
 
 # Active Live Database State Layer
 DB_CUSTOMERS = [
-    {"id": "SLD00001", "name": "Hsu Myat", "address": "Insein, Yangon", "email": "hsu@gmai.com", "phone": "09876543211"},
+    {"id": "SLD00001", "name": "Hsu Myat", "address": "Insein, Yangon", "email": "hsu@gmail.com", "phone": "09876543211"},
     {"id": "SLD00002", "name": "Meeni", "address": "Insein, Yangon", "email": "meeni@gamil.com", "phone": "09876543211"},
     {"id": "SLD00003", "name": "Win War", "address": "Insein, Yangon", "email": "winwar@gmail.com", "phone": "09876543211"},
-    {"id": "SLD00004", "name": "Kaung", "address": "Insein, Yangon", "email": "kaungh@gmail.com", "phone": "09876543211"},
+    {"id": "SLD00004", "name": "Kaung", "address": "Insein, Yangon", "email": "kaung@gmail.com", "phone": "09876543211"},
+    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
+    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
+    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
+    {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
     {"id": "SLD00005", "name": "Pyae", "address": "Insein, Yangon", "email": "pyae5@gmail.com", "phone": "09876543211"},
 ]
 
@@ -27,7 +31,7 @@ DB_CUSTOMERS = [
 def read_root():
     return {"message": "Database and Stationero API are ready!"}
 
-# --- UNCHANGED EXISTING COBOL DASHBOARD METRICS ---
+
 @app.get("/api/v1/dashboard/metrics")
 def get_dashboard_metrics():
     current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -45,14 +49,14 @@ def get_dashboard_metrics():
     except Exception:
         return {"total_sales": 2100000, "total_products": 2000000, "top_product": "Notebook", "current_sales_pct": 86}
 
-# --- SERVER-SIDE PAGINATED CUSTOMERS LIST ROUTE ---
+
 @app.get("/api/v1/customers")
 def get_customers(
     search: str = Query(None), 
     page: int = Query(1, ge=1), 
     limit: int = Query(5, ge=1)
 ):
-    # 1. Apply search filter if active
+    
     filtered = DB_CUSTOMERS
     if search:
         q = search.lower()
@@ -61,7 +65,7 @@ def get_customers(
     total_records = len(filtered)
     total_pages = math.ceil(total_records / limit) or 1
     
-    # 2. Slice items based on page offset coordinates
+    
     start_offset = (page - 1) * limit
     end_offset = start_offset + limit
     paginated_items = filtered[start_offset:end_offset]
@@ -74,7 +78,6 @@ def get_customers(
         "limit": limit
     }
 
-# --- UNCHANGED DELETE HANDLER ROUTE ---
 @app.delete("/api/v1/customers/{customer_id}")
 def delete_customer(customer_id: str):
     global DB_CUSTOMERS

@@ -1,4 +1,4 @@
-/* File Path: frontend/src/index.css */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
 body {
   margin: 0;
   padding: 0;
@@ -424,4 +424,8 @@ body {
   font-size: 14px;
   cursor: pointer;
   margin-top: 12px;
+}
+body {
+  margin: 0;
+  font-family: Inter, sans-serif;
 }
