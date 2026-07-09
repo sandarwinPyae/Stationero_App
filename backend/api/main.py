@@ -225,18 +225,27 @@ def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db))
             return {"message": cobol_message, "role": role_attribute, "customer_name": user_name}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Authentication failure: {e}")
-
+#Theingi Change
 @app.post("/api/order/confirm", status_code=status.HTTP_201_CREATED)
 def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(get_db)):
+    print("====== API HIT: CONFIRM ORDER ======")
+    print("Payload Data:", payload.dict())
+    
     try:
         last_global_order = db.query(SaleOrdersHeader).order_by(SaleOrdersHeader.sale_order_id.desc()).first()
         next_global_num = (last_global_order.sale_order_id if last_global_order else 0) + 1
         generated_system_invoice = f"INV{next_global_num:05d}"
+        
+        print(f"Generated Invoice: {generated_system_invoice}")
 
+        # COBOL Engine ကို လှမ်းခေါ်တဲ့ အပိုင်း
         result = subprocess.run(
             [COBOL_EXE_PATH, "CONFIRM_ORDER", generated_system_invoice, str(payload.total_qty), str(int(payload.net_amount)), payload.customer_email], 
             capture_output=True, text=True, check=False
         )
+        print("COBOL Output:", result.stdout)
+        print("COBOL Error (If Any):", result.stderr)
+
         if result.returncode != 0:
             raise HTTPException(status_code=400, detail=result.stdout.strip())
             
@@ -257,9 +266,14 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
             db.add(new_order_detail)
 
         db.commit() 
+        print("====== DATABASE SAVE SUCCESS ======")
         return {"message": "Success", "invoice_number": generated_system_invoice}
+        
     except Exception as e:
         db.rollback()
+        print("====== ERROR OCCURRED ======")
+        import traceback
+        traceback.print_exc()  # Error အစအဆုံးကို Terminal မှာ ပြပေးမယ်
         raise HTTPException(status_code=500, detail=f"Database relational insert breakdown: {e}")
 
 @app.get("/api/order/next-invoice/{customer_email}")

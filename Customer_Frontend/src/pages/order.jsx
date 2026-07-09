@@ -111,6 +111,10 @@ const OrderPage = () => {
       if (response.status === 201) { // axios မှာ status 201 ကို စစ်ရပါတယ်
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
+
+        // 🌟 အသစ်ထည့်ရမည့် Code: Cart ကို အလွတ်ပြန်လုပ်ပေးခြင်း 🌟
+        const cartKey = `stationero_cart_${customerProfile.email}`;
+        localStorage.removeItem(cartKey);
         navigate('/history');
       }
     } catch (error) {
