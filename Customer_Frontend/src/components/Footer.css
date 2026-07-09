@@ -1,0 +1,63 @@
+.footer-section {
+  background-color: #E6E6E6;
+  padding: 80px 0;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 120px;
+  padding: 0 40px;
+}
+
+.about-col {
+  max-width: 260px;
+}
+
+.footer-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-heading {
+  font-size: 1.05em;
+  font-weight: 700;
+  color: #111;
+  margin: 0 0 25px 0;
+  text-transform: uppercase;
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  text-decoration-thickness: 1.5px;
+}
+
+.footer-col p {
+  color: #333;
+  font-size: 0.9em;
+  line-height: 1.6;
+  margin: 0;
+  text-align: justify;
+}
+
+.footer-col ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-col ul li {
+  margin-bottom: 12px;
+}
+
+/* Footer.css ထဲတွင် ပြင်ရန် */
+.footer-col ul li a {
+  text-decoration: none;
+  color: #333;
+  font-size: 0.9em;
+  transition: color 0.3s ease;
+  display: inline-block; /* Link အတွက် ထည့်ပေးသင့်ပါတယ် */
+}
+.footer-col ul li a:hover {
+  color: #F84C7B;
+  font-weight: 500;
+}
