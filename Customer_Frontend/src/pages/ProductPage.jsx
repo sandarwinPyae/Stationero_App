@@ -10,7 +10,7 @@ const ProductCard = ({ product, onProductClick }) => {
       return (
             <div className="product-card" onClick={() => onProductClick(product.product_id)} style={{ cursor: 'pointer' }}>
                   <div className="product-img-box">
-                        <img src={`http://localhost:8000/images/${product.product_img_url}`} alt={product.product_name} />
+                        <img src={`http://localhost:8000/${product.product_img_url}`} alt={product.product_name} />
                   </div>
                   <h3 className="product-name">{product.product_name}</h3>
                   <p className="product-price-tag">{product.display_price}</p>
