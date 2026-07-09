@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ထည့်သွင်းထားသည်
+import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
+
 const OrderHistoryPage = () => {
-  const navigate = useNavigate(); // 🌟 navigate သို့ ပြောင်းလဲထားသည်
+  const navigate = useNavigate(); 
 
   const [hoveredLink, setHoveredLink] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -19,7 +20,6 @@ const OrderHistoryPage = () => {
   const [activeStartDate, setActiveStartDate] = useState('');
   const [activeEndDate, setActiveEndDate] = useState('');
 
-  // 🌟 path များ မှန်ကန်အောင် ပြင်ဆင်ထားသည်
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about' },
@@ -37,7 +37,7 @@ const OrderHistoryPage = () => {
     if (savedProfile) {
       try {
         const parsedUser = JSON.parse(savedProfile);
-        activeEmail = (parsedUser.email || parsedUser.user_email || '').trim();
+        activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim();
       } catch (e) {
         console.error(e);
       }
@@ -48,22 +48,28 @@ const OrderHistoryPage = () => {
       return;
     }
 
-
-
-
-    // 🌟 Axios သုံးပြီး Data ဆွဲထုတ်ခြင်း
+    // နောက်ကွယ်ကနေ ဒေတာကို စဥ်ဆက်မပြတ် ဆွဲထုတ်မည့် အဓိက Function
     const fetchHistory = async () => {
       try {
         const response = await axios.get(`http://localhost:8000/api/order/history-logs/${activeEmail}`);
         if (response.data.orders) setOrders(response.data.orders);
         if (response.data.returns) setReturns(response.data.returns);
       } catch (err) {
-        console.error("History fetch error:", err)
+        console.error("History fetch error:", err);
       }
     };
 
-
+    // စာမျက်နှာ စဖွင့်ဖွင့်ချင်းတွင် ချက်ချင်း ခေါ်ယူမည်
     fetchHistory();
+
+    // ---- FIXED: LIVE BACKGROUND AUTO-POLLING KEEPS STATUS IN 100% PERFECT SYNC ----
+    // ၄ စက္ကန့်လျှင် တစ်ကြိမ် နောက်ကွယ်မှ ဒေတာအသစ်ကို ပုံမှန် လှမ်းစစ်ပေးနေမည်ဖြစ်သည်
+    const liveHistorySyncInterval = setInterval(() => {
+      fetchHistory();
+    }, 4000);
+
+    // အသုံးပြုသူ ဤစာမျက်နှာမှ ထွက်သွားပါက Memory leak မဖြစ်အောင် timer အား ပြန်ဖျက်ပေးသည်
+    return () => clearInterval(liveHistorySyncInterval);
   }, [navigate]);
 
   const handleTabChange = (tabName) => {
@@ -87,8 +93,7 @@ const OrderHistoryPage = () => {
   const activeRecordsSource = activeTab === 'All' ? orders : returns;
 
   const filteredRecords = activeRecordsSource.filter(record => {
-    // 🌟 Search Filter (Case-insensitive)
-    let matchesSearch = true; // ဒီမှာ Variable ကို အရင်သတ်မှတ်ပေးရပါမယ်
+    let matchesSearch = true; 
     if (activeSearch) {
       const lowerSearch = activeSearch.toLowerCase().trim();
       const lowerInvoiceId = (record.invoice_number || '').toString().toLowerCase();
@@ -96,11 +101,11 @@ const OrderHistoryPage = () => {
 
       matchesSearch = lowerInvoiceId.includes(lowerSearch) || lowerStatus.includes(lowerSearch);
     }
-    // 🌟 Date Filter
+    
     let matchesDate = true;
     if (activeStartDate || activeEndDate) {
       const recordDate = new Date(record.order_date);
-      recordDate.setHours(0, 0, 0, 0); // အချိန်ကို ဖြုတ်ထားပါ
+      recordDate.setHours(0, 0, 0, 0); 
 
       if (activeStartDate) {
         const start = new Date(activeStartDate);
@@ -128,7 +133,7 @@ const OrderHistoryPage = () => {
           {navItems.map((item, index) => (
             <span
               key={index}
-              onClick={() => navigate(item.path)} // 🌟 navigate ချိတ်ဆက်ထားသည်
+              onClick={() => navigate(item.path)} 
               style={{ ...styles.link, ...(item.isHistoryPage ? styles.activeLink : {}) }}
             >
               {item.label}
@@ -164,7 +169,7 @@ const OrderHistoryPage = () => {
           <button
             type="button"
             onClick={(e) => {
-              e.preventDefault(); // 🌟 Form submit ဖြစ်မှာကို တားဆီးပေးခြင်း
+              e.preventDefault(); 
               handleSearchTrigger();
             }}
             style={styles.searchActionBtn}
@@ -185,25 +190,41 @@ const OrderHistoryPage = () => {
           {currentRecordsView.length === 0 ? (
             <div style={styles.emptyNotificationBlock}>No verified logs found matching current search terms.</div>
           ) : (
-            currentRecordsView.map((record, idx) => (
-              <div key={idx} style={styles.tableBodyRow}>
-                <span style={{ flex: 1.5, fontWeight: 'bold', color: activeTab === 'Returned' ? '#d9383a' : '#111' }}>{record.invoice_number}</span>
-                <span style={{ flex: 1.2, fontWeight: 'bold', color: record.status === 'Returned' ? '#d9383a' : record.status === 'Pending' ? '#d97706' : '#2b6cb0' }}>{record.status}</span>
-                <span style={{ flex: 1.2 }}>{record.total_amount.toLocaleString()} MMK</span>
-                <span style={{ flex: 1.5, color: '#444' }}>{record.payment_method}</span>
-                <span style={{ flex: 1.8, color: '#777', fontSize: '13px' }}>{record.order_date}</span>
-              </div>
-            ))
+            currentRecordsView.map((record, idx) => {
+              const currentStatus = String(record.status || '').toUpperCase();
+              
+              // Dynamic status badge text colors
+              const badgeColor = currentStatus === 'CONFIRMED' ? '#16a34a' : 
+                                 currentStatus === 'RETURNED' || currentStatus === 'CANCELLED' ? '#d9383a' : '#d97706';
+              
+              return (
+                <div key={idx} style={styles.tableBodyRow}>
+                  <span style={{ flex: 1.5, fontWeight: 'bold', color: activeTab === 'Returned' ? '#d9383a' : '#111' }}>{record.invoice_number}</span>
+                  
+                  {/* ---- FIXED: BADGE STATUS TEXT RENDERS LIVE COLORS CORRESPONDING TO NATIVE DATABASE STRINGS ---- */}
+                  <span style={{ flex: 1.2, fontWeight: 'bold', color: badgeColor }}>
+                    {record.status || 'Pending'}
+                  </span>
+                  
+                  <span style={{ flex: 1.2 }}>{(record.total_amount || 0).toLocaleString()} MMK</span>
+                  <span style={{ flex: 1.5, color: '#444' }}>{record.payment_method}</span>
+                  <span style={{ flex: 1.8, color: '#777', fontSize: '13px' }}>{record.order_date}</span>
+                </div>
+              );
+            })
           )}
         </div>
 
-        <div style={styles.paginationDockRow}>
-          <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} style={styles.arrowPaginationBtn}>&#9664;</button>
-          {[...Array(totalPagesCount)].map((_, pIdx) => (
-            <button key={pIdx} onClick={() => setCurrentPage(pIdx + 1)} style={{ ...styles.numberPaginationBtn, ...(currentPage === pIdx + 1 ? styles.activeNumberPaginationBtn : {}) }}>{pIdx + 1}</button>
-          ))}
-          <button disabled={currentPage === totalPagesCount} onClick={() => setCurrentPage(prev => Math.min(totalPagesCount, prev + 1))} style={styles.arrowPaginationBtn}>&#9654;</button>
-        </div>
+        {/* ---- FIXED: PAGINATION BAR NOW ONLY SHOWS IF TOTAL FILTERED RECORDS ARE OVER 5 ---- */}
+        {filteredRecords.length > 5 && (
+          <div style={styles.paginationDockRow}>
+            <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} style={styles.arrowPaginationBtn}>◀</button>
+            {[...Array(totalPagesCount)].map((_, pIdx) => (
+              <button key={pIdx} onClick={() => setCurrentPage(pIdx + 1)} style={{ ...styles.numberPaginationBtn, ...(currentPage === pIdx + 1 ? styles.activeNumberPaginationBtn : {}) }}>{pIdx + 1}</button>
+            ))}
+            <button disabled={currentPage === totalPagesCount} onClick={() => setCurrentPage(prev => Math.min(totalPagesCount, prev + 1))} style={styles.arrowPaginationBtn}>▶</button>
+          </div>
+        )}
       </main>
     </div>
   );

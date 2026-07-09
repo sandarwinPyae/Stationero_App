@@ -11,14 +11,17 @@ import LoginPage from './pages/login';
 import SignupPage from './pages/signup';
 import ForgotPasswordPage from './pages/forgotpassword';
 import OrderPage from './pages/order';
-
 import OrderHistoryPage from './pages/history';
 import ReturnsPage from './pages/returns';
 import ProfilePage from './pages/profile';
 
+// ---- FIXED: PROTECTED ROUTE CHECKS LOCAL STORAGE TO PRESERVE VIEW ON CTRL+S ----
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useContext(AuthContext);
-  return isLoggedIn ? children : <Navigate to="/login" />;
+  const hasLocalSession = localStorage.getItem('stationero_logged_user');
+  
+  // If either the context says true OR a local storage user profile exists, allow access!
+  return (isLoggedIn || hasLocalSession) ? children : <Navigate to="/login" replace />;
 };
 
 function App() {
