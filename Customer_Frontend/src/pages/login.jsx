@@ -43,20 +43,19 @@ const Login = () => {
         if (data.role === 'admin') {
           navigate('/admin');
         } else {
-          navigate('/product');
+          navigate('/');
         }
 
       }
     } catch (error) {
-      // 🌟 Error message ကို axios မှတဆင့် ယူခြင်း
-      const msg = error.response?.data?.message || error.response?.data?.detail || 'Authentication failed.';
-      setErrorMessage("Server connection error. Please try again later.");
-    }
+        const msg =
+          error.response?.data?.detail ||
+          error.response?.data?.message ||
+          "Server connection error. Please try again later.";
+
+        setErrorMessage(msg);
+      }
   };
-
-
-
-
 
   return (
     <div style={styles.container}>
@@ -64,8 +63,9 @@ const Login = () => {
         <div style={styles.logo}>Stationero</div>
         <nav style={styles.navLinks}>
           {/* 🌟 Navigation များကို navigate() ဖြင့် ပြောင်းထားပါသည် */}
-          <span style={styles.link} onClick={() => navigate('/product')}>Home</span>
+          <span style={styles.link} onClick={() => navigate('/')}>Home</span>
           <span style={styles.link} onClick={() => navigate('/about')}>About Us</span>
+          <span style={styles.link} onClick={() => navigate('/product')}>Product</span>
           <button
             type="button"
             onClick={() => navigate('/login')}

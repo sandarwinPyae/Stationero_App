@@ -86,29 +86,45 @@ const OrderHistoryPage = () => {
 
   const activeRecordsSource = activeTab === 'All' ? orders : returns;
 
-  const filteredRecords = activeRecordsSource.filter(record => {
-    // 🌟 Search Filter (Case-insensitive)
-    let matchesSearch = true; // ဒီမှာ Variable ကို အရင်သတ်မှတ်ပေးရပါမယ်
+    const filteredRecords = activeRecordsSource.filter(record => {
+    let matchesSearch = true; 
     if (activeSearch) {
       const lowerSearch = activeSearch.toLowerCase().trim();
+      
+      // ---- FIXED: UNIVERSAL SEARCH ENGINE MATCHES EVERY SINGLE DATA COLUMN SEAMLESSLY ----
       const lowerInvoiceId = (record.invoice_number || '').toString().toLowerCase();
       const lowerStatus = (record.status || '').toString().toLowerCase();
+      const lowerPaymentMethod = (record.payment_method || '').toString().toLowerCase();
+      const lowerTotalAmount = (record.total_amount || '').toString().toLowerCase();
+      const lowerSalePerson = (record.sale_person || '').toString().toLowerCase();
+      const lowerDate = (record.order_date || '').toString().toLowerCase();
 
-      matchesSearch = lowerInvoiceId.includes(lowerSearch) || lowerStatus.includes(lowerSearch);
+      matchesSearch = 
+        lowerInvoiceId.includes(lowerSearch) || 
+        lowerStatus.includes(lowerSearch) || 
+        lowerPaymentMethod.includes(lowerSearch) || 
+        lowerTotalAmount.includes(lowerSearch) || 
+        lowerSalePerson.includes(lowerSearch) || 
+        lowerDate.includes(lowerSearch);
     }
-    // 🌟 Date Filter
+
     let matchesDate = true;
     if (activeStartDate || activeEndDate) {
-      const recordDate = new Date(record.order_date);
-      recordDate.setHours(0, 0, 0, 0); // အချိန်ကို ဖြုတ်ထားပါ
+      const explicitDateString = record.order_date || record.sale_return_date;
+      if (explicitDateString && explicitDateString !== "-") {
+        const recordDate = new Date(explicitDateString);
+        recordDate.setHours(0, 0, 0, 0); 
 
-      if (activeStartDate) {
-        const start = new Date(activeStartDate);
-        if (recordDate < start) matchesDate = false;
-      }
-      if (activeEndDate) {
-        const end = new Date(activeEndDate);
-        if (recordDate > end) matchesDate = false;
+        if (activeStartDate) {
+          const start = new Date(activeStartDate);
+          if (recordDate < start) matchesDate = false;
+        }
+        if (activeEndDate) {
+          const end = new Date(activeEndDate);
+          if (recordDate > end) matchesDate = false;
+        }
+      } else {
+        matchesDate = false;
       }
     }
 
@@ -134,7 +150,15 @@ const OrderHistoryPage = () => {
               {item.label}
             </span>
           ))}
-          <span onClick={() => navigate('/login')} style={styles.link}>Logout</span>
+          <span 
+            onClick={() => {
+              localStorage.removeItem('stationero_logged_user');
+              navigate('/login');
+            }} 
+            style={styles.link}
+          >
+            Logout
+          </span>
         </nav>
       </header>
 
@@ -197,13 +221,38 @@ const OrderHistoryPage = () => {
           )}
         </div>
 
-        <div style={styles.paginationDockRow}>
-          <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} style={styles.arrowPaginationBtn}>&#9664;</button>
-          {[...Array(totalPagesCount)].map((_, pIdx) => (
-            <button key={pIdx} onClick={() => setCurrentPage(pIdx + 1)} style={{ ...styles.numberPaginationBtn, ...(currentPage === pIdx + 1 ? styles.activeNumberPaginationBtn : {}) }}>{pIdx + 1}</button>
-          ))}
-          <button disabled={currentPage === totalPagesCount} onClick={() => setCurrentPage(prev => Math.min(totalPagesCount, prev + 1))} style={styles.arrowPaginationBtn}>&#9654;</button>
-        </div>
+        {filteredRecords.length > 5 && (
+          <div style={styles.paginationDockRow}>
+            <button 
+              disabled={currentPage === 1} 
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))} 
+              style={styles.arrowPaginationBtn}
+            >
+              ◀
+            </button>
+            
+            {[...Array(totalPagesCount)].map((_, pIdx) => (
+              <button 
+                key={pIdx} 
+                onClick={() => setCurrentPage(pIdx + 1)} 
+                style={{ 
+                  ...styles.numberPaginationBtn, 
+                  ...(currentPage === pIdx + 1 ? styles.activeNumberPaginationBtn : {}) 
+                }}
+              >
+                {pIdx + 1}
+              </button>
+            ))}
+            
+            <button 
+              disabled={currentPage === totalPagesCount} 
+              onClick={() => setCurrentPage(prev => Math.min(totalPagesCount, prev + 1))} 
+              style={styles.arrowPaginationBtn}
+            >
+              ▶
+            </button>
+          </div>
+        )}
       </main>
     </div>
   );
