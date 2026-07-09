@@ -43,9 +43,12 @@ async def add_product(
         os.makedirs(upload_dir)
         
     file_path = os.path.join(upload_dir, image.filename)
+    
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(image.file, buffer)
-    
+
+    image_url = f"{upload_dir}/{image.filename}"
+    image_url = file_path.replace("\\", "/")
     new_product = models.Product(
         product_name=product_name,
         category_id=category_id,
@@ -53,7 +56,7 @@ async def add_product(
         selling_price=selling_price,
         current_qty=current_qty,
         description = description,
-        product_img_url=image.filename 
+        product_img_url=image_url 
     )
     db.add(new_product)
     db.commit()
@@ -118,7 +121,7 @@ async def edit_product(
         file_path = os.path.join(upload_dir, image.filename)
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
-        product.product_img_url = image.filename
+        product.product_img_url = file_path.replace("\\", "/")
 
     product.product_name = product_name
     product.category_id = category_id
@@ -127,7 +130,9 @@ async def edit_product(
     product.current_qty = current_qty + new_qty
     product.description = description
     
+    db.add(product) 
     db.commit()
+    db.refresh(product)
     return {"message": "Product updated successfully"}
 
 
