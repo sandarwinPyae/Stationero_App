@@ -130,7 +130,9 @@ const PurchaseSummary = () => {
                             {p.purchase_order_status}
                             </span>
                         </td>
-                        <td className="p-5">{new Date(p.purchase_order_date).toLocaleDateString()}</td>
+                        <td className="p-5">
+                          {new Date(p.purchase_order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </td>
                         </tr>
                         {selectedId === p.purchase_order_id && (
                         <tr className="bg-gray-50">
@@ -150,7 +152,9 @@ const PurchaseSummary = () => {
                                     <tr key={d.purchase_order_details_id} className="hover:bg-gray-50">
                                         <td className="p-3">{d.product?.product_name}</td>
                                         <td className="p-3 text-center">{d.qty}</td>
-                                        <td className="p-3 text-right">{d.unit_price.toLocaleString()} Ks</td>
+                                        <td className="p-3 text-right">
+                                          {d.unit_price.toLocaleString()} Ks
+                                        </td>
                                         <td className="p-3 text-right font-semibold">{d.sub_total.toLocaleString()} Ks</td>
                                     </tr>
                                     ))}

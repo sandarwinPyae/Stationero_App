@@ -118,7 +118,9 @@ const PurchaseReturnSummary = () => {
                         <tr onClick={() => setSelectedId(selectedId === r.purchase_return_id ? null : r.purchase_return_id)} 
                             className="cursor-pointer hover:bg-gray-50 border-b">
                         <td className="p-5 font-medium">{r.purchase_order?.po_number}</td>
-                        <td className="p-5">{new Date(r.purchase_return_date).toLocaleDateString()}</td>
+                        <td className="p-5">
+                          {new Date(r.purchase_return_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        </td>
                         <td className="p-5">{r.purchase_return_payment_method}</td>
                         <td className="p-5 text-red-600 font-bold">{r.total_amount.toLocaleString()} Ks</td>
                         </tr>
