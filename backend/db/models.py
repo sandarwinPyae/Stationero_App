@@ -56,12 +56,13 @@ class Product(Base):
 class SaleOrdersHeader(Base):
     __tablename__ = "sale_orders_header"
     sale_order_id = Column(Integer, primary_key=True, index=True)
-    customer_id = Column(Integer, ForeignKey("customer.customer_id"))
+    customer_email = Column("customer_id", String, ForeignKey("customer.customer_email"))
     invoice_number = Column(String, unique=True)
     total_amount = Column(Float)
     status = Column(String)
     discount = Column(Float, default=0.0, nullable=False)
     order_date = Column(DateTime, default=lambda: datetime.now(yangon_tz))
+    payment_method = Column(String, default="Cash Down")
     customer = relationship("Customer", back_populates="orders")
     details = relationship("SaleOrdersDetails", back_populates="sale_order")
     payments = relationship("Payment",back_populates="sale_order")
@@ -95,6 +96,7 @@ class SaleReturnHeader(Base):
     sale_return_payment_method = Column(String)
     sale_return_date = Column(DateTime, default=lambda: datetime.now(yangon_tz))
     return_reason = Column(String)
+    return_img_url = Column(String, nullable=True)
     sale_order = relationship("SaleOrdersHeader",back_populates="sale_returns")
     details = relationship("SaleReturnDetails",back_populates="sale_return")
     
@@ -121,7 +123,6 @@ class Supplier(Base):
     updated_date = Column(DateTime, default=lambda: datetime.now(yangon_tz), onupdate=lambda: datetime.now(yangon_tz))
     purchase_orders = relationship("PurchaseOrdersHeader",back_populates="supplier")
 
-
 class PurchaseOrdersHeader(Base):
     __tablename__ = "purchase_orders_header"
     purchase_order_id = Column(Integer, primary_key=True, index=True)
@@ -146,7 +147,6 @@ class PurchaseOrdersDetails(Base):
     purchase_order = relationship("PurchaseOrdersHeader",back_populates="details")
     product = relationship("Product",back_populates="purchase_order_details")
 
-
 class PurchaseReturnHeader(Base):
     __tablename__ = "purchase_return_header"
     purchase_return_id = Column(Integer, primary_key=True, index=True)
@@ -168,3 +168,7 @@ class PurchaseReturnDetails(Base):
     purchase_return = relationship("PurchaseReturnHeader",back_populates="details")
     product = relationship("Product",back_populates="purchase_return_details")
     
+class Promotion(Base):
+    __tablename__ = "promotions"
+    promo_id = Column(Integer, primary_key=True, index=True)
+    promo_type = Column(String)

@@ -1,0 +1,197 @@
+.product-page {
+      background-color: #fff;
+      min-height: 100vh;
+}
+
+.product-hero {
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+}
+
+/* Container ကို 1200px အကျယ်ထားပြီး အထဲကဟာတွေကို ညာဘက် (flex-end) ကပ်မယ် */
+.product-hero-container {
+      width: 100%;
+      max-width: 1200px;
+      position: relative;
+      /* အထဲက Box ကို လွတ်လွတ်လပ်လပ် ရွှေ့နိုင်အောင်လို့ပါ */
+      display: flex;
+      justify-content: flex-end;
+}
+
+/* ညာဘက်ကပ်နေမယ့် Background ပုံ */
+.hero-image-bg {
+      width: 85%;
+      /* အပြည့်မယူဘဲ 85% ပဲ ယူထားလို့ ဘယ်ဘက်မှာ နေရာလွတ်ကျန်ခဲ့မယ် */
+      height: 500px;
+      /* UI ပုံစံအတိုင်း အမြင့် ချိန်ထားတယ် */
+      background-image: url('../assets/office-supplies.jpg');
+      background-color: #F8C3D3;
+      background-size: cover;
+      background-position: center;
+      border-radius: 15px;
+      /* ထောင့်လေးတွေ ဝိုင်းထားတယ် */
+}
+
+/* OFFICE SUPPLIES စာသားပါသော Box */
+.product-hero-title-box {
+      position: absolute;
+      left: 0;
+      /* ဘယ်ဘက်အစွန်ဆုံးကို ကပ်မယ် */
+      bottom: 60px;
+      /* အောက်နား မရောက်ခင်လေး (60px အကွာ) မှာ ထားမယ် */
+      background-color: #e7e8ee;
+      /* မင်းတောင်းထားတဲ့ Color */
+      padding: 20px 45px;
+      border-radius: 5px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      /* UI ထဲကလို နည်းနည်းကြွနေအောင် */
+      z-index: 10;
+      /* ပုံရဲ့ အပေါ်ကို ရောက်နေအောင် z-index သုံးထားတယ် */
+}
+
+.product-hero-title {
+      color: #F84C7B;
+      font-size: 1.6em;
+      font-weight: normal;
+      /* စာလုံးသိပ်မထူအောင် ချိန်ထားတယ် */
+      margin: 0;
+      letter-spacing: 1px;
+}
+
+/* Product List Section */
+.product-list-section {
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 0 20px;
+}
+
+/* Toolbar (Search & Sort) */
+.product-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+}
+
+/* 🌟 Product Page သီးသန့် Search Bar (ပိုကြီးပြီး ထင်းအောင် ပြင်ထားသည်) 🌟 */
+.product-search-bar {
+      display: flex;
+      align-items: center;
+      background-color: transparent;
+      border: 2px solid #F84C7B;
+      border-radius: 25px;
+      /* ဘောင်ကို ပိုထူပြီး ပန်းရောင်ပြောင်းလိုက်တယ် */
+      padding: 10px 20px;
+      /* အပေါ်အောက် နေရာပိုကျယ်သွားမယ် */
+      width: 350px;
+      /* အလျားကို 250px ကနေ 350px ထိ ပိုရှည်ပေးလိုက်တယ် */
+}
+
+/* Search Icon ကိုပါ ပိုကြီးပြီး ပန်းရောင်ဖြစ်အောင် ထပ်ထည့်ပေးပါ */
+.product-search-bar .search-icon {
+      width: 22px;
+      height: 22px;
+      color: #F84C7B;
+}
+
+.product-search-bar input {
+      border: none;
+      background-color: transparent;
+      outline: none;
+      font-size: 1.1em;
+      /* စာလုံးအရွယ်အစား ပိုကြီးသွားမယ် */
+      width: 100%;
+      margin-left: 10px;
+      color: #222;
+}
+
+.product-search-bar input::placeholder {
+      color: #888;
+      /* Placeholder စာသားကို ရှင်းရှင်းလင်းလင်း ဖြစ်အောင် ချိန်ထားတယ် */
+}
+
+/* Sort Dropdown (Price: Low to High) - ပိုထင်းအောင် ပြင်ထားသည် */
+.sort-bar {
+      display: flex;
+      align-items: center;
+      font-size: 1.1em;
+      /* စာလုံးအရွယ်အစား ပိုကြီးသွားမယ် */
+      color: #222;
+}
+
+.sort-bar label {
+      margin-right: 12px;
+      font-weight: 700;
+      /* Price ဆိုတဲ့ စာသားကို အထူ ပြောင်းလိုက်တယ် */
+}
+
+.sort-select {
+      border: 1.5px solid #e0e0e0;
+      /* Box လေး ပေါ်လာအောင် ဘောင်ကွပ်လိုက်တယ် */
+      border-radius: 8px;
+      padding: 8px 15px;
+      /* ခလုတ်လေးလို ဖြစ်သွားအောင် Padding ထည့်တယ် */
+      outline: none;
+      background-color: #f9f9f9;
+      font-size: 1em;
+      color: #F84C7B;
+      /* ရွေးချယ်မယ့် စာသားကို ပန်းရောင်ထားမယ် */
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      /* အောက်ခံအရိပ်လေး ထည့်ထားတယ် */
+      transition: all 0.3s ease;
+}
+
+.sort-select:hover {
+      border-color: #F84C7B;
+      /* Mouse ထောက်ရင် ဘောင်က ပန်းရောင် ပြောင်းသွားမယ် */
+}
+
+/* Product Grid Layout */
+.product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      /* ၃ ကော်လံ */
+      gap: 40px;
+}
+
+/* Product Card ကို ဘယ်ဘက်ကပ်ထားမယ် */
+.product-card {
+      text-align: left;
+}
+
+.product-img-box {
+      background-color: #f9f9f9;
+      border-radius: 10px;
+      height: 280px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 15px;
+      overflow: hidden;
+      border: 1px solid #f0f0f0;
+}
+
+.product-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+}
+
+.product-name {
+      color: #F84C7B;
+      /* ပန်းရောင် */
+      font-size: 1.1em;
+      font-weight: normal;
+      /* စာလုံးသိပ်မထူအောင် */
+      margin: 0 0 5px 0;
+}
+
+.product-price-tag {
+      color: #222;
+      font-size: 1.05em;
+      font-weight: bold;
+      margin: 0;
+}
