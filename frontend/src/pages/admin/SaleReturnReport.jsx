@@ -12,7 +12,7 @@ const SaleReturnReport = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const recordsPerPage = 8;
+  const recordsPerPage = 5;
 
   useEffect(() => {
     axios.get('http://localhost:8000/sale-return-reports')
