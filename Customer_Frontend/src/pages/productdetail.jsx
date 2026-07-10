@@ -44,7 +44,7 @@ const ProductDetail = () => {
         }
       ];
       localStorage.setItem('stationero_active_checkout', JSON.stringify(checkoutData));
-      localStorage.setItem('checkout_source', 'buy_now'); 
+      localStorage.setItem('checkout_source', 'buy_now');
       navigate('/order');
       return;
     }
@@ -57,7 +57,7 @@ const ProductDetail = () => {
           const parsed = JSON.parse(savedProfile);
           userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
         }
-      } catch(e) {}
+      } catch (e) { }
 
       const cartKey = `stationero_cart_${userEmail}`;
       const savedCart = localStorage.getItem(cartKey);
@@ -69,7 +69,7 @@ const ProductDetail = () => {
         name: product.product_name,
         price: product.selling_price,
         quantity: quantity,
-        image: `http://localhost:8000/images/${product.product_img_url}`
+        image: `http://localhost:8000/${product.product_img_url}`
       };
 
       const existingIndex = cartItems.findIndex(i => i.id === newItem.id);
@@ -100,7 +100,7 @@ const ProductDetail = () => {
 
       <main style={styles.mainContent}>
         <div style={styles.imageColumn}>
-          <img src={`http://localhost:8000/images/${product.product_img_url}`} alt={product.product_name} style={styles.productImage} />
+          <img src={`http://localhost:8000/${product.product_img_url}`} alt={product.product_name} style={styles.productImage} />
         </div>
 
         <div style={styles.detailsColumn}>

@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel,EmailStr
 from sqlalchemy.orm import Session
 import sys
-
+from db.models import Product, Category, Customer, SaleOrdersDetails #Theingi add
 from typing import List, Optional
 from fastapi import UploadFile, File, Form
 from datetime import datetime
@@ -413,10 +413,25 @@ def get_products(
     sort: Optional[str] = "none", 
     db: Session = Depends(get_db)
 ):
-    query = db.query(Product).filter(Product.del_flag == 0)
+    #Theingi Change
+    query = db.query(Product).filter(
+        Product.del_flag == 0,
+         Product.current_qty > 0
+        )
     if search:
-        query = query.filter(Product.product_name.ilike(f"%{search}%"))
-    
+       category = db.query(Category).filter(
+        Category.category_name.ilike(f"%{search}%"),
+        Category.del_flag == 0
+    ).first()
+
+       if category:
+        query = query.filter(
+            Product.category_id == category.category_id
+        )
+       else:
+        query = query.filter(
+            Product.product_name.ilike(f"%{search}%")
+        )
     if sort == "low-to-high":
         query = query.order_by(Product.selling_price.asc())
     elif sort == "high-to-low":
@@ -443,12 +458,18 @@ def get_best_selling(db: Session = Depends(get_db)):
         SaleOrdersDetails.product_id,
         func.sum(SaleOrdersDetails.qty).label('total_qty')
     ).group_by(SaleOrdersDetails.product_id).order_by(desc('total_qty')).limit(3).all()
-    
+    #Theingi Change
     if best_selling_records:
         product_ids = [record.product_id for record in best_selling_records]
-        products = db.query(Product).filter(Product.product_id.in_(product_ids)).all()
+        products = db.query(Product).filter(
+            Product.product_id.in_(product_ids),
+            Product.del_flag == 0,
+    Product.current_qty > 0
+            ).all()
     else:
-        products = db.query(Product).filter(Product.del_flag == 0).limit(3).all()
+        products = db.query(Product).filter(
+            Product.del_flag == 0,
+            Product.current_qty > 0).limit(3).all()
         
     result = []
     for p in products:
@@ -499,7 +520,11 @@ def get_low_stock(db: Session = Depends(get_db)):
 
 @app.get("/api/products/new-arrivals", response_model=List[schemas.ProductResponse])
 def get_new_arrivals(db: Session = Depends(get_db)):
-    products = db.query(Product).filter(Product.del_flag == 0).order_by(Product.product_id.desc()).limit(3).all()
+    #Theingi Change
+    products = db.query(Product).filter(
+        Product.del_flag == 0,
+         Product.current_qty > 0
+        ).order_by(Product.product_id.desc()).limit(3).all()
     result = []
     for p in products:
         price_int = int(p.selling_price)
