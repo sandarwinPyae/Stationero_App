@@ -10,7 +10,7 @@ const OrderHistoryPage = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
-
+  const [hoveredSubmitBtn, setHoveredSubmitBtn] = useState(false);
   const [typedSearch, setTypedSearch] = useState('');
   const [typedStartDate, setTypedStartDate] = useState('');
   const [typedEndDate, setTypedEndDate] = useState('');
@@ -191,7 +191,12 @@ const OrderHistoryPage = () => {
               e.preventDefault(); // 🌟 Form submit ဖြစ်မှာကို တားဆီးပေးခြင်း
               handleSearchTrigger();
             }}
-            style={styles.searchActionBtn}
+            onMouseEnter={() => setHoveredSubmitBtn(true)}
+              onMouseLeave={() => setHoveredSubmitBtn(false)}
+              style={{
+                ...styles.submitReturnBtn,
+                ...(hoveredSubmitBtn ? styles.submitReturnBtnHover : {})
+              }}
           >
             Search
           </button>
@@ -282,6 +287,12 @@ const styles = {
   paginationDockRow: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '15px' },
   arrowPaginationBtn: { background: 'none', border: '1px solid #e2e8f0', borderRadius: '10px', color: '#f25278', cursor: 'pointer', padding: '8px 14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', transition: 'all 0.2s ease', backgroundColor: '#fff' },
   numberPaginationBtn: { border: '1px solid #e2e8f0', borderRadius: '10px', backgroundColor: '#fff', color: '#4a5568', cursor: 'pointer', padding: '8px 14px', fontSize: '13px', fontWeight: 'bold', transition: 'all 0.2s ease' },
-  activeNumberPaginationBtn: { backgroundColor: '#f25278', color: '#fff', border: '1px solid #f25278' }
+  activeNumberPaginationBtn: { backgroundColor: '#f25278', color: '#fff', border: '1px solid #f25278' },
+  submitReturnBtn: {
+    backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer',
+    transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none'
+  },
+  submitReturnBtnHover: { backgroundColor: '#e04167', boxShadow: '0 4px 15px rgba(242,82,120,0.3)' },
+
 };
 export default OrderHistoryPage;
