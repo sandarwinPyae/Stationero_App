@@ -5,6 +5,7 @@ const InventoryStockReport = () => {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const recordsPerPage = 5;
 
   useEffect(() => {
@@ -20,6 +21,29 @@ const InventoryStockReport = () => {
     } catch (error) {
       console.error("Error fetching live database inventory stock metrics:", error);
     }
+  };
+
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(filteredProducts);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inventory");
+    XLSX.writeFile(workbook, "Inventory_Report.xlsx");
+    setIsExportOpen(false);
+  };
+
+  const exportToPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+    const doc = new jsPDF();
+    doc.text("Inventory Stock Report", 14, 15);
+    autoTable(doc, {
+      head: [['ID', 'Name', 'Category', 'Qty', 'Status']],
+      body: filteredProducts.map(p => [p.product_id, p.product_name, p.category, p.qty, p.qty <= 10 ? 'Low Stock' : 'In Stock']),
+      startY: 20,
+    });
+    doc.save("Inventory_Report.pdf");
+    setIsExportOpen(false);
   };
 
   const filteredProducts = products.filter((p) =>
@@ -53,8 +77,32 @@ const InventoryStockReport = () => {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
           />
-          <div className="text-sm font-semibold text-gray-500">
-            Total Monitored Items: <span className="text-[#F25278]">{filteredProducts.length}</span>
+          
+          <div className="flex items-center gap-6">
+            {/* Total Monitored Items */}
+            <div className="text-sm font-semibold text-gray-500">
+              Total Monitored Items: <span className="text-[#F25278]">{filteredProducts.length}</span>
+            </div>
+
+            {/* Export Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#F25278] text-white font-semibold rounded-lg hover:bg-[#e0456a] transition-all shadow-sm"
+              >
+                <i className="fa-solid fa-file-export"></i> Export
+              </button>
+              {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-lg shadow-xl z-20 overflow-hidden">
+                  <button onClick={exportToPDF} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium">
+                    <i className="fa-solid fa-file-pdf text-red-500"></i> Export PDF
+                  </button>
+                  <button onClick={exportToExcel} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium">
+                    <i className="fa-solid fa-file-excel text-green-600"></i> Export Excel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -88,44 +136,41 @@ const InventoryStockReport = () => {
               ))}
             </tbody>
           </table>
-
           {filteredProducts.length === 0 && (
-            <div className="p-12 text-center text-gray-400 border-t border-gray-100 font-medium">
-              No inventory logs found matching current search terms.
-            </div>
+             <div className="p-12 text-center text-gray-400 border-t border-gray-100 font-medium">
+               No inventory logs found matching current search terms.
+             </div>
           )}
         </div>
 
         {/* PAGINATION */}
         {nPages > 1 && (
           <div className="flex justify-center mt-8 gap-2 items-center">
-            <button 
-              disabled={currentPage === 1} 
-              onClick={() => setCurrentPage(prev => prev - 1)} 
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="font-bold"><i className="fa-solid fa-chevron-left"></i></span>
-            </button>
-            {[...Array(nPages)].map((_, i) => (
-              <button 
-                key={i} 
-                onClick={() => setCurrentPage(i + 1)} 
-                className={`w-10 h-10 flex items-center justify-center border rounded-lg font-semibold text-sm transition-all ${
-                  currentPage === i + 1 
-                    ? 'bg-[#F25278] text-white border-[#F25278] shadow-sm' 
-                    : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
-                }`}
+             <button 
+                disabled={currentPage === 1} 
+                onClick={() => setCurrentPage(prev => prev - 1)} 
+                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                {i + 1}
+                <i className="fa-solid fa-chevron-left"></i>
               </button>
-            ))}
-            <button 
-              disabled={currentPage === nPages} 
-              onClick={() => setCurrentPage(prev => prev + 1)} 
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="font-bold"><i className="fa-solid fa-chevron-right"></i></span>
-            </button>
+              {[...Array(nPages)].map((_, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => setCurrentPage(i + 1)} 
+                  className={`w-10 h-10 flex items-center justify-center border rounded-lg font-semibold text-sm transition-all ${
+                    currentPage === i + 1 ? 'bg-[#F25278] text-white border-[#F25278] shadow-sm' : 'bg-white border-gray-300 text-gray-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+              <button 
+                disabled={currentPage === nPages} 
+                onClick={() => setCurrentPage(prev => prev + 1)} 
+                className="w-10 h-10 flex items-center justify-center bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              >
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
           </div>
         )}
       </div>

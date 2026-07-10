@@ -103,44 +103,7 @@ const AdminDashboard = () => {
         <div className="h-80">
           <ResponsiveContainer>
             <PieChart>
-              {/* <Pie
-                data={dashboardData.pieData}
-                dataKey="value"
-                nameKey="name"
-                cx="50%"
-                cy="50%"
-                outerRadius={80} // နေရာပိုရအောင် နည်းနည်းလျှော့လိုက်ပါတယ်
-                paddingAngle={5}
-                cornerRadius={5}
-                labelLine={true} // အပြင်ထုတ်ပြဖို့အတွက် true ပေးလိုက်ပါတယ်
-                label={({ cx, cy, midAngle, innerRadius, outerRadius, startAngle, endAngle, percent, name }) => {
-                  const RADIAN = Math.PI / 180;
-                  const sin = Math.sin(-RADIAN * midAngle);
-                  const cos = Math.cos(-RADIAN * midAngle);
-                  const sx = cx + (outerRadius + 5) * cos;
-                  const sy = cy + (outerRadius + 5) * sin;
-                  const mx = cx + (outerRadius + 20) * cos;
-                  const my = cy + (outerRadius + 20) * sin;
-                  const ex = mx + (cos >= 0 ? 1 : -1) * 10;
-                  const ey = my;
-                  const textAnchor = cos >= 0 ? 'start' : 'end';
-
-                  const displayName = name.length > 8 ? name.substring(0, 8) + '...' : name;
-
-                  return (
-                    <g>
-                      <path d={`M${sx},${sy}L${mx},${my}L${ex},${ey}`} stroke="#999" fill="none" />
-                      <text x={ex + (cos >= 0 ? 1 : -1) * 5} y={ey} textAnchor={textAnchor} fill="#333" dominantBaseline="central" style={{ fontSize: '10px' }}>
-                        {`${displayName}`}
-                      </text>
-                    </g>
-                  );
-                }}
-              >
-                {dashboardData.pieData.map((entry, index) => (
-                  <Cell key={index} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie> */}
+              
               <Pie
                 data={dashboardData.pieData}
                 dataKey="value"
@@ -151,10 +114,7 @@ const AdminDashboard = () => {
                 paddingAngle={5}
                 cornerRadius={5}
                 labelLine={true} 
-                label={({ name, percent }) => {
-                  const shortName = name.length > 10 ? name.substring(0, 10) + '...' : name;
-                  return `${shortName}`;
-                }}
+                
               >
                 {dashboardData.pieData.map((entry, index) => (
                   <Cell key={index} fill={COLORS[index % COLORS.length]} />

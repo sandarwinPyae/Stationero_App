@@ -4,6 +4,7 @@ import axios from 'axios';
 const PurchaseReturnSummary = () => {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isExportOpen, setIsExportOpen] = useState(false);
 
   // Filter & Pagination States
   const [searchTerm, setSearchTerm] = useState('');
@@ -35,6 +36,53 @@ const PurchaseReturnSummary = () => {
     return matchesSearch && matchesStartDate && matchesEndDate;
   });
 
+  // Date Formatting Helper
+  const formatDate = (dateString) => {
+    const dateObj = new Date(dateString);
+    const dd = String(dateObj.getDate()).padStart(2, '0');
+    const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+    const yyyy = dateObj.getFullYear();
+    const hh = String(dateObj.getHours()).padStart(2, '0');
+    const min = String(dateObj.getMinutes()).padStart(2, '0');
+    const ss = String(dateObj.getSeconds()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy}, ${hh}:${min}:${ss}`;
+  };
+
+  // Export Functions
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const formattedData = filteredData.map(r => ({
+      "PO Number": r.purchase_order?.po_number,
+      "Return Date": formatDate(r.purchase_return_date),
+      "Payment Method": r.purchase_return_payment_method,
+      "Total Amount (Ks)": r.total_amount
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Returns");
+    XLSX.writeFile(workbook, "Purchase_Return_Summary.xlsx");
+    setIsExportOpen(false);
+  };
+
+  const exportToPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+    const doc = new jsPDF();
+    doc.text("Purchase Return Summary Report", 14, 15);
+    autoTable(doc, {
+      head: [['PO Number', 'Return Date', 'Payment Method', 'Total Amount']],
+      body: filteredData.map(r => [
+        r.purchase_order?.po_number, 
+        formatDate(r.purchase_return_date), 
+        r.purchase_return_payment_method, 
+        r.total_amount.toLocaleString() + ' Ks'
+      ]),
+      startY: 20,
+    });
+    doc.save("Purchase_Return_Summary.pdf");
+    setIsExportOpen(false);
+  };
+
   const indexOfLast = currentPage * recordsPerPage;
   const indexOfFirst = indexOfLast - recordsPerPage;
   const currentRecords = filteredData.slice(indexOfFirst, indexOfLast);
@@ -52,52 +100,36 @@ const PurchaseReturnSummary = () => {
       </header>
 
       <div className="px-8 pb-8">
-        <h2 className="text-2xl font-bold mb-8 text-gray-800">Purchase Return Summary Report</h2>
+        <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-800">Purchase Return Summary Report</h2>
+            <div className="relative">
+                <button onClick={() => setIsExportOpen(!isExportOpen)} className="flex items-center gap-2 px-4 py-2.5 bg-[#F25278] text-white font-semibold rounded-lg hover:bg-[#e0456a] transition-all shadow-sm">
+                    <i className="fa-solid fa-file-export"></i> Export
+                </button>
+                {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-lg shadow-xl z-20 overflow-hidden">
+                    <button onClick={exportToPDF} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"><i className="fa-solid fa-file-pdf text-red-500"></i> Export PDF</button>
+                    <button onClick={exportToExcel} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium"><i className="fa-solid fa-file-excel text-green-600"></i> Export Excel</button>
+                </div>
+                )}
+            </div>
+        </div>
 
-        {/* Filter Bar with Reset */}
+        {/* Filter Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
-  
-          {/* Search PO */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-500 uppercase">Search</label>
-            <input 
-              type="text" 
-              value={searchTerm} 
-              placeholder="Search PO Number" 
-              className="p-2 border rounded-lg" 
-              onChange={(e) => setSearchTerm(e.target.value)} 
-            />
+            <input type="text" value={searchTerm} placeholder="Search PO Number" className="p-2 border rounded-lg text-sm" onChange={(e) => setSearchTerm(e.target.value)} />
           </div>
-
-          {/* Start Date */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-500 uppercase">Start Date</label>
-            <input 
-              type="date" 
-              value={startDate} 
-              className="p-2 border rounded-lg" 
-              onChange={(e) => setStartDate(e.target.value)} 
-            />
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setStartDate(e.target.value)} />
           </div>
-
-          {/* End Date */}
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-500 uppercase">End Date</label>
-            <input 
-              type="date" 
-              value={endDate} 
-              className="p-2 border rounded-lg" 
-              onChange={(e) => setEndDate(e.target.value)} 
-            />
+            <input type="date" value={endDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} />
           </div>
-
-          {/* Reset Button */}
-          <button 
-            onClick={resetFilters}
-            className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition"
-          >
-            Reset Filters
-          </button>
+          <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
         </div>
 
         {/* Table Section */}
@@ -115,16 +147,12 @@ const PurchaseReturnSummary = () => {
                 <tbody>
                     {currentRecords.map((r) => (
                     <React.Fragment key={r.purchase_return_id}>
-                        <tr onClick={() => setSelectedId(selectedId === r.purchase_return_id ? null : r.purchase_return_id)} 
-                            className="cursor-pointer hover:bg-gray-50 border-b">
-                        <td className="p-5 font-medium">{r.purchase_order?.po_number}</td>
-                        <td className="p-5">
-                          {new Date(r.purchase_return_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                        </td>
-                        <td className="p-5">{r.purchase_return_payment_method}</td>
-                        <td className="p-5 text-red-600 font-bold">{r.total_amount.toLocaleString()} Ks</td>
+                        <tr onClick={() => setSelectedId(selectedId === r.purchase_return_id ? null : r.purchase_return_id)} className="cursor-pointer hover:bg-gray-50 border-b">
+                            <td className="p-5 font-medium">{r.purchase_order?.po_number}</td>
+                            <td className="p-5">{formatDate(r.purchase_return_date)}</td>
+                            <td className="p-5">{r.purchase_return_payment_method}</td>
+                            <td className="p-5 text-red-600 font-bold">{r.total_amount.toLocaleString()} Ks</td>
                         </tr>
-                        
                         {selectedId === r.purchase_return_id && (
                         <tr className="bg-red-50/50">
                             <td colSpan="4" className="p-6">
@@ -158,12 +186,9 @@ const PurchaseReturnSummary = () => {
                 </tbody>
                 </table>
             ) : (
-                <div className="p-10 text-center text-gray-500 font-medium">
-                <i className="fa-solid fa-magnifying-glass text-3xl mb-3 block opacity-50"></i>
-                No matching records found.
-                </div>
+                <div className="p-10 text-center text-gray-500 font-medium">No matching records found.</div>
             )}
-            </div>
+        </div>
 
         {/* Pagination */}
         {nPages > 1 && (

@@ -6,6 +6,7 @@ const InventoryLowStockReport = () => {
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isExportOpen, setIsExportOpen] = useState(false);
   const recordsPerPage = 5;
 
   useEffect(() => {
@@ -21,6 +22,30 @@ const InventoryLowStockReport = () => {
     } catch (error) {
       console.error("Error fetching live low stock metrics:", error);
     }
+  };
+
+  // Export Functions
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const worksheet = XLSX.utils.json_to_sheet(filteredProducts);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "LowStock");
+    XLSX.writeFile(workbook, "Low_Stock_Report.xlsx");
+    setIsExportOpen(false);
+  };
+
+  const exportToPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+    const doc = new jsPDF();
+    doc.text("Inventory Low Stock Report", 14, 15);
+    autoTable(doc, {
+      head: [['ID', 'Name', 'Category', 'Qty', 'Status']],
+      body: filteredProducts.map(p => [p.product_id, p.product_name, p.category, p.qty, 'Low Stock']),
+      startY: 20,
+    });
+    doc.save("Low_Stock_Report.pdf");
+    setIsExportOpen(false);
   };
 
   const filteredProducts = products.filter((p) =>
@@ -54,8 +79,31 @@ const InventoryLowStockReport = () => {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
           />
-          <div className="text-sm font-semibold text-gray-500">
-            Total Low Stock Items: <span className="text-red-500">{filteredProducts.length}</span>
+          
+          <div className="flex items-center gap-6">
+            <div className="text-sm font-semibold text-gray-500">
+              Total Low Stock Items: <span className="text-red-500">{filteredProducts.length}</span>
+            </div>
+
+            {/* Export Button */}
+            <div className="relative">
+              <button 
+                onClick={() => setIsExportOpen(!isExportOpen)}
+                className="flex items-center gap-2 px-4 py-2.5 bg-[#F25278] text-white font-semibold rounded-lg hover:bg-[#e0456a] transition-all shadow-sm"
+              >
+                <i className="fa-solid fa-file-export"></i> Export
+              </button>
+              {isExportOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-lg shadow-xl z-20 overflow-hidden">
+                  <button onClick={exportToPDF} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium">
+                    <i className="fa-solid fa-file-pdf text-red-500"></i> Export PDF
+                  </button>
+                  <button onClick={exportToExcel} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2 text-sm font-medium">
+                    <i className="fa-solid fa-file-excel text-green-600"></i> Export Excel
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -75,7 +123,6 @@ const InventoryLowStockReport = () => {
             <tbody className="divide-y divide-gray-100">
               {currentRecords.map((p, index) => {
                 const rawId = p.product_id ? String(p.product_id).replace(/\D/g, '') : '';
-
                 return (
                   <tr key={index} className="hover:bg-gray-50/50 transition-colors">
                     <td className="py-4 px-6 font-bold text-gray-700">{p.product_id}</td>
@@ -88,12 +135,13 @@ const InventoryLowStockReport = () => {
                     <td className="py-4 px-6 text-center">
                       <Link 
                         to={`/edit-product/${rawId}`} 
-                        className="inline-flex items-center justify-center p-2 rounded-lg text-emerald-600 hover:bg-emerald-50 border border-emerald-100 transition-colors bg-white shadow-sm"
+                        className="inline-flex items-center justify-center p-2 rounded-lg text-blue-600 hover:bg-blue-50 border border-emerald-100 transition-colors bg-white shadow-sm"
                         title="Edit Product"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                        {/* <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
                           <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125" />
-                        </svg>
+                        </svg> */}
+                        <i className="fa-solid fa-pen-to-square"></i>
                       </Link>
                     </td>
                   </tr>

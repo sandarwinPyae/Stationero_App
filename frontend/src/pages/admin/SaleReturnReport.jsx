@@ -11,13 +11,26 @@ const SaleReturnReport = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const recordsPerPage = 8; // တစ်မျက်နှာမှာ 8 ခုပြမယ်
+  const [isExportOpen, setIsExportOpen] = useState(false);
+  const recordsPerPage = 8;
 
   useEffect(() => {
     axios.get('http://localhost:8000/sale-return-reports')
       .then(res => { setReturns(res.data); setLoading(false); })
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
+
+  // Helper Function: Date Format dd/mm/yyyy, hh:mm:ss
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const dd = String(date.getDate()).padStart(2, '0');
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const yyyy = date.getFullYear();
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${dd}/${mm}/${yyyy}, ${hh}:${min}:${ss}`;
+  };
 
   const resetFilters = () => {
     setSearchTerm('');
@@ -26,22 +39,56 @@ const SaleReturnReport = () => {
     setCurrentPage(1);
   };
 
+  // Export Excel Function
+  const exportToExcel = async () => {
+    const XLSX = await import('xlsx');
+    const exportData = filteredData.map(s => ({
+      "Invoice": s.invoice_number,
+      "Return Amount (Ks)": s.total_returned_amount,
+      "Payment Method": s.sale_return_payment_method,
+      "Reason": s.return_reason,
+      "Date": formatDate(s.sale_return_date)
+    }));
+    const ws = XLSX.utils.json_to_sheet(exportData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sale_Returns");
+    XLSX.writeFile(wb, "Sale_Return_Report.xlsx");
+    setIsExportOpen(false);
+  };
+
+  // Export PDF Function
+  const exportToPDF = async () => {
+    const { jsPDF } = await import('jspdf');
+    const autoTable = (await import('jspdf-autotable')).default;
+    const doc = new jsPDF();
+    doc.text("Sale Return Report", 14, 15);
+    const tableBody = filteredData.map(s => [
+      s.invoice_number, 
+      s.total_returned_amount.toLocaleString(), 
+      s.sale_return_payment_method, 
+      s.return_reason, 
+      formatDate(s.sale_return_date)
+    ]);
+    autoTable(doc, {
+      head: [['Invoice', 'Amount (Ks)', 'Method', 'Reason', 'Date']],
+      body: tableBody,
+      startY: 20
+    });
+    doc.save("Sale_Return_Report.pdf");
+    setIsExportOpen(false);
+  };
+
   // Filter Logic
   const filteredData = returns.filter(s => {
-    // 1. Search Logic
     const matchesSearch = s.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           s.return_reason.toLowerCase().includes(searchTerm.toLowerCase());
-
-
     const itemDateStr = s.sale_return_date.substring(0, 10); 
-    
-    // 3. Date Comparison Logic
     const matchesStartDate = !startDate || itemDateStr >= startDate;
     const matchesEndDate = !endDate || itemDateStr <= endDate;
     
     return matchesSearch && matchesStartDate && matchesEndDate;
   });
-  // Pagination Logic
+
   const nPages = Math.ceil(filteredData.length / recordsPerPage);
   const indexOfLast = currentPage * recordsPerPage;
   const indexOfFirst = indexOfLast - recordsPerPage;
@@ -51,7 +98,6 @@ const SaleReturnReport = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-200">
         <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500"></i>
@@ -59,21 +105,34 @@ const SaleReturnReport = () => {
       </header>
 
       <div className="p-6">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Sale Return Report</h2>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">Sale Return Report</h2>
+          <div className="relative">
+            <button onClick={() => setIsExportOpen(!isExportOpen)} className="bg-[#F25278] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#e0456a] transition-all flex items-center gap-2">
+              <i className="fa-solid fa-file-export"></i> Export
+            </button>
+            {isExportOpen && (
+              <div className="absolute right-0 mt-2 w-32 bg-white border border-gray-100 rounded-lg shadow-xl z-20 overflow-hidden">
+                <button onClick={exportToPDF} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2"><i className="fa-solid fa-file-pdf text-red-500"></i> PDF</button>
+                <button onClick={exportToExcel} className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center gap-2"><i className="fa-solid fa-file-excel text-green-600"></i> Excel</button>
+              </div>
+            )}
+          </div>
+        </div>
         
         {/* Filter Bar */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Search</label>
-            <input type="text" placeholder="Invoice / Reason" className="p-2 border rounded-lg" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
+            <input type="text" placeholder="Invoice / Reason" className="p-2 border rounded-lg text-sm" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" className="p-2 border rounded-lg" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
+            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" className="p-2 border rounded-lg" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
+            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
           </div>
           <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
         </div>
@@ -99,7 +158,7 @@ const SaleReturnReport = () => {
                       <td className="p-4 font-semibold">{s.total_returned_amount.toLocaleString()}</td>
                       <td className="p-4 text-gray-600">{s.sale_return_payment_method}</td>
                       <td className="p-4 text-gray-600">{s.return_reason}</td>
-                      <td className="p-4 text-gray-500">{new Date(s.sale_return_date).toLocaleDateString()}</td>
+                      <td className="p-4 text-gray-500">{formatDate(s.sale_return_date)}</td>
                     </tr>
                     {selectedId === s.sale_return_id && (
                       <tr>
@@ -111,7 +170,6 @@ const SaleReturnReport = () => {
                                     <th className="p-3">Selling Price</th>
                                     <th className="p-3 text-center">Qty</th>
                                     <th className="p-3 text-right">Subtotal</th>
-                                
                                 </tr>
                             </thead>
                             <tbody className="divide-y">{s.details.map((d, i) => (
@@ -122,7 +180,7 @@ const SaleReturnReport = () => {
                                 <td className="p-3 text-right font-bold">
                                   {d.sub_total.toLocaleString()}
                                 </td>
-                            </tr>
+                              </tr>
                             ))}</tbody>
                           </table>
                         </td>
