@@ -104,7 +104,17 @@ const ProfilePage = () => {
               {item.label}
             </span>
           ))}
-          <span onClick={() => navigate('/login')} style={styles.link}>Logout</span>
+
+          <span 
+            onClick={() => {
+              localStorage.removeItem('stationero_logged_user');
+              navigate('/login');
+            }} 
+            style={styles.link}
+          >
+            Logout
+          </span>
+
         </nav>
       </header>
 
@@ -118,7 +128,7 @@ const ProfilePage = () => {
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email Address</label>
-              <input type="email" value={email} disabled style={{...styles.inputField, backgroundColor: '#f5f5f5'}} readOnly />
+              <input type="text" value={email} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Phone Number</label>

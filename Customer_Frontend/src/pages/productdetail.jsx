@@ -94,7 +94,15 @@ const ProductDetail = () => {
         <nav style={styles.navLinks}>
           <span onClick={() => navigate('/')} style={styles.link}>Home</span>
           <span onClick={() => navigate('/cart')} style={styles.link}>Shopping Cart</span>
-          <span onClick={() => { localStorage.removeItem('stationero_logged_user'); navigate('/login'); }} style={styles.link}>Logout</span>
+          <span 
+            onClick={() => {
+              localStorage.removeItem('stationero_logged_user');
+              navigate('/login');
+            }} 
+            style={styles.link}
+          >
+            Logout
+          </span>
         </nav>
       </header>
 

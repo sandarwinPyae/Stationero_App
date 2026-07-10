@@ -50,6 +50,7 @@ const SignUpPage = () => {
         <nav style={styles.navLinks}>
           <span style={styles.link} onClick={() => navigate('/')}>Home</span>
           <span style={styles.link} onClick={() => navigate('/about')}>About Us</span>
+          <span style={styles.link} onClick={() => navigate('/product')}>Product</span>
           <button
             type="button"
             onClick={() => navigate('/login')}

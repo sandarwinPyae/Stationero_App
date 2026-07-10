@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react'; 
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
+import axios from 'axios'; 
+import { AuthContext } from '../context/AuthContext'; 
+
 const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { userProfile } = useContext(AuthContext); 
 
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
@@ -19,6 +22,8 @@ const OrderPage = () => {
     address: '-'
   });
 
+  const [isFirstOrder, setIsFirstOrder] = useState(false);
+
   const navItems = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about' },
@@ -30,76 +35,126 @@ const OrderPage = () => {
     { label: 'Profile', path: '/profile' }
   ];
 
-  const calculate = (items) => {
-    const totalAmount = items.reduce((sum, item) => sum + (item.amount || item.price * item.qty), 0);
-    const totalDiscount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
-    setPricingSummary({ total: totalAmount, discount: totalDiscount, net: totalAmount - totalDiscount });
+  const calculate = (items, checkFirstOrderFlag = isFirstOrder) => {
+    try {
+      const totalAmount = items.reduce((sum, item) => sum + (item.amount || item.price * item.qty), 0);
+      let baseDiscount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
+      
+      let specialDiscount = 0;
+      if (checkFirstOrderFlag) {
+        specialDiscount = totalAmount * 0.10;
+      }
+
+      const finalDiscount = baseDiscount + specialDiscount;
+      const netPayable = totalAmount - finalDiscount;
+
+      setPricingSummary({ 
+        total: totalAmount, 
+        discount: finalDiscount, 
+        net: netPayable 
+      });
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   useEffect(() => {
     setSaleDateString(new Date().toLocaleDateString());
 
     const savedProfile = localStorage.getItem('stationero_logged_user');
-    let activeEmail = 'guest';
-    if (savedProfile && savedProfile !== "undefined") {
-      try {
-        const parsed = JSON.parse(savedProfile);
-        activeEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
-      } catch (e) { console.error(e); }
-    }
+    const parsedLocal = savedProfile ? JSON.parse(savedProfile) : null;
+    
+    const activeEmail = (
+      userProfile?.email || 
+      userProfile?.customer_email || 
+      parsedLocal?.email || 
+      parsedLocal?.customer_email || 
+      ""
+    ).trim();
 
-    if (!savedProfile || activeEmail === 'guest') {
+    if (!activeEmail) {
       navigate('/login');
       return;
     }
 
-    // 🌟 ဒီနေရာမှာ async function အသစ်ဆောက်ပြီး ခေါ်ပါမယ် 🌟
-    const fetchProfile = async () => {
+    const fetchProfileAndOrderHistory = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`);
+        const profileRes = await axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`);
+        const data = profileRes.data;
         setCustomerProfile({
-          name: data.name || data.customer_name,
+          name: data.name || data.customer_name || "Customer",
           email: data.email || activeEmail,
-          phone: data.phone,
-          address: data.address
+          phone: data.phone || "-",
+          address: data.address || "-"
         });
+
+        let firstOrderCheck = false;
+        try {
+          // Hits her direct history-logs list array wrapper path
+          const historyRes = await axios.get(`http://localhost:8000/api/order/history-logs/${activeEmail}`);
+          const historyData = historyRes.data;
+          
+          // ---- FIXED: EXTRACTS LIST FROM NATIVE .orders OBJECT WRAPPER ----
+          let ordersArray = [];
+          if (historyData) {
+            if (Array.isArray(historyData.orders)) {
+              ordersArray = historyData.orders;
+            } else if (Array.isArray(historyData)) {
+              ordersArray = historyData;
+            }
+          }
+
+          // STRICT SECURITY LOCK: If any past rows exist on her back-end, discount drops to false!
+          if (ordersArray.length === 0) {
+            firstOrderCheck = true; 
+          } else {
+            firstOrderCheck = false; 
+          }
+        } catch (historyErr) {
+          console.warn("History link channel dropped, turning off discount for safety.");
+          firstOrderCheck = false; 
+        }
+
+        setIsFirstOrder(firstOrderCheck);
+        processCheckoutLogic(firstOrderCheck);
+
       } catch (err) {
-        console.error("Profile fetch error:", err);
+        console.error(err);
+        processCheckoutLogic(false);
       }
     };
 
-    fetchProfile();
+    const processCheckoutLogic = (firstOrderFlag) => {
+      let targetItems = [];
+      if (location.state && location.state.items) {
+        targetItems = location.state.items;
+      } else if (localStorage.getItem('stationero_active_checkout')) {
+        targetItems = JSON.parse(localStorage.getItem('stationero_active_checkout'));
+      }
+      
+      setCheckoutItems(targetItems);
+      calculate(targetItems, firstOrderFlag);
+    };
 
-    // CHECKOUT LOGIC
-    const activeCheckoutData = localStorage.getItem('stationero_active_checkout');
-    const checkoutSource = localStorage.getItem('checkout_source');
-    const cartKey = `stationero_cart_${activeEmail}`;
-    const cartData = localStorage.getItem(cartKey);
+    fetchProfileAndOrderHistory();
 
-    if (location.state && location.state.items) {
-      setCheckoutItems(location.state.items);
-      calculate(location.state.items);
+  }, [navigate, location.state, userProfile]);
+
+  useEffect(() => {
+    if (checkoutItems.length > 0) {
+      calculate(checkoutItems, isFirstOrder);
     }
-    else if (localStorage.getItem('stationero_active_checkout')) {
-      const items = JSON.parse(localStorage.getItem('stationero_active_checkout'));
-      setCheckoutItems(items);
-      calculate(items);
-    }
-    else {
-      setCheckoutItems([]);
-      setPricingSummary({ total: 0, discount: 0, net: 0 });
-    }
-  }, [navigate, location.state]);
-  const handleConfirmOrder = async () => {
+  }, [isFirstOrder, checkoutItems.length]);
+
+     const handleConfirmOrder = async () => {
     try {
       const itemsPayload = checkoutItems.map(item => ({
-        product_id: item.product_id,
-        qty: item.qty,
-        selling_price: item.price,
-        sub_total: item.amount
+        product_id: parseInt(item.product_id, 10),
+        qty: parseInt(item.qty, 10),
+        selling_price: parseFloat(item.price || 0),
+        sub_total: parseFloat(item.amount || (item.price * item.qty))
       }));
 
-      // 🌟 axios.post သို့ ပြောင်းလဲခြင်း
       const response = await axios.post('http://localhost:8000/api/order/confirm', {
         net_amount: pricingSummary.net,
         total_qty: checkoutItems.reduce((sum, item) => sum + item.qty, 0),
@@ -108,20 +163,38 @@ const OrderPage = () => {
         items: itemsPayload
       });
 
-      if (response.status === 201) { // axios မှာ status 201 ကို စစ်ရပါတယ်
+      if (response.status === 201 || response.status === 200) { 
+        // ---- FIXED: INDESTRUCTIBLE FOR-LOOP MANUALLY PURGES ALL CART SEGMENTS FROM DISK ----
+        try {
+          const allKeys = Object.keys(localStorage);
+          allKeys.forEach(key => {
+            if (key.startsWith('stationero_cart')) {
+              console.log(`Force deleting storage residue node: ${key}`);
+              localStorage.removeItem(key);
+            }
+          });
+        } catch (storageErr) {
+          console.error("Global storage purge exception handler: ", storageErr);
+        }
+
+        // Clean out generic fallback variables
+        localStorage.removeItem('cart');
+        localStorage.removeItem('cartItems');
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
-
-        // 🌟 အသစ်ထည့်ရမည့် Code: Cart ကို အလွတ်ပြန်လုပ်ပေးခြင်း 🌟
-        const cartKey = `stationero_cart_${customerProfile.email}`;
-        localStorage.removeItem(cartKey);
-        navigate('/history');
+        
+        // ---- FIXED: ABSOLUTE BROWSER HARD RELOAD RESTORES RE-INITIALIZATION STATE CHAINS ----
+        // This cuts through any frozen React Context Memory states and forces a clean re-fetch
+        window.location.href = '/history';
       }
     } catch (error) {
-      console.error("Order confirmation error:", error);
+      console.error(error);
       alert("Order confirmation failed!");
     }
   };
+
+
+
 
   return (
     <div style={styles.container}>
@@ -147,8 +220,7 @@ const OrderPage = () => {
         </nav>
       </header>
 
-      <main style={styles.mainContent}>
-        {/* 🌟 ပစ္စည်းမရှိပါက ပြသမည့် အလွတ်ဒီဇိုင်း 🌟 */}
+            <main style={styles.mainContent}>
         {checkoutItems.length === 0 ? (
           <div style={styles.emptyOrderContainer}>
             <h2 style={styles.emptyOrderText}>Your Order is Empty</h2>
@@ -164,7 +236,6 @@ const OrderPage = () => {
             </button>
           </div>
         ) : (
-          /* 🌟 ပစ္စည်းရှိပါက ပြသမည့် မူလ Invoice ဒီဇိုင်း 🌟 */
           <>
             <div style={styles.invoiceCard}>
               <div style={styles.brandTitleHeader}>Stationero</div>
@@ -200,43 +271,53 @@ const OrderPage = () => {
                     <option value="KBZ Pay">KBZ Pay</option>
                     <option value="Wave Pay">Wave Pay</option>
                   </select>
-
-
-
                 </div>
               </div>
 
               <div style={styles.tableWrapper}>
                 <div style={styles.tableHeaderRow}>
                   <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-                  <span style={{ ...styles.thCell, width: '40%' }}>Product Name</span>
+                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>Product Name</span>
                   <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
                   <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-                  <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>
-                  <span style={{ ...styles.thCell, width: '14%' }}>Amount</span>
+                  
+                  {pricingSummary.discount > 0 && (
+                    <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>
+                  )}
+                  
+                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '14%' : '19%' }}>Total Amount</span>
                 </div>
 
                 {checkoutItems.map((item, idx) => (
                   <div key={idx} style={styles.tableBodyRow}>
                     <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                    <span style={{ ...styles.tdCell, width: '40%' }}>{item.name}</span>
+                    <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
                     <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
                     <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
-                    <span style={{ ...styles.tdCell, width: '13%' }}>{(item.discount || 0).toLocaleString()}</span>
-                    <span style={{ ...styles.tdCell, width: '14%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()}</span>
+                    
+                    {pricingSummary.discount > 0 && (
+                      <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>
+                        {(item.discount || 0).toLocaleString()}
+                      </span>
+                    )}
+                    
+                    <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>
+                      {(item.amount || 0).toLocaleString()} MMK
+                    </span>
                   </div>
                 ))}
               </div>
 
               <div style={styles.summaryContainer}>
-                <div style={styles.summaryRow}>
-                  <span style={styles.summaryLabel}>Total Amount :</span>
-                  <span style={styles.summaryValue}>{pricingSummary.total.toLocaleString()}</span>
-                </div>
-                <div style={styles.summaryRow}>
-                  <span style={styles.summaryLabel}>Discount :</span>
-                  <span style={styles.summaryValue}>{pricingSummary.discount.toLocaleString()}</span>
-                </div>
+                {pricingSummary.discount > 0 && (
+                  <div style={styles.summaryRow}>
+                    <span style={styles.summaryLabel}>Discount :</span>
+                    <span style={{ ...styles.summaryValue, color: '#dc2626', fontWeight: 'bold' }}>
+                      -{pricingSummary.discount.toLocaleString()} MMK
+                    </span>
+                  </div>
+                )}
+                
                 <div style={{ ...styles.summaryRow, marginTop: '10px' }}>
                   <span style={styles.summaryLabel}>Net Amount :</span>
                   <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '16px', fontWeight: 'bold' }}>
@@ -273,6 +354,7 @@ const OrderPage = () => {
   );
 };
 
+
 const styles = {
   container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
@@ -303,14 +385,11 @@ const styles = {
   cancelBtnHover: { backgroundColor: '#d5d5d5', color: '#111' },
   confirmBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   confirmBtnHover: { backgroundColor: '#d93a5f', color: 'white' },
-  // 🌟 အသစ်ထပ်ဖြည့်ထားသော Style များ 🌟
   emptyOrderContainer: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '60px 40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' },
   emptyOrderText: { color: '#111', fontSize: '20px', margin: 0, fontWeight: 'bold' },
   emptyOrderSubtext: { color: '#777', fontSize: '15px', margin: '0 0 15px 0' },
   shopBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 35px', borderRadius: '25px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   shopBtnHover: { backgroundColor: '#d93a5f', color: 'white' },
-  // styles အောက်ဆုံးတွင် ထပ်ဖြည့်ရန်
   selectInput: { padding: '6px 12px', borderRadius: '5px', border: '1px solid #ddd', outline: 'none', fontSize: '14px', color: '#333', cursor: 'pointer', fontFamily: 'inherit' }
 };
-
-export default OrderPage;
+  export default OrderPage;

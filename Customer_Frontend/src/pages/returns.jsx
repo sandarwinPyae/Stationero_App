@@ -122,7 +122,15 @@ const ReturnsPage = () => {
               {item.label}
             </span>
           ))}
-          <span onClick={() => navigate('/login')} style={styles.link}>Logout</span>
+          <span 
+            onClick={() => {
+              localStorage.removeItem('stationero_logged_user');
+              navigate('/login');
+            }} 
+            style={styles.link}
+          >
+            Logout
+          </span>
         </nav>
       </header>
 
