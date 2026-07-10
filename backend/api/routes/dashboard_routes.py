@@ -39,15 +39,21 @@ class DashboardResponse(BaseModel):
 def get_dashboard_data(db: Session = Depends(get_db)):
     try:
         # 1. Total Sales
-        total_sales = db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0)).scalar()
+        current_month = datetime.now().month
+        current_year = datetime.now().year
+
+        total_sales = db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0)) \
+            .filter(
+                func.extract('month', models.Payment.pay_date) == current_month,
+                func.extract('year', models.Payment.pay_date) == current_year
+            )\
+            .scalar()
+
 
         # 2. Products Sold
-        products_sold = (
-            db.query(func.coalesce(func.sum(models.SaleOrdersDetails.qty), 0))
-            .join(models.SaleOrdersHeader, models.SaleOrdersDetails.sale_order_id == models.SaleOrdersHeader.sale_order_id)
-            .filter(models.SaleOrdersHeader.status == "Confirmed")
-            .scalar()
-        )
+        pending_orders_count = db.query(func.count(models.SaleOrdersHeader.sale_order_id)) \
+                         .filter(models.SaleOrdersHeader.status == "Pending") \
+                         .scalar()
 
         # 3. Top Selling Product
         top_product = (
@@ -66,12 +72,14 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         current_month_sales = (
             db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0))
-            .filter(models.Payment.pay_date >= start_of_month)
+            .filter(
+                models.Payment.pay_date >= start_of_month
+                )
             .scalar()
         )
 
-        TARGET_SALES = 500000
-        percentage = (current_month_sales / TARGET_SALES) * 100 if TARGET_SALES > 0 else 0
+        TARGET_SALES = 5000000
+        percentage = (total_sales / TARGET_SALES) * 100 if TARGET_SALES > 0 else 0
         final_percentage = min(round(percentage, 1), 100)
 
         DAILY_TARGET = TARGET_SALES / 30  
@@ -134,7 +142,7 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         return {
             "cards": [
                 {"title": "Total Sales", "value": f"{total_sales:,.0f} MMK"},
-                {"title": "Products Sold", "value": str(products_sold)},
+                {"title": "Pending Orders", "value": str(pending_orders_count)},
                 {"title": "Top Selling Product", "value": top_product_name},
             ],
             "pieData": pie_data,
