@@ -51,7 +51,7 @@
 }
 
 .product-hero-title {
-      color: #F84C7B;
+      color: #F25278;
       font-size: 1.6em;
       font-weight: normal;
       /* စာလုံးသိပ်မထူအောင် ချိန်ထားတယ် */
@@ -79,7 +79,7 @@
       display: flex;
       align-items: center;
       background-color: transparent;
-      border: 2px solid #F84C7B;
+      border: 2px solid #F25278;
       border-radius: 25px;
       /* ဘောင်ကို ပိုထူပြီး ပန်းရောင်ပြောင်းလိုက်တယ် */
       padding: 10px 20px;
@@ -92,7 +92,7 @@
 .product-search-bar .search-icon {
       width: 22px;
       height: 22px;
-      color: #F84C7B;
+      color: #F25278;
 }
 
 .product-search-bar input {
@@ -135,7 +135,7 @@
       outline: none;
       background-color: #f9f9f9;
       font-size: 1em;
-      color: #F84C7B;
+      color: #F25278;
       /* ရွေးချယ်မယ့် စာသားကို ပန်းရောင်ထားမယ် */
       font-weight: 700;
       cursor: pointer;
@@ -145,7 +145,7 @@
 }
 
 .sort-select:hover {
-      border-color: #F84C7B;
+      border-color: #F25278;
       /* Mouse ထောက်ရင် ဘောင်က ပန်းရောင် ပြောင်းသွားမယ် */
 }
 
@@ -181,7 +181,7 @@
 }
 
 .product-name {
-      color: #F84C7B;
+      color: #F25278;
       /* ပန်းရောင် */
       font-size: 1.1em;
       font-weight: normal;

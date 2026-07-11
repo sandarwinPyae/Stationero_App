@@ -3,6 +3,7 @@ import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
+
 import Footer from "../components/Footer";
 
 export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = true }) => {
@@ -10,7 +11,11 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
       const navigate = useNavigate();
 
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-
+      const isUserAuthenticated = isLoggedIn || (() => {
+            const activeSessionToken = localStorage.getItem('stationero_logged_user');
+            return activeSessionToken !== null && activeSessionToken !== "undefined";
+      })();
+      const [navSearchQuery, setNavSearchQuery] = useState("");
       const handleLogin = () => {
             navigate('/login');
       };
@@ -86,7 +91,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
             <nav className="navbar">
                   <div className="container">
                         <h1 className="logo">Stationero</h1>
-                        {isLoggedIn ? (
+                        {isUserAuthenticated ? (
                               <>
                                     {renderSearchBar()}
                                     <ul className="nav-links user-nav-links">

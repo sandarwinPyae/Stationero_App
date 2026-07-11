@@ -1,28 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
+import axios from 'axios'; 
+import { StationeroNavbar } from './StationeroPage'; 
+import { AuthProvider } from '../context/AuthContext';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
 
-  const [hoveredLink, setHoveredLink] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Shopping Cart', path: '/cart' },
-    { label: 'Order', path: '/order' },
-    { label: 'Returns', path: '/returns' },
-    { label: 'History', path: '/history' },
-    { label: 'Profile', path: '/profile', isProfilePage: true }
-  ];
 
   useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
@@ -44,10 +34,9 @@ const ProfilePage = () => {
       return; 
     }
 
-    // 🌟 Profile Data ကို Axios ဖြင့် ခေါ်ယူခြင်း
     axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`)
       .then(res => {
-        const data = res.data; // 🌟 res.json() မလိုတော့ပါ
+        const data = res.data; 
         setName(data.name || data.customer_name || 'New Customer');
         setEmail(data.email || data.customer_email || activeEmail);
         setPhone(data.phone || data.phone_number || '-');
@@ -65,7 +54,6 @@ const ProfilePage = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      // 🌟 Profile Update ကို Axios ဖြင့် ပို့ဆောင်ခြင်း (Headers, JSON.stringify မလိုတော့ပါ)
       const response = await axios.post('http://localhost:8000/api/customer/profile/update', { 
         email, 
         name, 
@@ -86,37 +74,9 @@ const ProfilePage = () => {
 
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          {navItems.map((item, index) => (
-            <span
-              key={index}
-              onClick={() => navigate(item.path)}
-              onMouseEnter={() => setHoveredLink(index)}
-              onMouseLeave={() => setHoveredLink(null)}
-              style={{
-                ...styles.link,
-                ...(item.isProfilePage ? styles.activeLink : {}),
-                ...(hoveredLink === index ? { color: '#f25278' } : {})
-              }}
-            >
-              {item.label}
-            </span>
-          ))}
-
-          <span 
-            onClick={() => {
-              localStorage.removeItem('stationero_logged_user');
-              navigate('/login');
-            }} 
-            style={styles.link}
-          >
-            Logout
-          </span>
-
-        </nav>
-      </header>
+      <AuthProvider>
+        <StationeroNavbar showSearch={false} />
+      </AuthProvider>
 
       <main style={styles.mainContent}>
         <div style={styles.profileCard}>
@@ -128,7 +88,7 @@ const ProfilePage = () => {
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Email Address</label>
-              <input type="text" value={email} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+              <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
             </div>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Phone Number</label>
@@ -155,13 +115,9 @@ const ProfilePage = () => {
   );
 };
 
+
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh' },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
-  logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
-  navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
-  link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
-  activeLink: { color: '#f25278', fontWeight: 'bold' },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh' },
   mainContent: { padding: '50px 20px', display: 'flex', justifyContent: 'center' },
   profileCard: { backgroundColor: '#fff', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', width: '100%', maxWidth: '500px', border: '1px solid #f0f0f0' },
   heading: { fontSize: '22px', fontWeight: 'bold', marginBottom: '25px', color: '#111', borderBottom: '2px solid #fdf2f4', paddingBottom: '10px' },

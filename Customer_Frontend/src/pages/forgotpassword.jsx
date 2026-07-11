@@ -108,7 +108,7 @@ const ForgotPasswordPage = () => {
 };
 
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px' },
   card: { backgroundColor: '#ffffff', padding: '45px', borderRadius: '15px', boxShadow: '0 4px 20px rgba(0,0,0,0.02)', width: '100%', maxWidth: '440px', border: '1px solid #f0f0f0', display: 'flex', flexDirection: 'column' },
   logoRow: { color: '#f25278', fontSize: '26px', fontWeight: 'bold', textAlign: 'center', marginBottom: '15px' },
   heading: { fontSize: '20px', fontWeight: 'bold', color: '#111', margin: '0 0 8px 0', textAlign: 'center' },
