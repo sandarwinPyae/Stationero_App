@@ -24,11 +24,15 @@ const ProductPage = () => {
       const { isLoggedIn } = useContext(AuthContext);
 
       const initialSearch = searchParams.get("search") || "";
+
       const [products, setProducts] = useState([]);
+      const [categories, setCategories] = useState([]);
+
       const [searchQuery, setSearchQuery] = useState(initialSearch);
+      const [selectedCategory, setSelectedCategory] = useState("");
+
       const [sortOrder, setSortOrder] = useState("none");
       const [loading, setLoading] = useState(false);
-
       const handleProductClick = (productId) => {
             if (isLoggedIn) {
                   navigate(`/product/${productId}`);
@@ -38,31 +42,81 @@ const ProductPage = () => {
       };
 
       // 🌟 Axios သုံးပြီး အဓိက ပြင်ဆင်ထားသော fetchProducts
+      // Fetch Products
       const fetchProducts = async () => {
             setLoading(true);
+
             try {
-                  const response = await axios.get("http://localhost:8000/api/products", {
-                        params: {
-                              sort: sortOrder,
-                              search: searchQuery.trim() !== "" ? searchQuery.trim() : undefined
+                  const response = await axios.get(
+                        "http://localhost:8000/api/products",
+                        {
+                              params: {
+                                    sort: sortOrder,
+                                    search:
+                                          searchQuery.trim() !== ""
+                                                ? searchQuery.trim()
+                                                : undefined,
+
+                                    category:
+                                          selectedCategory !== ""
+                                                ? selectedCategory
+                                                : undefined,
+                              },
                         }
-                  });
-                  // axios သည် response.data ထဲတွင် data အားလုံးကို တန်းထည့်ပေးသည်
+                  );
+
+                  console.log("API Response:", response.data);
+
                   setProducts(response.data);
+
             } catch (error) {
-                  console.error("Error fetching products with axios:", error);
+
+                  console.error("Error fetching products:", error);
+
             } finally {
+
                   setLoading(false);
+
             }
       };
+      // Fetch Categories
+      useEffect(() => {
 
+            const fetchCategories = async () => {
+
+                  try {
+
+                        const response = await axios.get(
+                              "http://localhost:8000/api/categories"
+                        );
+
+                        console.log("Categories:", response.data);
+
+                        setCategories(response.data);
+
+                  } catch (error) {
+
+                        console.error("Error fetching categories:", error);
+
+                  }
+
+            };
+
+            fetchCategories();
+
+      }, []);
+      useEffect(() => {
+            setSearchQuery(searchParams.get("search") || "");
+      }, [searchParams]);
       useEffect(() => {
             const delayDebounceFn = setTimeout(() => {
                   fetchProducts();
             }, 300);
             return () => clearTimeout(delayDebounceFn);
-      }, [searchQuery, sortOrder]);
-
+      }, [searchQuery, selectedCategory, sortOrder]);
+      useEffect(() => {
+            console.log("Products State:", products);
+      }, [products]);
       return (
             <div className="product-page">
                   <StationeroNavbar showSearch={false} />
@@ -90,7 +144,26 @@ const ProductPage = () => {
                                           onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                               </div>
+                              <div className="category-bar">
+                                    <label style={{ fontWeight: 'bold' }}>Category:</label>
 
+                                    <select
+                                          className="category-select"
+                                          value={selectedCategory}
+                                          onChange={(e) => setSelectedCategory(e.target.value)}
+                                    >
+                                          <option value="">All Categories</option>
+
+                                          {categories.map((category) => (
+                                                <option
+                                                      key={category.category_id}
+                                                      value={category.category_name}
+                                                >
+                                                      {category.category_name}
+                                                </option>
+                                          ))}
+                                    </select>
+                              </div>
                               <div className="sort-bar">
                                     <label>Price: </label>
                                     <select

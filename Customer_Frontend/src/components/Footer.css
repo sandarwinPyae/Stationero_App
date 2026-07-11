@@ -50,14 +50,25 @@
 }
 
 /* Footer.css ထဲတွင် ပြင်ရန် */
-.footer-col ul li a {
+/* Footer.css ထဲတွင် ပြင်ရန် */
+.footer-col ul li a,
+.footer-col ul li .footer-span-link {
   text-decoration: none;
   color: #333;
   font-size: 0.9em;
   transition: color 0.3s ease;
-  display: inline-block; /* Link အတွက် ထည့်ပေးသင့်ပါတယ် */
+  display: inline-block;
+  cursor: pointer;
+  /* Span ကို နှိပ်လို့ရမှန်း သိအောင် ထည့်ပေးထားပါတယ် */
 }
-.footer-col ul li a:hover {
+
+/* Mouse တင်တဲ့အချိန်၊ နှိပ်လိုက်တဲ့အချိန် နဲ့ Page ရောက်နေတဲ့အချိန် အားလုံးအတွက် */
+.footer-col ul li a:hover,
+.footer-col ul li .footer-span-link:hover,
+.footer-col ul li a:active,
+.footer-col ul li .footer-span-link:active,
+.footer-col ul li a.active {
   color: #F84C7B;
+  font-size: 0.9em;
   font-weight: 500;
 }

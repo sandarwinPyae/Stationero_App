@@ -1,8 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom'; // Link ကို import လုပ်ပါ
+import { Link, useNavigate } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
+      const navigate = useNavigate();
+
+      const handleSectionClick = (sectionId) => {
+            navigate(`/#${sectionId}`);
+      };
+
       return (
             <footer className="footer-section">
                   <div className="container footer-container">
@@ -23,9 +29,8 @@ const Footer = () => {
                         <div className="footer-col links-col">
                               <h4 className="footer-heading">OUR STORES</h4>
                               <ul>
-                                    {/* <a> tag အစား Link ကို သုံးပါ */}
                                     <li><Link to="/about">About us</Link></li>
-                                    <li><Link to="/contact">Contact us</Link></li> 
+                                    <li><Link to="/contact">Contact us</Link></li>
                               </ul>
                         </div>
 
@@ -33,8 +38,24 @@ const Footer = () => {
                               <h4 className="footer-heading">INFORMATION</h4>
                               <ul>
                                     <li><Link to="/product">Product</Link></li>
-                                    <li><a href="/#new-arrivals">New Arrivals</a></li>
-        <li><a href="/#best-selling">Best Selling Products</a></li>
+                                    <li>
+                                          {/* ပြင်ဆင်ထားသော အပိုင်း */}
+                                          <span
+                                                className="footer-span-link"
+                                                onClick={() => handleSectionClick('new-arrivals')}
+                                          >
+                                                New Arrivals
+                                          </span>
+                                    </li>
+                                    <li>
+                                          {/* ပြင်ဆင်ထားသော အပိုင်း */}
+                                          <span
+                                                className="footer-span-link"
+                                                onClick={() => handleSectionClick('best-selling')}
+                                          >
+                                                Best Selling Products
+                                          </span>
+                                    </li>
                               </ul>
                         </div>
                   </div>

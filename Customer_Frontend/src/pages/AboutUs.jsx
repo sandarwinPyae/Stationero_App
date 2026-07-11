@@ -1,26 +1,23 @@
 import React from 'react';
 import './AboutUs.css';
-// Navbar ကို StationeroPage ထဲကနေ လှမ်း Import လုပ်ပါတယ် (Curly Braces {} ပါရပါမယ်)
 import { StationeroNavbar } from './StationeroPage';
 import { Link } from 'react-router-dom';
-
-
-
-import { motion } from 'framer-motion'; // Animation အတွက်
-
-
+import { motion } from 'framer-motion';
+import sandarImg from '../assets/sandar.jpg';
+import hninImg from '../assets/hnin.jpg';
+import kaungImg from '../assets/kaung.jpg';
+import theingiImg from '../assets/theingi.jpg';
 const AboutUs = () => {
       const teamMembers = [
-            { name: 'Sandar Win Pyae' },
-            { name: 'Hnin Eaindra Khine' },
-            { name: 'Kaung Yu Thant' },
-            { name: 'Theingi Win Pyae' },
+            { name: 'Sandar Win Pyae', img: sandarImg },
+            { name: 'Hnin Eaindra Khine', img: hninImg },
+            { name: 'Kaung Yu Thant', img: kaungImg },
+            { name: 'Theingi Win Pyae', img: theingiImg },
       ];
-
       return (
             <div className="about-us-page">
 
-                  <StationeroNavbar  showSearch={false} />
+                  <StationeroNavbar showSearch={false} />
                   <div className="about-container">
                         {/* About Stationero Section */}
                         <section className="about-box">
@@ -50,17 +47,8 @@ const AboutUs = () => {
 
                               <div className="team-grid">
                                     {teamMembers.map((member, index) => (
-                                          <motion.div
-                                                key={index}
-                                                className="team-member"
-                                                whileHover={{ scale: 1.05 }} // Mouse တင်ရင် ကြီးလာမယ့် Animation
-                                          >
-                                                {/* Anime ပုံများ */}
-                                                <img
-                                                      src={`https://api.dicebear.com/9.x/anime/svg?seed=${member.name}`}
-                                                      alt={member.name}
-                                                      className="team-img"
-                                                />
+                                          <motion.div key={index} className="team-member" whileHover={{ scale: 1.05 }}>
+                                                <img src={member.img} alt={member.name} className="team-img" />
                                                 <p className="team-name">{member.name}</p>
                                           </motion.div>
                                     ))}
@@ -72,4 +60,5 @@ const AboutUs = () => {
             </div>
       );
 };
+
 export default AboutUs;

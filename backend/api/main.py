@@ -78,7 +78,7 @@ if PROJECT_ROOT not in sys.path:
 from backend.db import models, database, schemas
 from backend.db.database import get_db
 from backend.db.models import (
-    Customer, User, SaleOrdersHeader, SaleOrdersDetails, 
+    Customer, User, SaleOrdersHeader, SaleOrdersDetails, Category, 
     SaleReturnHeader, SaleReturnDetails, Product, Promotion, Payment
 )
 
@@ -163,7 +163,7 @@ class ForgotPasswordRequest(BaseModel):
 
 
 # =====================================================================
-# --- 5. CUSTOMER AUTHENTICATION & ORDERS ROUTER (သူငယ်ချင်း၏ Code) ---
+# --- 5. CUSTOMER AUTHENTICATION & ORDERS ROUTER 
 # =====================================================================
 
 @app.get("/")
@@ -573,7 +573,8 @@ def forgot_password_reset(payload: ForgotPasswordRequest, db: Session = Depends(
 
 @app.get("/api/products", response_model=List[schemas.ProductResponse])
 def get_products(
-    search: Optional[str] = None, 
+    search: Optional[str] = None,
+     category: Optional[str] = None, 
     sort: Optional[str] = "none", 
     db: Session = Depends(get_db)
 ):
@@ -582,19 +583,23 @@ def get_products(
         Product.del_flag == 0,
          Product.current_qty > 0
         )
+    # Product Name Search only
     if search:
-       category = db.query(Category).filter(
-        Category.category_name.ilike(f"%{search}%"),
+     query = query.filter(
+        Product.product_name.ilike(f"%{search}%")
+    )
+
+
+# Category Dropdown Filter
+    if category:
+     selected_category = db.query(Category).filter(
+        Category.category_name == category,
         Category.del_flag == 0
     ).first()
 
-       if category:
+     if selected_category:
         query = query.filter(
-            Product.category_id == category.category_id
-        )
-       else:
-        query = query.filter(
-            Product.product_name.ilike(f"%{search}%")
+            Product.category_id == selected_category.category_id
         )
     if sort == "low-to-high":
         query = query.order_by(Product.selling_price.asc())
@@ -615,7 +620,20 @@ def get_products(
            
         })
     return result
+@app.get("/api/categories")
+def get_categories(db: Session = Depends(get_db)):
 
+    categories = db.query(Category).filter(
+        Category.del_flag == 0
+    ).all()
+
+    return [
+        {
+            "category_id": c.category_id,
+            "category_name": c.category_name
+        }
+        for c in categories
+    ]
 @app.get("/api/products/best-selling", response_model=List[schemas.ProductResponse])
 def get_best_selling(db: Session = Depends(get_db)):
     best_selling_records = db.query(

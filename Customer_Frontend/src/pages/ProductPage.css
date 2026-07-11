@@ -195,3 +195,35 @@
       font-weight: bold;
       margin: 0;
 }
+
+.category-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+}
+
+.category-select {
+      border: 1.5px solid #e0e0e0;
+
+      border-radius: 8px;
+      padding: 8px 15px;
+      outline: none;
+      background-color: #f9f9f9;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      color: #F84C7B;
+      cursor: pointer;
+      font-weight: 700;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+      /* အောက်ခံအရိပ်လေး ထည့်ထားတယ် */
+      transition: all 0.3s ease;
+
+
+}
+
+.category label {
+      margin-right: 12px;
+      font-weight: 700;
+      /* Price ဆိုတဲ့ စာသားကို အထူ ပြောင်းလိုက်တယ် */
+}

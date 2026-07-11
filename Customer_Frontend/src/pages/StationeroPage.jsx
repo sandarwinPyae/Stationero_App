@@ -10,41 +10,48 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
       const navigate = useNavigate();
 
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-      const [navSearchQuery, setNavSearchQuery] = useState("");
 
       const handleLogin = () => {
-            navigate('/login'); 
+            navigate('/login');
       };
 
       const handleLogout = (e) => {
             e.preventDefault();
             setIsLoggedIn(false);
-            localStorage.removeItem('stationero_logged_user'); 
+            localStorage.removeItem('stationero_logged_user');
             navigate('/');
       };
 
       const handleSearchSubmit = async (e) => {
-            if (e.key === 'Enter' && navSearchQuery.trim() !== "") {
-                  const query = navSearchQuery.trim().toLowerCase();
-                  try {
-                        const resBest = await fetch("http://127.0.0.1:8000/api/products/best-selling");
-                        const bestProducts = await resBest.json();
-                        if (bestProducts.find(p => p.product_name.toLowerCase().includes(query))) {
-                              scrollToSection('best-selling');
-                              return;
-                        }
+            if (e.key !== "Enter") return;
 
-                        const resNew = await fetch("http://127.0.0.1:8000/api/products/new-arrivals");
-                        const newProducts = await resNew.json();
-                        if (newProducts.find(p => p.product_name.toLowerCase().includes(query))) {
-                              scrollToSection('new-arrivals');
-                              return;
-                        }
+            const query = searchQuery.trim().toLowerCase();
 
-                        navigate(`/product?search=${encodeURIComponent(query)}`);
-                  } catch (error) {
-                        console.error("Search error", error);
+            if (!query) return;
+
+            try {
+                  const resBest = await fetch("http://127.0.0.1:8000/api/products/best-selling");
+                  const bestProducts = await resBest.json();
+
+                  const resNew = await fetch("http://127.0.0.1:8000/api/products/new-arrivals");
+                  const newProducts = await resNew.json();
+
+                  const homeProducts = [...bestProducts, ...newProducts];
+
+                  const found = homeProducts.some(p =>
+                        p.product_name.toLowerCase().includes(query) ||
+                        p.category_name?.toLowerCase().includes(query)
+                  );
+
+                  if (found) {
+                        setSearchQuery(query);
+                        return;
                   }
+
+                  navigate(`/product?search=${encodeURIComponent(query)}`);
+
+            } catch (err) {
+                  console.error(err);
             }
       };
 
@@ -69,6 +76,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                               placeholder="Search product"
                               value={searchQuery}
                               onChange={(e) => setSearchQuery(e.target.value)}
+                              onKeyDown={handleSearchSubmit}
                         />
                   </div>
             )
@@ -114,6 +122,16 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
 
 const HeroSection = () => {
       const navigate = useNavigate();
+      const { isLoggedIn } = useContext(AuthContext); // 🌟 Login စစ်ဖို့ ထည့်ထားပါတယ်
+
+      const handleShopNowClick = () => {
+            if (isLoggedIn) {
+                  navigate('/product');
+            } else {
+                  navigate('/login');
+            }
+      };
+
       return (
             <section className="hero" style={{ backgroundImage: `url(http://127.0.0.1:8000/images/heroBg.jpg)` }}>
                   <div className="hero-container">
@@ -126,7 +144,7 @@ const HeroSection = () => {
                                     Stationero makes it so that in everything we do, the<br />
                                     support we provide can help and educate you.
                               </p>
-                              <button className="btn btn-shop-outline" onClick={() => navigate('/product')}>
+                              <button className="btn btn-shop-outline" onClick={handleShopNowClick}>
                                     SHOP NOW &gt;
                               </button>
                         </div>
@@ -141,7 +159,7 @@ const OfferCard = ({ image, title, discount, productId }) => {
 
       const handleShopClick = () => {
             if (isLoggedIn && productId) {
-                  navigate(`/product/${productId}`);
+                  navigate(`/product`);
             } else if (!isLoggedIn) {
                   navigate('/login');
             }
@@ -163,7 +181,7 @@ const OfferCard = ({ image, title, discount, productId }) => {
 // 🌟 100% Dynamic ဖြစ်အောင် ပြင်ဆင်ထားသော CategoryOffers
 const CategoryOffers = () => {
       const [products, setProducts] = useState([]);
-      
+
       useEffect(() => {
             fetch("http://127.0.0.1:8000/api/products")
                   .then(res => res.json())
@@ -183,19 +201,16 @@ const CategoryOffers = () => {
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/notebookOffer.jpg"
                                     title="NOTEBOOKS"
-                                    discount="25% OFF"
                                     productId={notebookId || 1}
                               />
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/tapeOffer.jpg"
                                     title="ALL TAPES"
-                                    discount="25% OFF"
                                     productId={tapeId || 1}
                               />
                               <OfferCard
                                     image="http://127.0.0.1:8000/images/correctionTapeOffer.jpg"
                                     title="CORRECTION TAPES"
-                                    discount="25% OFF"
                                     productId={correctionTapeId || 1}
                               />
                         </div>
@@ -204,20 +219,23 @@ const CategoryOffers = () => {
       );
 };
 
-const ProductCard = ({ product, onProductClick }) => {
-      console.log(product.product_img_url);
+
+const ProductCard = ({ product }) => {
       return (
-            <div className="product-card" onClick={() => onProductClick(product.product_id)} style={{ cursor: 'pointer' }}>
+            <Link
+                  to="/product"
+                  className="product-card"
+                  style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+            >
                   <div className="product-img-box">
-                        <img 
+                        <img
                               src={`http://127.0.0.1:8000/${product.product_img_url}`}
-                              alt={product.product_name} 
+                              alt={product.product_name}
                         />
                   </div>
                   <h3 className="product-name">{product.product_name}</h3>
                   <p className="product-price-tag">{product.display_price}</p>
-            </div>
-            
+            </Link>
       );
 };
 
@@ -281,7 +299,7 @@ const NewArrivalsGrid = ({ searchQuery }) => {
                   .then(res => res.json())
                   .then(data => setProducts(data));
       }, []);
-      
+
       const filtered = products.filter(p => p.product_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const handleProductClick = (productId) => {
@@ -331,7 +349,7 @@ const PromoBanner = () => {
 
       const handlePromoClick = () => {
             if (isLoggedIn && promoProduct) {
-                  navigate(`/product/${promoProduct.product_id}`);
+                  navigate(`/product`);
             } else if (!isLoggedIn) {
                   navigate('/login');
             }
@@ -350,7 +368,7 @@ const PromoBanner = () => {
 
                               {/* Database ထဲက ဈေးနှုန်းအတိုင်း အမှန်တကယ် ပြသပေးပါမည် */}
                               <p className="promo-price">{promoProduct ? promoProduct.display_price : "Loading..."}</p>
-                              
+
                               <button className="btn btn-promo-shop" onClick={handlePromoClick}>
                                     SHOP NOW &gt;
                               </button>
@@ -365,13 +383,23 @@ const PromoBanner = () => {
 
 const NewExperienceSection = () => {
       const navigate = useNavigate();
+      const { isLoggedIn } = useContext(AuthContext); // 🌟 Login စစ်ဖို့ ထည့်ထားပါတယ်
+
+      const handleShopClick = () => {
+            if (isLoggedIn) {
+                  navigate('/product');
+            } else {
+                  navigate('/login');
+            }
+      };
+
       return (
             <section className="experience-section">
                   <div className="container experience-wrapper" style={{ backgroundImage: `url(http://127.0.0.1:8000/images/experienceBg.jpg)` }}>
                         <div className="exp-content">
                               <p className="exp-label">100% STATIONERY PRODUCT</p>
                               <h2 className="exp-title">Open Up To<br />A New Experience.</h2>
-                              <button className="btn btn-exp-shop" onClick={() => navigate('/product')}>
+                              <button className="btn btn-exp-shop" onClick={handleShopClick}>
                                     ALL PRODUCTS&gt;
                               </button>
                         </div>
@@ -399,6 +427,20 @@ const StationeroPage = () => {
       const [searchQuery, setSearchQuery] = useState("");
       const location = useLocation();
 
+      // 🌟 Footer ကနေ Hash နဲ့ လာရင် တန်း Scroll ချပေးမယ့် အပိုင်း
+      useEffect(() => {
+            if (location.hash) {
+                  const id = location.hash.replace('#', '');
+                  const element = document.getElementById(id);
+                  if (element) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                  }
+            } else {
+                  window.scrollTo(0, 0);
+            }
+      }, [location]);
+
+      // Search လုပ်တဲ့အခါ Scroll ချပေးမယ့် အပိုင်း
       useEffect(() => {
             if (searchQuery) {
                   fetch("http://127.0.0.1:8000/api/products/best-selling")
