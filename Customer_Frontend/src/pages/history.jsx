@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ထည့်သွင်းထားသည်
 import axios from 'axios';
+import { StationeroNavbar } from './StationeroPage'; 
+import { AuthProvider } from '../context/AuthContext';
 const OrderHistoryPage = () => {
   const navigate = useNavigate(); // 🌟 navigate သို့ ပြောင်းလဲထားသည်
 
@@ -18,19 +20,6 @@ const OrderHistoryPage = () => {
   const [activeSearch, setActiveSearch] = useState('');
   const [activeStartDate, setActiveStartDate] = useState('');
   const [activeEndDate, setActiveEndDate] = useState('');
-
-  // 🌟 path များ မှန်ကန်အောင် ပြင်ဆင်ထားသည်
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Shopping Cart', path: '/cart' },
-    { label: 'Order', path: '/order' },
-    { label: 'Returns', path: '/returns' },
-    { label: 'History', path: '/history', isHistoryPage: true },
-    { label: 'Profile', path: '/profile' }
-  ];
-
   useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
     let activeEmail = '';
@@ -96,7 +85,6 @@ const OrderHistoryPage = () => {
       const lowerStatus = (record.status || '').toString().toLowerCase();
       const lowerPaymentMethod = (record.payment_method || '').toString().toLowerCase();
       const lowerTotalAmount = (record.total_amount || '').toString().toLowerCase();
-      const lowerSalePerson = (record.sale_person || '').toString().toLowerCase();
       const lowerDate = (record.order_date || '').toString().toLowerCase();
 
       matchesSearch = 
@@ -104,7 +92,6 @@ const OrderHistoryPage = () => {
         lowerStatus.includes(lowerSearch) || 
         lowerPaymentMethod.includes(lowerSearch) || 
         lowerTotalAmount.includes(lowerSearch) || 
-        lowerSalePerson.includes(lowerSearch) || 
         lowerDate.includes(lowerSearch);
     }
 
@@ -138,29 +125,9 @@ const OrderHistoryPage = () => {
 
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          {navItems.map((item, index) => (
-            <span
-              key={index}
-              onClick={() => navigate(item.path)} // 🌟 navigate ချိတ်ဆက်ထားသည်
-              style={{ ...styles.link, ...(item.isHistoryPage ? styles.activeLink : {}) }}
-            >
-              {item.label}
-            </span>
-          ))}
-          <span 
-            onClick={() => {
-              localStorage.removeItem('stationero_logged_user');
-              navigate('/login');
-            }} 
-            style={styles.link}
-          >
-            Logout
-          </span>
-        </nav>
-      </header>
+      <AuthProvider>
+              <StationeroNavbar showSearch={false} />
+            </AuthProvider>
 
       <main style={styles.mainContent}>
         <h1 style={styles.mainHeading}>Orders History</h1>
@@ -264,7 +231,7 @@ const OrderHistoryPage = () => {
 };
 
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },

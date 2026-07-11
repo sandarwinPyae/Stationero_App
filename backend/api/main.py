@@ -161,7 +161,6 @@ class ForgotPasswordRequest(BaseModel):
     email: EmailStr
     new_password: str    
 
-
 # =====================================================================
 # --- 5. CUSTOMER AUTHENTICATION & ORDERS ROUTER (သူငယ်ချင်း၏ Code) ---
 # =====================================================================
@@ -169,6 +168,33 @@ class ForgotPasswordRequest(BaseModel):
 @app.get("/")
 def read_root():
     return {"message": "Database and Unified Services are ready!"}
+
+# ---- FIXED: AUTOMATICALLY GENERATES THE ADMIN ACCOUNT ON SERVER STARTUP ----
+# ---- FIXED: COUPLING GENERATION HOOKS DIRECTLY WITH ACTIVE DATABASE CLASS REFS ----
+@app.on_event("startup")
+def configure_master_admin_account():
+    # Create a fresh database connection session safely using your project class model
+    db = Session() 
+    try:
+        admin_email = "admin@gmail.com"
+        admin_exists = db.query(User).filter(User.user_email == admin_email).first()
+        
+        if not admin_exists:
+            new_admin = User(
+                user_email=admin_email,
+                user_password="admin123", 
+                role="admin"
+            )
+            db.add(new_admin)
+            db.commit()
+            print(f"🌟 Setup Complete: Admin account '{admin_email}' successfully injected into SQLite!")
+    except Exception as e:
+        db.rollback()
+        print(f"Admin auto-setup skipped: {e}")
+    finally:
+        db.close()
+
+
 
 @app.post("/api/signup", status_code=status.HTTP_201_CREATED)
 def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
@@ -293,11 +319,20 @@ def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db))
         if "not registered" in cobol_message or is_registered == "N":
             raise HTTPException(status_code=400, detail="You are not registered, please sign up!")
 
-        # 4. Generate stable user session data packages
+      
+        if user_role == "admin":
+            redirect_destination = "http://localhost:5174/admin/dashboard"
+        else:
+            redirect_destination = "/cart"
+
         return {
             "message": "Login successful!",
             "role": user_role,
-            "user": {"email": user_record.user_email, "role": user_role}
+            "redirect_to": redirect_destination,
+            "user": {
+                "email": user_record.user_email,
+                "role": user_role
+            }
         }
         
     except HTTPException as he:
@@ -320,30 +355,38 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
 
         # SAFE ENVIRONMENT SHIELD FOR COBOL EXECUTION
         try:
-            result = subprocess.run(
+            subprocess.run(
                 [COBOL_EXE_PATH, "CONFIRM_ORDER", generated_system_invoice, str(payload.total_qty), str(int(payload.net_amount)), payload.customer_email], 
                 capture_output=True, text=True, check=False
             )
         except OSError as os_err:
             print(f"Bypassing architecture binary execution conflict cleanly: {os_err}")
             
-        # 1. GENERATE SALE ORDERS HEADER ROW
+        # ---- FIXED: DIRECT DATABASE LOOKUP BYPASSES MISSING PYDANTIC FIELD ATTRIBUTEERRORS ----
+        user_lookup = db.query(User).filter(User.user_email == payload.customer_email.strip()).first()
+        final_numeric_id = user_lookup.user_id if user_lookup else 6
+        try:
+            gross_amount = sum(float(item.qty) * float(item.selling_price) for item in payload.items)
+            computed_total_discount = gross_amount * 0.10
+        except Exception:
+            computed_total_discount = (float(payload.net_amount) / 0.90) * 0.10
         new_order_header = SaleOrdersHeader(
-            customer_id=payload.customer_email,
+            customer_id=int(final_numeric_id), 
             invoice_number=generated_system_invoice,
             total_amount=payload.net_amount, 
+            discount=float(computed_total_discount),
             status="Pending",
             order_date=datetime.now(),
             payment_method=payload.payment_method
         )
         db.add(new_order_header)
-        db.flush() # 👈 Forces database to assign sale_order_id instantly so we can pass it below!
+        db.flush() 
 
-        # 2. ---- FIXED: AUTOMATICALLY GENERATES DYNAMIC REALTIME PAYMENT LEDGER RECORD ROW ----
+        # 2. AUTOMATICALLY GENERATES DYNAMIC REALTIME PAYMENT LEDGER RECORD ROW
         new_payment_record = Payment(
-            sale_order_id=new_order_header.sale_order_id, # 👈 Ties cleanly to her generated ForeignKey field ID
-            sale_payment_method=payload.payment_method,   # e.g., 'Cash Down', 'KBZ Pay', 'Wave Pay'
-            amount_paid=float(payload.net_amount),         # Inserts net total cash amount directly into table column
+            sale_order_id=new_order_header.sale_order_id, 
+            sale_payment_method=payload.payment_method,   
+            amount_paid=float(payload.net_amount),         
             pay_date=datetime.now()
         )
         db.add(new_payment_record)
@@ -359,7 +402,6 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
             )
             db.add(new_order_detail)
 
-        # Commit everything safely to app.db simultaneously
         db.commit() 
         print("====== DATABASE SAVE SUCCESS ======")
         return {"message": "Success", "invoice_number": generated_system_invoice}
@@ -368,7 +410,7 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         db.rollback()
         print("====== ERROR OCCURRED ======")
         import traceback
-        traceback.print_exc()  # Error အစအဆုံးကို Terminal မှာ ပြပေးမယ်
+        traceback.print_exc()  
         raise HTTPException(status_code=500, detail=f"Database relational insert breakdown: {e}")
 
 @app.get("/api/order/next-invoice/{customer_email}")
@@ -401,12 +443,13 @@ def process_loose_product_return_status(
     if not target_product:
         raise HTTPException(status_code=404, detail=f"Product name '{product_name}' not found in stock inventory.")
 
-    # 2. Automatically verify if this customer has a past order containing this item
+    user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
+    active_numeric_id = user_lookup.user_id if user_lookup else 7
+
     past_order_detail = db.query(SaleOrdersDetails).join(
         SaleOrdersHeader, SaleOrdersDetails.sale_order_id == SaleOrdersHeader.sale_order_id
     ).filter(
-        # ---- FIXED: UPDATED ATTR REF TO customer_id TO PREVENT ATTRIBUTEERROR CRASHES ----
-        SaleOrdersHeader.customer_id == customer_email.strip(), 
+        SaleOrdersHeader.customer_id == int(active_numeric_id), 
         SaleOrdersDetails.product_id == target_product.product_id
     ).first()
 
@@ -415,8 +458,6 @@ def process_loose_product_return_status(
             status_code=400, 
             detail=f"No past purchase order record found for '{product_name}' under this account."
         )
-
-    # Pull financial totals and parent order IDs from the database records automatically
     parent_order_id = past_order_detail.sale_order_id
     unit_price = float(past_order_detail.selling_price if past_order_detail.selling_price else 0.0)
     computed_subtotal = qty * unit_price
@@ -465,6 +506,9 @@ def process_loose_product_return_status(
         )
         db.add(new_return_detail)
 
+        # 🟢 ---- CLEANED UP: THE OLD DELETION/REDUCTION BLOCK HAS BEEN REMOVED ----
+        # This guarantees your original sales rows stay 100% safe and permanent in the DB!
+
         db.commit()
         return {"status": "Success", "message": "Return logged completely separate from invoice id dependencies."}
     except Exception as e:
@@ -474,15 +518,14 @@ def process_loose_product_return_status(
 @app.get("/api/order/history-logs/{customer_email}")
 def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)):
     try:
-        # 1. Fetch this user's specific purchase orders sorted by primary key descending
+        user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
+        active_numeric_id = user_lookup.user_id if user_lookup else 7
         orders_query = db.query(SaleOrdersHeader).filter(
-            SaleOrdersHeader.customer_id == customer_email.strip()
+            SaleOrdersHeader.customer_id == int(active_numeric_id)
         ).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
         
         orders_list = []
         total_orders = len(orders_query)
-        
-        # FORCES THE INVOICE STRINGS TO INDEX DYNAMICALLY FROM TOTAL COUNT DOWN TO 1
         for idx, o in enumerate(orders_query):
             display_num = total_orders - idx
             orders_list.append({
@@ -520,6 +563,110 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
     except Exception as e:
         print(f"History descending sorting error log trace: {e}")
         raise HTTPException(status_code=500, detail=f"Database full history logs pipeline error: {e}")
+
+@app.get("/api/order/return-items-check/{invoice_number}")
+def get_items_by_invoice_number(invoice_number: str, db: Session = Depends(get_db)):
+    try:
+        # 🟢 IMPORT THE FUNCTION MODULE DIRECTLY TO RESOLVE THE INTERNAL 500 CODES
+        from sqlalchemy import func
+
+        header_record = db.query(SaleOrdersHeader).filter(
+            SaleOrdersHeader.invoice_number == invoice_number.strip()
+        ).first()
+        
+        if not header_record:
+            return {"items": []}
+            
+        items_query = db.query(SaleOrdersDetails).filter(
+            SaleOrdersDetails.sale_order_id == header_record.sale_order_id
+        ).all()
+        
+        formatted_items = []
+        for detail in items_query:
+            product_node = db.query(Product).filter(Product.product_id == detail.product_id).first()
+            prod_name = product_node.product_name if product_node else "Unknown Item"
+
+            # This calculation checks your return history to balance available quantities
+            already_returned = db.query(func.sum(SaleReturnDetails.qty)).join(
+                SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
+            ).filter(
+                SaleReturnHeader.sale_order_id == header_record.sale_order_id,
+                SaleReturnDetails.product_id == detail.product_id
+            ).scalar() or 0
+            
+            original_qty = int(detail.qty) if detail.qty else 0
+            actual_returnable_qty = original_qty - int(already_returned)
+            
+            # This gate strictly excludes items if their available balance drops to 0
+            if actual_returnable_qty > 0:
+                formatted_items.append({
+                    "name": str(prod_name).strip(),
+                    "product_name": str(prod_name).strip(),
+                    "qty": int(actual_returnable_qty)
+                })
+            
+        return {"items": formatted_items}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/order/valid-return-invoices/{customer_email}")
+def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)):
+    try:
+        from sqlalchemy import func
+        
+        user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
+        if not user_lookup:
+            return {"orders": []}
+        
+        all_user_orders = db.query(SaleOrdersHeader).filter(
+            SaleOrdersHeader.customer_id == user_lookup.user_id
+        ).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
+        
+        total_history_count = len(all_user_orders)
+        valid_orders_list = []
+        
+        # ၂။ အော်ဒါတစ်ခုချင်းစီ၏ မူရင်းနံပါတ်စဉ်ကို ပြောင်းလဲမှုမရှိစေရန် တိုက်ရိုက်သတ်မှတ်ခြင်း
+        for idx, order in enumerate(all_user_orders):
+            # 🟢 History.jsx ၏ တွက်ချက်မှုပုံစံအတိုင်း အသစ်ဆုံးအော်ဒါကို ၎င်း၏ မူရင်းနံပါတ်စဉ်အစစ် တိုက်ရိုက်တွက်ထုတ်ပေးခြင်း
+            display_num = total_history_count - idx
+            computed_invoice_name = f"INV{display_num:05d}"
+            
+            # GUARD FILTER: Status က 'Confirmed' ဖြစ်နေသည့် အော်ဒါများကိုသာ ခွင့်ပြုပါမည် (Pending များကို ပယ်ဖျက်ခြင်း)
+            if not order.status or str(order.status).strip().lower() != "confirmed":
+                continue
+                
+            # RETURN BALANCER: ၎င်းအော်ဒါထဲတွင် ပြန်စရာ လက်ကျန်ပစ္စည်း ကျန်မကျန် ဆက်လက်စစ်ဆေးခြင်း
+            details = db.query(SaleOrdersDetails).filter(SaleOrdersDetails.sale_order_id == order.sale_order_id).all()
+            has_returnable_items = False
+            
+            for detail in details:
+                already_returned = db.query(func.sum(SaleReturnDetails.qty)).join(
+                    SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
+                ).filter(
+                    SaleReturnHeader.sale_order_id == order.sale_order_id,
+                    SaleReturnDetails.product_id == detail.product_id
+                ).scalar() or 0
+                
+                original_qty = int(detail.qty) if detail.qty else 0
+                if original_qty - int(already_returned) > 0:
+                    has_returnable_items = True
+                    break
+            
+            # ၃။ အခြေအနေအားလုံး ကိုက်ညီပြီး ပြန်စရာ ကျန်ရှိနေမှသာ မူရင်းနံပါတ်စဉ်အစစ်အတိုင်း Dropdown ထဲ ထည့်သွင်းခြင်း
+            if has_returnable_items:
+                valid_orders_list.append({
+                    "invoice_number": computed_invoice_name, # 👈 ယခုဆိုလျှင် လုံးဝမလွဲတော့ဘဲ 'INV00003' အစစ်အတိုင်း တန်းပေါ်လာပါမည်!
+                    "real_db_invoice": order.invoice_number,   
+                    "status": order.status
+                })
+                
+        return {"orders": valid_orders_list}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # 🌟 Profile Page အတွက် Data ပြန်ဆွဲထုတ်ပေးမည့် API အသစ် 🌟
 @app.get("/api/customer/profile/{email}")
 def get_customer_profile(email: str, db: Session = Depends(get_db)):

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthProvider } from '../context/AuthContext'; 
+import { StationeroNavbar } from './StationeroPage'; 
+
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -11,17 +14,6 @@ const ShoppingCart = () => {
   const [itemToDelete, setItemToDelete] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editQuantity, setEditQuantity] = useState(1);
-
-  const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Shopping Cart', path: '/cart', isCart: true },
-    { label: 'Order', path: '/order' },
-    { label: 'Returns', path: '/returns' },
-    { label: 'History', path: '/history' },
-    { label: 'Profile', path: '/profile' }
-  ];
 
   const getCartKey = () => {
     let userEmail = 'guest';
@@ -89,35 +81,9 @@ const ShoppingCart = () => {
   };
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          {navItems.map((item, index) => (
-            <span
-              key={index}
-              onClick={() => navigate(item.path)}
-              onMouseEnter={() => setHoveredLink(index)}
-              onMouseLeave={() => setHoveredLink(null)}
-              style={{
-                ...styles.link,
-                ...(item.isCart ? styles.activeLink : {}),
-                ...(hoveredLink === index ? { color: '#f25278' } : {})
-              }}
-            >
-              {item.label}
-            </span>
-          ))}
-          <span 
-            onClick={() => {
-              localStorage.removeItem('stationero_logged_user');
-              navigate('/login');
-            }} 
-            style={styles.link}
-          >
-            Logout
-          </span>
-        </nav>
-      </header>
+      <AuthProvider>
+          <StationeroNavbar showSearch={false} />
+      </AuthProvider>
 
       <main style={styles.mainContent}>
         <h1 style={styles.mainHeading}>Shopping Cart</h1>
@@ -223,7 +189,7 @@ const ShoppingCart = () => {
 };
 
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },

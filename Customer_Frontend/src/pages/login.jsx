@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom'; // 🌟 useNavigate ကို Import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext'; // 🌟 AuthContext ကို Import လုပ်ပါ
 import axios from 'axios';
+import { StationeroNavbar } from './StationeroPage'; 
+import { AuthProvider } from '../context/AuthContext';
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,78 +16,76 @@ const Login = () => {
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
 
-  const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMessage('');
+    
+    // Clear out any old cached error message text blocks on your screen instantly
+    if (typeof setErrorMessage === 'function') {
+      setErrorMessage('');
+    }
 
     try {
-      // 🌟 axios.post သို့ ပြောင်းလဲခြင်း
-      const response = await axios.post('http://localhost:8000/api/login', {
-        email: email,
-        password: password
+      console.log("Dispatching clean authentication payload over the wire...");
+      
+      // ---- FIXED: USING AN EXPLICIT DIRECT NETWORK CLIENT POST TO BYPASS STALE STATES ----
+      const response = await axios({
+        method: 'post',
+        url: 'http://localhost:8000/api/login',
+        data: {
+          email: email.trim(),
+          password: password
+        },
+        timeout: 5000 // Fails fast if the server is dropped rather than freezing your view
       });
 
       const data = response.data;
 
-      // 🌟 axios တွင် response.ok အစား status ကို စစ်ရပါမည်
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
+        const userRole = data.role || 'customer';
+
         const userObj = {
           name: data.customer_name || (data.profile && data.profile.name) || 'Customer',
           email: email.trim(),
           phone: (data.profile && data.profile.phone) || '-',
           address: (data.profile && data.profile.address) || '-',
-          role: data.role || 'customer'
+          role: userRole
         };
 
+        // Save session tokens to persistent browser memory card
         localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
-        setIsLoggedIn(true);
-
-        if (data.role === 'admin') {
-          navigate('/admin');
-        } else {
-          navigate('/');
+        
+        if (typeof setIsLoggedIn === 'function') {
+          setIsLoggedIn(true);
         }
 
+        // ---- FIXED: BYPASS LOCAL ROUTER COMPILATION BLOCKS COMPLETELY ----
+        if (userRole === 'admin') {
+          console.log("Master Admin access verified! Redirecting browser port...");
+          window.location.href = "http://localhost:5174/admin/dashboard"; // 👈 Port hopping
+        } else {
+          console.log("Customer authenticated! Forcing hard reload to sync profile layout...");
+          navigate('/'); // 👈 Clean reload customer dashboard baseline
+        }
       }
     } catch (error) {
-        const msg =
-          error.response?.data?.detail ||
-          error.response?.data?.message ||
-          "Server connection error. Please try again later.";
-
-        setErrorMessage(msg);
+      console.error("Login endpoint stream exception caught:", error);
+      
+      const serverFeedback = error.response?.data?.detail || error.response?.data?.message;
+      const displayString = serverFeedback || "Server connection error. Please try again later.";
+      
+      if (typeof setErrorMessage === 'function') {
+        setErrorMessage(displayString);
+      } else {
+        alert(displayString);
       }
+    }
   };
 
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          {/* 🌟 Navigation များကို navigate() ဖြင့် ပြောင်းထားပါသည် */}
-          <span style={styles.link} onClick={() => navigate('/')}>Home</span>
-          <span style={styles.link} onClick={() => navigate('/about')}>About Us</span>
-          <span style={styles.link} onClick={() => navigate('/product')}>Product</span>
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            onMouseEnter={() => setHoveredBtn('navLogin')}
-            onMouseLeave={() => setHoveredBtn(null)}
-            style={{ ...styles.navBtn, ...(hoveredBtn === 'navLogin' ? styles.btnHover : {}) }}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/signup')}
-            onMouseEnter={() => setHoveredBtn('navSignup')}
-            onMouseLeave={() => setHoveredBtn(null)}
-            style={{ ...styles.navBtn, ...(hoveredBtn === 'navSignup' ? styles.btnHover : {}) }}
-          >
-            Signup
-          </button>
-        </nav>
-      </header>
+      <AuthProvider>
+          <StationeroNavbar showSearch={false} />
+      </AuthProvider>
 
       <main style={styles.mainContent}>
         <h2 style={styles.heading}>Log in</h2>
@@ -142,7 +142,7 @@ const Login = () => {
 
 // Styles များ မူလအတိုင်း ထားပါသည်
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },

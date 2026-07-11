@@ -1,6 +1,8 @@
 /* Base Styles */
+
+@import url('https://googleapis.com');
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: 'poppins', sans-serif;
   margin: 0;
   color: #333;
 }
@@ -15,7 +17,7 @@ body {
 }
 
 .highlight {
-  color: #F84C7B;
+  color: #F25278;
 }
 
 /* Buttons */
@@ -29,12 +31,12 @@ body {
 }
 
 .btn:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 
 /* Login / Sign Up ခလုတ် ပုံမှန်အချိန် */
 .btn-auth {
-  background-color: #F84C7B;
+  background-color: #F25278;
   color: #fff;
   /* စာသားပိုပေါ်အောင် #222 ကနေ #fff အဖြူရောင် ပြောင်းပေးထားတယ် */
   margin-left: 15px;
@@ -49,7 +51,7 @@ body {
 
 /* Mouse ထောက်လိုက်တဲ့အချိန် (Hover) */
 .btn-auth:hover {
-  background-color: #D1355D;
+  background-color: #e04167;
   /* အရောင် ပိုရင့်သွားမယ် */
   transform: translateY(-2px);
   /* အပေါ်ကို နည်းနည်းလေး ကြွတက်လာမယ် */
@@ -67,8 +69,8 @@ body {
 
 .btn-shop-outline {
   background-color: #fff;
-  color: #F84C7B;
-  border: 1.5px solid #F84C7B;
+  color: #F25278;
+  border: 1.5px solid #F25278;
   border-radius: 25px;
   padding: 12px 28px;
   font-size: 0.9em;
@@ -78,8 +80,8 @@ body {
 
 .btn-shop-small {
   background-color: transparent;
-  color: #F84C7B;
-  border: 1.5px solid #F84C7B;
+  color: #F25278;
+  border: 1.5px solid #F25278;
   border-radius: 25px;
   padding: 12px 32px;
   font-size: 0.9em;
@@ -89,14 +91,14 @@ body {
 }
 
 .btn-shop-small:hover {
-  background-color: #F84C7B;
+  background-color: #F25278;
   color: #fff;
 }
 
 .btn-shop-small:active {
   transform: scale(0.95);
-  background-color: #D1355D;
-  border-color: #D1355D;
+  background-color: #e04167;
+  border-color: #e04167;
 }
 
 /* Navbar */
@@ -107,9 +109,10 @@ body {
 }
 
 .logo {
-  font-size: 1.8em;
+  font-family: 'Azeret Mono', monospace, sans-serif;
+  font-size: 30px;
   font-weight: 800;
-  color: #F84C7B;
+  color: #F25278;
   margin: 0;
 }
 
@@ -117,7 +120,7 @@ body {
   display: flex;
   align-items: center;
   background-color: #F3F3F3;
-  border: 1px solid #F84C7B;
+  border: 1px solid #F25278;
   border-radius: 25px;
   padding: 8px 15px;
   width: 250px;
@@ -126,7 +129,7 @@ body {
 .search-icon {
   width: 16px;
   height: 16px;
-  color: #F84C7B;
+  color: #F25278;
   margin-right: 8px;
 }
 
@@ -172,13 +175,13 @@ body {
 
 /* လက်ရှိရောက်နေတဲ့ Page (Active) */
 .nav-links li a.active {
-  color: #F84C7B !important;
+  color: #F25278 !important;
   font-weight: bold;
 }
 
 /* Mouse ထောက်လိုက်တဲ့အချိန် (Hover) */
 .nav-links li a:hover {
-  color: #F84C7B;
+  color: #F25278;
   /* ပန်းရောင် ပြောင်းသွားမယ် */
   transform: scale(1.1);
   /* စာသားလေး နည်းနည်း ပိုကြီးသွားမယ် (ပိုသိသာအောင်လို့ပါ) */
@@ -309,7 +312,7 @@ body {
 
 /* စာသားတွေ ဘယ်ဘက်ကပ်နေအောင် မargin လေး နည်းနည်းချိန်ပေးပါ */
 .product-name {
-  color: #F84C7B;
+  color: #F25278;
   font-size: 1.2em;
   font-weight: 700;
   margin: 10px 0 5px 0;
@@ -363,7 +366,7 @@ body {
 }
 
 .promo-subtitle {
-  color: #F84C7B;
+  color: #F25278;
   font-size: 1.1em;
   font-weight: 800;
   margin: 0 0 15px 0;
@@ -383,7 +386,7 @@ body {
 }
 
 .promo-price {
-  color: #F84C7B;
+  color: #F25278;
   font-size: 1.6em;
   font-weight: bold;
   margin: 0 0 30px 0;
@@ -391,8 +394,8 @@ body {
 
 .btn-promo-shop {
   background-color: transparent;
-  color: #F84C7B;
-  border: 1px solid #F84C7B;
+  color: #F25278;
+  border: 1px solid #F25278;
   border-radius: 25px;
   padding: 10px 30px;
   font-size: 0.9em;
@@ -402,7 +405,7 @@ body {
 }
 
 .btn-promo-shop:hover {
-  background-color: #F84C7B;
+  background-color: #F25278;
   color: #fff;
 }
 
@@ -473,9 +476,9 @@ body {
 .btn-exp-shop {
   background-color: transparent;
   /* နောက်ခံကို အကြည်ထားပါမယ် */
-  color: #F84C7B;
+  color: #F25278;
   /* စာသားကို ပန်းရောင်ထားပါမယ် */
-  border: 1.5px solid #F84C7B;
+  border: 1.5px solid #F25278;
   /* ပန်းရောင် ဘောင်ကွပ်ပါမယ် */
   border-radius: 25px;
   padding: 10px 28px;
@@ -489,7 +492,7 @@ body {
 
 /* Mouse ထောက်လိုက်တဲ့အချိန် (Hover - အရောင်ပြည့်သွားမယ့်ပုံစံ) */
 .btn-exp-shop:hover {
-  background-color: #F84C7B;
+  background-color: #F25278;
   /* နောက်ခံက ပန်းရောင် ပြည့်သွားမယ် */
   color: #fff;
   /* နောက်ခံ ပန်းရောင်ဖြစ်သွားလို့ စာသားကို အဖြူရောင် ပြောင်းလိုက်မယ် */
@@ -499,9 +502,9 @@ body {
 .btn-exp-shop:active {
   transform: scale(0.95);
   /* နှိပ်လိုက်ရင် ခလုတ်လေး အောက်ကို ချိုင့်ဝင်သွားမယ် */
-  background-color: #D1355D;
+  background-color: #e04167;
   /* နှိပ်လိုက်ချိန်မှာ အရောင်ပိုရင့်သွားမယ် */
-  border-color: #D1355D;
+  border-color: #e04167;
   /* ဘောင်အရောင်ပါ လိုက်ရင့်သွားမယ် */
 }
 
@@ -543,8 +546,8 @@ body {
 /* Sign Up Button (ပုံမှန်အချိန်) */
 .btn-sign-up-offer {
   background-color: transparent;
-  color: #F84C7B;
-  border: 1.5px solid #F84C7B;
+  color: #F25278;
+  border: 1.5px solid #F25278;
   border-radius: 25px;
   padding: 10px 32px;
   font-size: 0.9em;
@@ -555,11 +558,10 @@ body {
 
 /* Mouse ထောက်လိုက်တဲ့အချိန် (Hover - သိသာအောင် လုပ်ထားတယ်) */
 .btn-sign-up-offer:hover {
-  background-color: #F84C7B;
-  color: #fff;
+  background-color: #e04167;
   transform: translateY(-2px);
   /* အပေါ်ကို ကြွတက်လာမယ် */
-  box-shadow: 0 4px 8px rgba(248, 76, 123, 0.3);
+  box-shadow: 0 4px 15px rgba(242,82,120,0.3);
   /* အရိပ်လေး ထွက်လာမယ် */
 }
 
@@ -567,13 +569,10 @@ body {
 .btn-sign-up-offer:active {
   transform: scale(0.95);
   /* အောက်ကို ချိုင့်ဝင်သွားမယ် */
-  box-shadow: none;
-  background-color: #D1355D;
+  background-color: #e04167;
   /* အရောင် ရင့်သွားမယ် */
-  border-color: #D1355D;
+  border-color: #e04167;
 }
-
-
 
 /* လင့်ခ်တွေ အားလုံးကို တစ်တန်းတည်းဖြစ်အောင် စီမယ် */
 .user-nav-links {
@@ -604,13 +603,13 @@ body {
 
 /* လက်ရှိရောက်နေတဲ့ Page (Active) */
 .user-nav-links li a.active {
-  color: #F84C7B;
+  color: #F25278;
   font-weight: 800;
 }
 
 /* 🖱️ Mouse ထောက်လိုက်တဲ့အချိန် (Hover Effect) */
 .user-nav-links li a:hover {
-  color: #F84C7B;
+  color: #F25278;
   /* ပန်းရောင် ပြောင်းသွားမယ် */
   transform: scale(1.1);
   /* မောက်စ်တင်ရင် စာလုံးလေး နည်းနည်း ကြီးလာမယ် */

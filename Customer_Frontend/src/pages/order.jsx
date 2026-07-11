@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react'; 
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios'; 
-import { AuthContext } from '../context/AuthContext'; 
+import { AuthContext } from '../context/AuthContext';
+import { AuthProvider } from '../context/AuthContext'; 
+import { StationeroNavbar } from './StationeroPage'; 
 
 const OrderPage = () => {
   const navigate = useNavigate();
@@ -24,7 +26,7 @@ const OrderPage = () => {
 
   const [isFirstOrder, setIsFirstOrder] = useState(false);
 
-  const navItems = [
+  /*const navItems = [
     { label: 'Home', path: '/' },
     { label: 'About Us', path: '/about' },
     { label: 'Product', path: '/product' },
@@ -33,7 +35,7 @@ const OrderPage = () => {
     { label: 'Returns', path: '/returns' },
     { label: 'History', path: '/history' },
     { label: 'Profile', path: '/profile' }
-  ];
+  ];*/
 
   const calculate = (items, checkFirstOrderFlag = isFirstOrder) => {
     try {
@@ -146,8 +148,18 @@ const OrderPage = () => {
     }
   }, [isFirstOrder, checkoutItems.length]);
 
-     const handleConfirmOrder = async () => {
+       const handleConfirmOrder = async () => {
     try {
+      // 1. ---- FIXED: EXTRACTS USER PACKET SAFELY TO GRAB THE RELATIONAL NUMERIC ID ----
+      const storedUserStr = localStorage.getItem('stationero_logged_user');
+      let numericCustomerId = 6; // Standard safe fallback user ID integer if empty
+      
+      if (storedUserStr && storedUserStr !== "undefined") {
+        const parsedUser = JSON.parse(storedUserStr);
+        // Safely extract user_id or fallback integer keys from the database mapping
+        numericCustomerId = parseInt(parsedUser.user_id || parsedUser.id || parsedUser.user?.user_id, 10) || 6;
+      }
+
       const itemsPayload = checkoutItems.map(item => ({
         product_id: parseInt(item.product_id, 10),
         qty: parseInt(item.qty, 10),
@@ -155,7 +167,9 @@ const OrderPage = () => {
         sub_total: parseFloat(item.amount || (item.price * item.qty))
       }));
 
+      // 2. ---- FIXED: MATCHES THE EXACT PAYLOAD VALUES EXPECTED BY YOUR SCHEMAS ----
       const response = await axios.post('http://localhost:8000/api/order/confirm', {
+        customer_id: numericCustomerId, // 👈 INJECTS THE TRUE NUMERIC INTEGER ID DIRECTLY!
         net_amount: pricingSummary.net,
         total_qty: checkoutItems.reduce((sum, item) => sum + item.qty, 0),
         customer_email: customerProfile.email,
@@ -164,7 +178,6 @@ const OrderPage = () => {
       });
 
       if (response.status === 201 || response.status === 200) { 
-        // ---- FIXED: INDESTRUCTIBLE FOR-LOOP MANUALLY PURGES ALL CART SEGMENTS FROM DISK ----
         try {
           const allKeys = Object.keys(localStorage);
           allKeys.forEach(key => {
@@ -177,14 +190,11 @@ const OrderPage = () => {
           console.error("Global storage purge exception handler: ", storageErr);
         }
 
-        // Clean out generic fallback variables
         localStorage.removeItem('cart');
         localStorage.removeItem('cartItems');
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
         
-        // ---- FIXED: ABSOLUTE BROWSER HARD RELOAD RESTORES RE-INITIALIZATION STATE CHAINS ----
-        // This cuts through any frozen React Context Memory states and forces a clean re-fetch
         window.location.href = '/history';
       }
     } catch (error) {
@@ -194,33 +204,13 @@ const OrderPage = () => {
   };
 
 
-
-
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          {navItems.map((item, index) => (
-            <span
-              key={index}
-              onClick={() => navigate(item.path)}
-              onMouseEnter={() => setHoveredLink(index)}
-              onMouseLeave={() => setHoveredLink(null)}
-              style={{
-                ...styles.link,
-                ...(item.isOrderPage ? styles.activeLink : {}),
-                ...(hoveredLink === index ? { color: '#f25278' } : {})
-              }}
-            >
-              {item.label}
-            </span>
-          ))}
-          <span onClick={() => navigate('/login')} style={styles.link}>Logout</span>
-        </nav>
-      </header>
+      <AuthProvider>
+        <StationeroNavbar showSearch={false} />
+      </AuthProvider>
 
-            <main style={styles.mainContent}>
+        <main style={styles.mainContent}>
         {checkoutItems.length === 0 ? (
           <div style={styles.emptyOrderContainer}>
             <h2 style={styles.emptyOrderText}>Your Order is Empty</h2>
@@ -288,24 +278,29 @@ const OrderPage = () => {
                   <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '14%' : '19%' }}>Total Amount</span>
                 </div>
 
-                {checkoutItems.map((item, idx) => (
-                  <div key={idx} style={styles.tableBodyRow}>
-                    <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                    <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
-                    <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
-                    <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
-                    
-                    {pricingSummary.discount > 0 && (
-                      <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>
-                        {(item.discount || 0).toLocaleString()}
+                {checkoutItems.map((item, idx) => {
+                  const rowGrossAmount = parseInt(item.qty, 10) * parseFloat(item.price || 0);
+                  const computedRowDiscount = rowGrossAmount * 0.10;
+
+                  return (
+                    <div key={idx} style={styles.tableBodyRow}>
+                      <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
+                      <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
+                      <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
+                      <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
+                      
+                      {pricingSummary.discount > 0 && (
+                        <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>
+                          {computedRowDiscount.toLocaleString()}
+                        </span>
+                      )}
+                      
+                      <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>
+                        {(item.amount || 0).toLocaleString()} MMK
                       </span>
-                    )}
-                    
-                    <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>
-                      {(item.amount || 0).toLocaleString()} MMK
-                    </span>
-                  </div>
-                ))}
+                    </div>
+                  );
+                })}
               </div>
 
               <div style={styles.summaryContainer}>
@@ -356,7 +351,7 @@ const OrderPage = () => {
 
 
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },

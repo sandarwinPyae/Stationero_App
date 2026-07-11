@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
-
+import { StationeroNavbar } from './StationeroPage'; 
+import { AuthProvider } from '../context/AuthContext';
 const SignUpPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -45,32 +46,9 @@ const SignUpPage = () => {
 
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          <span style={styles.link} onClick={() => navigate('/')}>Home</span>
-          <span style={styles.link} onClick={() => navigate('/about')}>About Us</span>
-          <span style={styles.link} onClick={() => navigate('/product')}>Product</span>
-          <button
-            type="button"
-            onClick={() => navigate('/login')}
-            onMouseEnter={() => setHoveredBtn('navLogin')}
-            onMouseLeave={() => setHoveredBtn(null)}
-            style={{ ...styles.navBtn, ...(hoveredBtn === 'navLogin' ? styles.btnHover : {}) }}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate('/signup')}
-            onMouseEnter={() => setHoveredBtn('navSignup')}
-            onMouseLeave={() => setHoveredBtn(null)}
-            style={{ ...styles.navBtn, ...(hoveredBtn === 'navSignup' ? styles.btnHover : {}) }}
-          >
-            Signup
-          </button>
-        </nav>
-      </header>
+      <AuthProvider>
+          <StationeroNavbar showSearch={false} />
+      </AuthProvider>
 
       <main style={styles.mainContent}>
         <h2 style={styles.heading}>Create Account</h2>
@@ -134,7 +112,7 @@ const SignUpPage = () => {
 };
 
 const styles = {
-  container: { fontFamily: 'Arial, sans-serif', backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },
