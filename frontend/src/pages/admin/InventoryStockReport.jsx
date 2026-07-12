@@ -38,8 +38,8 @@ const InventoryStockReport = () => {
     const doc = new jsPDF();
     doc.text("Inventory Stock Report", 14, 15);
     autoTable(doc, {
-      head: [['ID', 'Name', 'Category', 'Qty', 'Status']],
-      body: filteredProducts.map(p => [p.product_id, p.product_name, p.category, p.qty, p.qty <= 10 ? 'Low Stock' : 'In Stock']),
+      head: [['ID', 'Name', 'Category', 'Qty', 'Unit Price', 'Inventory Value', 'Status']],
+      body: filteredProducts.map(p => [p.product_id, p.product_name, p.category, p.qty,p.unit_price, p.inventory_value, p.qty <= 10 ? 'Low Stock' : 'In Stock']),
       startY: 20,
     });
     doc.save("Inventory_Report.pdf");
@@ -115,16 +115,20 @@ const InventoryStockReport = () => {
                 <th className="py-4 px-6">Product Name</th>
                 <th className="py-4 px-6">Category</th>
                 <th className="py-4 px-6 text-center">Qty</th>
+                <th className="py-4 px-6 text-center">Unit Price</th>
+                <th className="py-4 px-6 text-center">Inventory Value</th>
                 <th className="py-4 px-6 text-center">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
               {currentRecords.map((p, index) => (
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="py-4 px-6 font-bold text-gray-700">{p.product_id}</td>
+                  <td className="py-4 px-6 text-gray-700">{p.product_id}</td>
                   <td className="py-4 px-6 font-medium text-gray-800">{p.product_name}</td>
                   <td className="py-4 px-6 text-gray-500">{p.category}</td>
-                  <td className="py-4 px-6 text-center font-bold text-gray-800">{p.qty}</td>
+                  <td className="py-4 px-6 text-center text-gray-800">{p.qty}</td>
+                  <td className="py-4 px-6 text-center text-gray-800">{p.unit_price}</td>
+                  <td className="py-4 px-6 text-center text-gray-800">{p.inventory_value}</td>
                   <td className="py-4 px-6 text-center">
                     {p.qty <= 10 ? (
                       <span className="text-red-600 text-xs bg-red-50 px-2.5 py-1 rounded-full font-bold border border-red-100">Low Stock</span>
