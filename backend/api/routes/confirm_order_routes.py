@@ -32,7 +32,13 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Order not found")
 
     order_details = []
+    # တွက်ချက်မှုအတွက် variable အသစ်
+    total_calculated_amount = 0
+    
     for detail in order.details:
+        # Loop ထဲမှာ sub_total တန်ဖိုးများကို ပေါင်းသွားခြင်း
+        total_calculated_amount += detail.sub_total
+        
         order_details.append({
             "sale_order_detail_id": detail.sale_order_detail_id,
             "product_id": detail.product_id,
@@ -50,6 +56,7 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
             "status": order.status,
             "discount": order.discount,
             "total_amount": order.total_amount,
+            "calculated_total_amount": total_calculated_amount, 
             "customer": {
                 "customer_name": order.customer.customer_name if order.customer else "N/A",
                 "customer_email": order.customer.customer_email if order.customer else "N/A",
@@ -68,6 +75,7 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
             for p in order.payments
         ]
     }
+
 
 # sale order status change (pending -> confirmed)
 @router.put("/confirm-sale/{order_id}")

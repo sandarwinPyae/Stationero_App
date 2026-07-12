@@ -134,14 +134,14 @@ const ConfirmedOrderDetailsPage = () => {
           {/* Totals */}
           <div className="w-full flex justify-end">
             <div className="w-64 space-y-2 text-sm">
-              <div className="flex justify-between"><span>Total Amount :</span> <span className="font-bold">{order.header.total_amount}</span></div>
+              <div className="flex justify-between"><span>Total Amount :</span> <span className="font-bold">{order.header.calculated_total_amount}</span></div>
               {order.header.discount > 0 && (
                 <div className="flex justify-between">
                   <span>Discount :</span> 
                   <span className="font-bold">{order.header.discount}</span>
                 </div>
               )}
-              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.header.total_amount - order.header.discount}</span></div>
+              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.header.total_amount}</span></div>
             </div>
           </div>
 
