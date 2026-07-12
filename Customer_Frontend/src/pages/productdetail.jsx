@@ -10,14 +10,25 @@ const ProductDetail = () => {
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
-
+  // Theingi Change 
   useEffect(() => {
-    if (!isLoggedIn) {
-      navigate('/login');
-    } else {
-      fetchProductDetail();
+
+    const hasSession =
+      localStorage.getItem("stationero_logged_user");
+
+
+    if (!isLoggedIn && !hasSession) {
+
+      navigate("/login");
+      return;
+
     }
-  }, [isLoggedIn, navigate]);
+
+
+    fetchProductDetail();
+
+
+  }, [id]);
 
   const fetchProductDetail = async () => {
     try {
@@ -94,11 +105,11 @@ const ProductDetail = () => {
         <nav style={styles.navLinks}>
           <span onClick={() => navigate('/')} style={styles.link}>Home</span>
           <span onClick={() => navigate('/cart')} style={styles.link}>Shopping Cart</span>
-          <span 
+          <span
             onClick={() => {
               localStorage.removeItem('stationero_logged_user');
               navigate('/login');
-            }} 
+            }}
             style={styles.link}
           >
             Logout

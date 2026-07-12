@@ -34,12 +34,22 @@ const ProductPage = () => {
       const [sortOrder, setSortOrder] = useState("none");
       const [loading, setLoading] = useState(false);
       const handleProductClick = (productId) => {
-            if (isLoggedIn) {
-                  navigate(`/product/${productId}`);
-            } else {
-                  navigate('/login');
-            }
-      };
+
+    const hasSession =
+        localStorage.getItem("stationero_logged_user");
+
+
+    if(isLoggedIn || hasSession){
+
+        navigate(`/product/${productId}`);
+
+    }else{
+
+        navigate('/login');
+
+    }
+
+};
 
       // 🌟 Axios သုံးပြီး အဓိက ပြင်ဆင်ထားသော fetchProducts
       // Fetch Products
