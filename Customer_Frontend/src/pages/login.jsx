@@ -8,11 +8,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
-
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate(); // 🌟 Routing အတွက် သုံးရန်
   const { setIsLoggedIn } = useContext(AuthContext); // 🌟 Global Login State ကို ယူရန်
-
-  // Hover states for various interactive blocks
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
 
@@ -100,13 +98,40 @@ const Login = () => {
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} style={styles.input} required />
           </div>
 
+                    {/* ---- 🟢 FIXED: MINIMALIST SIMPLE EYE ICON PASSWORD FIELD ---- */}
           <div style={styles.inputGroup}>
             <label style={styles.label}>Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} style={styles.input} required />
-
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+              <input 
+                type={showPassword ? "text" : "password"} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                style={{ ...styles.input, width: '100%', paddingRight: '45px', boxSizing: 'border-box' }} 
+                required 
+              />
+              <span
+                onClick={() => setShowPassword(!showPassword)}
+                /* ညာဘက်အစွန်းတွင် အိုင်ကွန်လေး သပ်ရပ်စွာ ငြိမ်နေစေရန် ညှိပေးခြင်း */
+                style={{ position: 'absolute', right: '15px', cursor: 'pointer', display: 'flex', alignItems: 'center', userSelect: 'none' }}
+              >
+                {showPassword ? (
+                  /* 👁️ ရိုးရှင်းသော မျက်လုံးဖွင့်အိုင်ကွန် (Stationero Pink အရောင်ဖျော့) */
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#f25278" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                ) : (
+                  /* 🙈 ရိုးရှင်းသော မျက်လုံးပိတ်အိုင်ကွန် (မျက်လုံးပေါ်တွင် မျဉ်းစောင်းတစ်လိုင်းတည်းသာ ပါဝင်သည့် သန့်ပြန့်သောဒီဇိုင်း) */
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#9ca3af" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l6 6" />
+                  </svg>
+                )}
+              </span>
+            </div>
             <span
-              onClick={() => navigate('/forgot-password')} // 🌟 Route ကို App.jsx အတိုင်း ပြင်ထားသည်
-              style={{ color: '#f25278', cursor: 'pointer', fontSize: '13px', textAlign: 'right', marginTop: '6px', fontWeight: 'bold' }}
+              onClick={() => navigate('/forgot-password')} 
+              style={{ color: '#f25278', cursor: 'pointer', fontSize: '13px', textAlign: 'right', marginTop: '8px', fontWeight: 'bold' }}
             >
               Forgot password?
             </span>
@@ -147,6 +172,8 @@ const styles = {
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },
   link: { cursor: 'pointer', color: '#333' },
+  toggleText: { position: 'absolute', right: '15px', fontSize: '12px', color: '#f25278', fontWeight: 'bold', cursor: 'pointer', userSelect: 'none' },
+  passwordWrapper: { position: 'relative', display: 'flex', alignItems: 'center', width: '100%' },
   mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' },
   heading: { fontSize: '24px', marginBottom: '20px', color: '#111' },
   formBox: { backgroundColor: '#f3f3f3', padding: '40px', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px' },

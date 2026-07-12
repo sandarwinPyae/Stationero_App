@@ -165,7 +165,7 @@ const OrderHistoryPage = () => {
                 ...(hoveredSubmitBtn ? styles.submitReturnBtnHover : {})
               }}
           >
-            Search
+            Search 
           </button>
         </div>
 
@@ -181,15 +181,23 @@ const OrderHistoryPage = () => {
           {currentRecordsView.length === 0 ? (
             <div style={styles.emptyNotificationBlock}>No verified logs found matching current search terms.</div>
           ) : (
-            currentRecordsView.map((record, idx) => (
-              <div key={idx} style={styles.tableBodyRow}>
-                <span style={{ flex: 1.5, fontWeight: 'bold', color: activeTab === 'Returned' ? '#d9383a' : '#111' }}>{record.invoice_number}</span>
-                <span style={{ flex: 1.2, fontWeight: 'bold', color: record.status === 'Returned' ? '#d9383a' : record.status === 'Pending' ? '#d97706' : '#2b6cb0' }}>{record.status}</span>
-                <span style={{ flex: 1.2 }}>{record.total_amount.toLocaleString()} MMK</span>
-                <span style={{ flex: 1.5, color: '#444' }}>{record.payment_method}</span>
-                <span style={{ flex: 1.8, color: '#777', fontSize: '13px' }}>{record.order_date}</span>
-              </div>
-            ))
+            currentRecordsView.map((record, idx) => {
+              const grossAmount = record.total_amount ? Number(record.total_amount) : 0;
+              const discountAmount = record.discount ? Number(record.discount) : 0;
+              const customerPaidNetAmount = grossAmount - discountAmount;
+
+              return (
+                <div key={idx} style={styles.tableBodyRow}>
+                  <span style={{ flex: 1.5, fontWeight: 'bold', color: activeTab === 'Returned' ? '#d9383a' : '#111' }}>{record.invoice_number}</span>
+                  <span style={{ flex: 1.2, fontWeight: 'bold', color: record.status === 'Returned' ? '#d9383a' : record.status === 'Pending' ? '#d97706' : '#2b6cb0' }}>{record.status}</span>
+                  <span style={{ flex: 1.2 }}>
+                    {customerPaidNetAmount.toLocaleString()} MMK
+                  </span>
+                  <span style={{ flex: 1.5, color: '#444' }}>{record.payment_method}</span>
+                  <span style={{ flex: 1.8, color: '#777', fontSize: '13px' }}>{record.order_date}</span>
+                </div>
+              );
+            })
           )}
         </div>
 

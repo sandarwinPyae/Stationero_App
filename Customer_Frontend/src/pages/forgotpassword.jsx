@@ -7,7 +7,7 @@ const ForgotPasswordPage = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const handlePasswordResetSubmit = async (e) => {
     e.preventDefault();
 
@@ -56,35 +56,64 @@ const ForgotPasswordPage = () => {
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>New Password</label>
-            <div style={styles.passwordWrapper}>
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
               <input
                 type={showPassword ? "text" : "password"}
-                placeholder="Minimum 6 characters"
+                placeholder="Minimum 8 characters and Must include both digit and character"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                style={styles.passwordInput}
+                style={{ ...styles.passwordInput, width: '100%', paddingRight: '45px', boxSizing: 'border-box' }}
                 required
               />
               <span
                 onClick={() => setShowPassword(!showPassword)}
-                style={styles.toggleText}
+                style={{ position: 'absolute', right: '15px', cursor: 'pointer', display: 'flex', alignItems: 'center', userSelect: 'none' }}
               >
-                {showPassword ? "Hide" : "Show"}
+                {showPassword ? (
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#f25278" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#9ca3af" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l6 6" />
+                  </svg>
+                )}
               </span>
             </div>
           </div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>Confirm New Password</label>
-            <input
-              type="password"
-              placeholder="Repeat your new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              style={styles.inputField}
-              required
-            />
+            <div style={{ position: 'relative', width: '100%', display: 'flex', alignItems: 'center' }}>
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                placeholder="Repeat your new password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                style={{ ...styles.inputField, width: '100%', paddingRight: '45px', boxSizing: 'border-box' }}
+                required
+              />
+              <span
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{ position: 'absolute', right: '15px', cursor: 'pointer', display: 'flex', alignItems: 'center', userSelect: 'none' }}
+              >
+                {showConfirmPassword ? (
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#f25278" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://w3.org" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#9ca3af" style={{ width: '18px', height: '18px' }}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 9l6 6" />
+                  </svg>
+                )}
+              </span>
+            </div>
           </div>
+
 
           <button
             type="submit"

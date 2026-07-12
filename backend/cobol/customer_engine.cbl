@@ -4,10 +4,22 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
        01 LK-ACTION           PIC X(15).
-       01 LK-PARAM-2          PIC X(20).
-       01 LK-PARAM-3          PIC X(20).
+       01 LK-PARAM-2          PIC X(50).
+       01 LK-PARAM-3          PIC X(50).
        01 LK-PARAM-4          PIC X(20).
        01 LK-PARAM-5          PIC X(20).
+
+       01 WS-EMAIL-LEN        PIC 9(3) VALUE 0.
+       01 WS-PASS-LEN         PIC 9(3) VALUE 0.
+       01 WS-IDX              PIC 9(3) VALUE 1.
+       01 WS-CHAR             PIC X(1).
+       01 WS-HAS-DIGIT        PIC X(1) VALUE "N".
+       01 WS-HAS-ALPHA        PIC X(1) VALUE "N".
+       01 WS-HAS-AT           PIC X(1) VALUE "N".
+       01  WS-TOTAL-QTY-NUM        PIC 9(5) VALUE 0.
+       01  WS-GROSS-AMOUNT         PIC 9(7)V99 VALUE 0.
+       01  WS-COMPUTED-DISCOUNT    PIC 9(7)V99 VALUE 0.
+       01  WS-PAST-ORDERS-COUNT    PIC 9(3) VALUE 0.
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -32,14 +44,22 @@
            END-EVALUATE
            GOBACK.
 
-       SIGNUP-PROCESS.
+              SIGNUP-PROCESS.
+           IF LK-PARAM-3 = "N"
+               DISPLAY "Password must be at least 8 characters long."
+               MOVE 5 TO RETURN-CODE
+               GOBACK
+           END-IF.
+
            IF LK-PARAM-2 = "Y"
                DISPLAY "Email is already exist, please login"
                MOVE 1 TO RETURN-CODE
+               GOBACK
            ELSE
                DISPLAY "Registered successfully!"
                MOVE 0 TO RETURN-CODE
            END-IF.
+
 
        LOGIN-PROCESS.
            IF LK-PARAM-2 = "N"
@@ -62,12 +82,21 @@
            END-IF.
 
        ORDER-PROCESS.
-           DISPLAY "Order Confirmed Successfully!"
-           DISPLAY "Invoice logged in system ledger."
+           COMPUTE WS-PAST-ORDERS-COUNT = FUNCTION NUMVAL(LK-PARAM-4).
+           COMPUTE WS-GROSS-AMOUNT = FUNCTION NUMVAL(LK-PARAM-5).
+
+           IF WS-PAST-ORDERS-COUNT = 0
+               COMPUTE WS-COMPUTED-DISCOUNT = WS-GROSS-AMOUNT * 0.10
+           ELSE
+               MOVE 0 TO WS-COMPUTED-DISCOUNT
+           END-IF.
+
+           DISPLAY "COBOL_RESULT_DISCOUNT:" WS-COMPUTED-DISCOUNT.
+           DISPLAY "Order Placed Successfully! (Pending Admin Approval)".
            MOVE 0 TO RETURN-CODE.
+
 
        RETURN-PROCESS.
            DISPLAY "COBOL ENGINE: Processing Order Return Sequence..."
            DISPLAY "Ledger audit status updated to: RETURNED"
            MOVE 0 TO RETURN-CODE.
-
