@@ -18,7 +18,6 @@ import PurchaseReturnsPage from './PurchaseReturnsPage';
 import PurchaseReturnList from './PurchaseReturnList';
 import PurchaseReturnDetails from './PurchaseReturnDetails';
 
-// 🌟 HEAD က Reports တွေ
 import ConfirmedOrderPage from './ConfirmedOrderPage';
 import ConfirmedOrderDetailsPage from './ConfirmedOrderDetailsPage';
 import PurchaseSummary from './PurchaseSummary';
@@ -27,7 +26,6 @@ import SupplierWisePurchase from './SupplierWisePurchase';
 import SaleReport from './SaleReport';
 import SaleReturnReport from './SaleReturnReport';
 
-// 🌟 add-inventory-report က Reports တွေ
 import InventoryStockReport from "./InventoryStockReport";
 import LowStockReport from "./InventoryLowStockReport";
 import AdminDashboard from './Admin_Dashboard';
@@ -58,7 +56,6 @@ function App() {
             <Route path='/purchase/returns' element={<PurchaseReturnList/>} />     
             <Route path="/purchase/return/details/:id" element={<PurchaseReturnDetails />} /> 
             
-            {/* 🌟 ပေါင်းထည့်ထားသော Route များ */}
             <Route path="/confirm-orders" element={<ConfirmedOrderPage />} />   
             <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage />} />
             <Route path="/purchase-reports" element={<PurchaseSummary />} />
@@ -68,6 +65,8 @@ function App() {
             <Route path='/sale-return-reports' element={<SaleReturnReport />} />
             <Route path="/stock-report" element={<InventoryStockReport />} /> 
             <Route path="/low-stock-report" element={<LowStockReport />} />
+            
+            <Route path="/admin/dashboard" element={<AdminDashboard />} />
             <Route path="/dashboard" element={<AdminDashboard />} />
             <Route path="/customers" element={<CustomerPage />} />
 

@@ -141,7 +141,7 @@ const ConfirmedOrderDetailsPage = () => {
                   <span className="font-bold">{order.header.discount}</span>
                 </div>
               )}
-              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.header.total_amount}</span></div>
+              <div className="flex justify-between border-t pt-2 mt-2"><span>Net Amount :</span> <span className="font-bold text-lg">{order.header.total_amount - order.header.discount}</span></div>
             </div>
           </div>
 

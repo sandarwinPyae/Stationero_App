@@ -35,7 +35,7 @@ class DashboardResponse(BaseModel):
     performance: float
 
 
-@router.get("/dashboard" , response_model=DashboardResponse)
+@router.get("/admin/dashboard" , response_model=DashboardResponse)
 def get_dashboard_data(db: Session = Depends(get_db)):
     try:
         # 1. Total Sales
