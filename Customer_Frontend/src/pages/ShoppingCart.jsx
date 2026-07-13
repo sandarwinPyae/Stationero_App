@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext'; 
 import { StationeroNavbar } from './StationeroPage'; 
-import { ArrowLeft } from 'lucide-react';
+import { AlignCenter, ArrowLeft } from 'lucide-react';
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -201,9 +201,10 @@ const styles = {
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
+  backButtonWrapper: { display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '8px 14px', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', zIndex: 10, transition: 'all 0.2s ease' },
   backArrow: { color: '#f25278', fontWeight: 'bold'},
-  backText: { color: '#f25278', fontWeight: 'bold'},
-  mainContent: { padding: '40px 80px', maxWidth: '1400px', margin: '0 auto' },
+  backText: { color: '#f25278', fontWeight: '700', fontSize: '14px', fontFamily: "Poppins, sans-serif" },
+  mainContent: { padding: '40px 80px',maxWidth: '1400px', margin: '0 auto' },
   mainHeading: { fontSize: '28px', color: '#111', margin: '0 0 30px 0', fontWeight: 'bold' },
   successBanner: { backgroundColor: '#eef9f0', color: '#1e7e34', padding: '15px', borderRadius: '8px', marginBottom: '25px', border: '1px solid #c3e6cb', fontWeight: 'bold', textAlign: 'center' },
   tableWrapper: { display: 'flex', flexDirection: 'column', gap: '15px' },

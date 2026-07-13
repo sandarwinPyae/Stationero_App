@@ -8,6 +8,8 @@
        01 LK-PARAM-3          PIC X(50).
        01 LK-PARAM-4          PIC X(20).
        01 LK-PARAM-5          PIC X(20).
+       01 LK-PARAM-6          PIC X(50).
+       01 LK-PARAM-7          PIC X(20).
 
        01 WS-EMAIL-LEN        PIC 9(3) VALUE 0.
        01 WS-PASS-LEN         PIC 9(3) VALUE 0.
@@ -16,10 +18,15 @@
        01 WS-HAS-DIGIT        PIC X(1) VALUE "N".
        01 WS-HAS-ALPHA        PIC X(1) VALUE "N".
        01 WS-HAS-AT           PIC X(1) VALUE "N".
-       01  WS-TOTAL-QTY-NUM        PIC 9(5) VALUE 0.
-       01  WS-GROSS-AMOUNT         PIC 9(7)V99 VALUE 0.
-       01  WS-COMPUTED-DISCOUNT    PIC 9(7)V99 VALUE 0.
-       01  WS-PAST-ORDERS-COUNT    PIC 9(3) VALUE 0.
+       01 WS-TOTAL-QTY-NUM    PIC 9(5) VALUE 0.
+       01 WS-GROSS-AMOUNT     PIC 9(7)V99 VALUE 0.
+       01 WS-COMPUTED-DISCOUNT PIC 9(7)V99 VALUE 0.
+       01 WS-PAST-ORDERS-COUNT PIC 9(3) VALUE 0.
+
+       01 WS-RETURN-QTY       PIC 9(4) VALUE 0.
+       01 WS-UNIT-PRICE       PIC 9(7)V99 VALUE 0.
+       01 WS-ACTUAL-REFUND-PRICE PIC 9(7)V99 VALUE 0.
+       01 WS-COMPUTED-SUBTOTAL   PIC 9(7)V99 VALUE 0.
 
        PROCEDURE DIVISION.
        MAIN-LOGIC.
@@ -28,6 +35,8 @@
            ACCEPT LK-PARAM-3 FROM ARGUMENT-VALUE.
            ACCEPT LK-PARAM-4 FROM ARGUMENT-VALUE.
            ACCEPT LK-PARAM-5 FROM ARGUMENT-VALUE.
+           ACCEPT LK-PARAM-6 FROM ARGUMENT-VALUE.
+           ACCEPT LK-PARAM-7 FROM ARGUMENT-VALUE.
 
            EVALUATE FUNCTION TRIM(LK-ACTION)
                WHEN "SIGNUP"
@@ -44,7 +53,7 @@
            END-EVALUATE
            GOBACK.
 
-              SIGNUP-PROCESS.
+       SIGNUP-PROCESS.
            IF LK-PARAM-3 = "N"
                DISPLAY "Password must be at least 8 characters long."
                MOVE 5 TO RETURN-CODE
@@ -59,7 +68,6 @@
                DISPLAY "Registered successfully!"
                MOVE 0 TO RETURN-CODE
            END-IF.
-
 
        LOGIN-PROCESS.
            IF LK-PARAM-2 = "N"
@@ -92,11 +100,17 @@
            END-IF.
 
            DISPLAY "COBOL_RESULT_DISCOUNT:" WS-COMPUTED-DISCOUNT.
-           DISPLAY "Order Placed Successfully! (Pending Admin Approval)".
            MOVE 0 TO RETURN-CODE.
 
-
        RETURN-PROCESS.
-           DISPLAY "COBOL ENGINE: Processing Order Return Sequence..."
-           DISPLAY "Ledger audit status updated to: RETURNED"
+           COMPUTE WS-RETURN-QTY = FUNCTION NUMVAL(LK-PARAM-3).
+           COMPUTE WS-UNIT-PRICE = FUNCTION NUMVAL(LK-PARAM-4).
+
+           COMPUTE WS-ACTUAL-REFUND-PRICE = WS-UNIT-PRICE * 0.90.
+           COMPUTE WS-COMPUTED-SUBTOTAL = 
+           WS-RETURN-QTY * WS-ACTUAL-REFUND-PRICE.
+
+           DISPLAY "COBOL_RESULT_SUBTOTAL:" WS-COMPUTED-SUBTOTAL.
+           DISPLAY "COBOL_RESULT_UNIT_PRICE:" WS-ACTUAL-REFUND-PRICE.
+           
            MOVE 0 TO RETURN-CODE.

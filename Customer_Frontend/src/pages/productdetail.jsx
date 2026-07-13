@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
 import { AuthContext } from '../context/AuthContext';
+import { StationeroNavbar } from './StationeroPage'; 
 
 const ProductDetail = () => {
   const { isLoggedIn } = useContext(AuthContext);
@@ -101,20 +102,14 @@ const ProductDetail = () => {
   return (
     <div style={styles.container}>
       <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-        <nav style={styles.navLinks}>
-          <span onClick={() => navigate('/')} style={styles.link}>Home</span>
-          <span onClick={() => navigate('/cart')} style={styles.link}>Shopping Cart</span>
-          <span
-            onClick={() => {
-              localStorage.removeItem('stationero_logged_user');
-              navigate('/login');
-            }}
-            style={styles.link}
-          >
-            Logout
-          </span>
-        </nav>
+        <div className="logo" style={{ fontFamily: 'Azeret Mono, monospace', color: '#f25278', fontSize: '30px', fontWeight: '800', letterSpacing: '-1.5px' }}>Stationero</div>
+          <div 
+        onClick={() => navigate('/product')} 
+        style={styles.backButtonWrapper}
+      >
+        <span style={styles.backArrow}>←</span> 
+        <span style={styles.backText}>Back</span>
+      </div>
       </header>
 
       <main style={styles.mainContent}>
@@ -152,27 +147,30 @@ const ProductDetail = () => {
 };
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', borderBottom: '1px solid #f0f0f0' },
-  logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
+  container: { fontFamily: "Poppins, sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', borderBottom: '1px solid #f0f0f0', position: 'relative' },
+  logo: { fontFamily: "Azeret Mono, monospace", color: '#f25278', fontSize: '30px', fontWeight: '800', letterSpacing: '-1.5px', margin: 0, textTransform: 'none' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   mainContent: { display: 'flex', padding: '50px', gap: '50px', maxWidth: '1000px', margin: '0 auto', alignItems: 'flex-start' },
   imageColumn: { flex: 1, display: 'flex', justifyContent: 'center' },
   productImage: { width: '100%', maxWidth: '400px', borderRadius: '10px', objectFit: 'cover' },
   detailsColumn: { flex: 1, display: 'flex', flexDirection: 'column' },
-  title: { fontSize: '28px', color: '#333', margin: '0 0 15px 0' },
-  price: { fontSize: '22px', color: '#f25278', margin: '0 0 20px 0', fontWeight: 'bold' },
-  sectionTitle: { fontSize: '16px', color: '#333', margin: '0 0 10px 0', fontWeight: 'bold' },
-  description: { fontSize: '14px', color: '#666', lineHeight: '1.6', margin: '0 0 30px 0' },
+  backButtonWrapper: { display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '8px 14px', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', zIndex: 10, transition: 'all 0.2s ease' },
+  backArrow: { color: '#f25278', fontWeight: '800', fontSize: '16px' },
+  backText: { color: '#f25278', fontWeight: '700', fontSize: '14px', fontFamily: "Poppins, sans-serif" },
+  title: { fontSize: '28px', color: '#333', margin: '0 0 15px 0', fontWeight: '700', fontFamily: "Poppins, sans-serif" },
+  price: { fontSize: '24px', color: '#f25278', margin: '0 0 20px 0', fontWeight: '700', fontFamily: "Poppins, sans-serif" },
+  sectionTitle: { fontSize: '16px', color: '#333', margin: '0 0 10px 0', fontWeight: '700', fontFamily: "Poppins, sans-serif" },
+  description: { fontSize: '14px', color: '#666', lineHeight: '1.6', margin: '0 0 30px 0', fontWeight: '400', fontFamily: "Poppins, sans-serif" },
   actionBox: { border: '1px solid #e0e0e0', padding: '25px', borderRadius: '10px', display: 'flex', flexDirection: 'column', gap: '15px' },
-  quantityLabel: { fontSize: '14px', fontWeight: 'bold', color: '#333' },
+  quantityLabel: { fontSize: '14px', fontWeight: '700', color: '#333', fontFamily: "Poppins, sans-serif" },
   quantitySelectorRow: { display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '5px', width: 'fit-content', backgroundColor: '#fff' },
-  qtyBtn: { background: 'none', border: 'none', padding: '10px 15px', cursor: 'pointer', fontSize: '18px' },
-  qtyDisplay: { padding: '0 20px', fontSize: '16px', fontWeight: 'bold' },
-  buyNowBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '15px', borderRadius: '5px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', textAlign: 'center' },
+  qtyBtn: { background: 'none', border: 'none', padding: '10px 15px', cursor: 'pointer', fontSize: '18px', fontWeight: '600' },
+  qtyDisplay: { padding: '0 20px', fontSize: '16px', fontWeight: '700' },
+  buyNowBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '15px', borderRadius: '5px', fontSize: '16px', fontWeight: '700', cursor: 'pointer', textAlign: 'center', transition: 'opacity 0.2s ease', fontFamily: "Poppins, sans-serif" },
   secondaryActionsRow: { display: 'flex', gap: '15px' },
-  cartBtn: { flex: 1, backgroundColor: 'white', color: '#f25278', border: '1px solid #f25278', padding: '12px', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' }
+  cartBtn: { flex: 1, backgroundColor: 'white', color: '#f25278', border: '1px solid #f25278', padding: '12px', borderRadius: '5px', cursor: 'pointer', fontWeight: '700', fontFamily: "Poppins, sans-serif" }
 };
 
 export default ProductDetail;
