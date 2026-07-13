@@ -18,7 +18,7 @@ import ProfilePage from './pages/profile';
 const ProtectedRoute = ({ children }) => {
   const { isLoggedIn } = useContext(AuthContext);
   const hasLocalSession = localStorage.getItem('stationero_logged_user');
-  
+
   // If either the context says true OR a local storage user profile exists, allow access!
   return (isLoggedIn || hasLocalSession) ? children : <Navigate to="/login" replace />;
 };

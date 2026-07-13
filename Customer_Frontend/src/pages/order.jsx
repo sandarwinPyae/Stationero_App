@@ -1,14 +1,14 @@
-import React, { useState, useEffect, useContext } from 'react'; 
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
-import { AuthProvider } from '../context/AuthContext'; 
-import { StationeroNavbar } from './StationeroPage'; 
+import { AuthProvider } from '../context/AuthContext';
+import { StationeroNavbar } from './StationeroPage';
 
 const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userProfile } = useContext(AuthContext); 
+  const { userProfile } = useContext(AuthContext);
 
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
@@ -41,7 +41,7 @@ const OrderPage = () => {
     try {
       const totalAmount = items.reduce((sum, item) => sum + (item.amount || item.price * item.qty), 0);
       let baseDiscount = items.reduce((sum, item) => sum + (item.discount || 0), 0);
-      
+
       let specialDiscount = 0;
       if (checkFirstOrderFlag) {
         specialDiscount = totalAmount * 0.10;
@@ -50,10 +50,10 @@ const OrderPage = () => {
       const finalDiscount = baseDiscount + specialDiscount;
       const netPayable = totalAmount - finalDiscount;
 
-      setPricingSummary({ 
-        total: totalAmount, 
-        discount: finalDiscount, 
-        net: netPayable 
+      setPricingSummary({
+        total: totalAmount,
+        discount: finalDiscount,
+        net: netPayable
       });
     } catch (e) {
       console.error(e);
@@ -65,12 +65,12 @@ const OrderPage = () => {
 
     const savedProfile = localStorage.getItem('stationero_logged_user');
     const parsedLocal = savedProfile ? JSON.parse(savedProfile) : null;
-    
+
     const activeEmail = (
-      userProfile?.email || 
-      userProfile?.customer_email || 
-      parsedLocal?.email || 
-      parsedLocal?.customer_email || 
+      userProfile?.email ||
+      userProfile?.customer_email ||
+      parsedLocal?.email ||
+      parsedLocal?.customer_email ||
       ""
     ).trim();
 
@@ -95,7 +95,7 @@ const OrderPage = () => {
           // Hits her direct history-logs list array wrapper path
           const historyRes = await axios.get(`http://localhost:8000/api/order/history-logs/${activeEmail}`);
           const historyData = historyRes.data;
-          
+
           // ---- FIXED: EXTRACTS LIST FROM NATIVE .orders OBJECT WRAPPER ----
           let ordersArray = [];
           if (historyData) {
@@ -108,13 +108,13 @@ const OrderPage = () => {
 
           // STRICT SECURITY LOCK: If any past rows exist on her back-end, discount drops to false!
           if (ordersArray.length === 0) {
-            firstOrderCheck = true; 
+            firstOrderCheck = true;
           } else {
-            firstOrderCheck = false; 
+            firstOrderCheck = false;
           }
         } catch (historyErr) {
           console.warn("History link channel dropped, turning off discount for safety.");
-          firstOrderCheck = false; 
+          firstOrderCheck = false;
         }
 
         setIsFirstOrder(firstOrderCheck);
@@ -133,7 +133,7 @@ const OrderPage = () => {
       } else if (localStorage.getItem('stationero_active_checkout')) {
         targetItems = JSON.parse(localStorage.getItem('stationero_active_checkout'));
       }
-      
+
       setCheckoutItems(targetItems);
       calculate(targetItems, firstOrderFlag);
     };
@@ -148,12 +148,12 @@ const OrderPage = () => {
     }
   }, [isFirstOrder, checkoutItems.length]);
 
-       const handleConfirmOrder = async () => {
+  const handleConfirmOrder = async () => {
     try {
       // 1. ---- FIXED: EXTRACTS USER PACKET SAFELY TO GRAB THE RELATIONAL NUMERIC ID ----
       const storedUserStr = localStorage.getItem('stationero_logged_user');
       let numericCustomerId = 6; // Standard safe fallback user ID integer if empty
-      
+
       if (storedUserStr && storedUserStr !== "undefined") {
         const parsedUser = JSON.parse(storedUserStr);
         // Safely extract user_id or fallback integer keys from the database mapping
@@ -177,24 +177,37 @@ const OrderPage = () => {
         items: itemsPayload
       });
 
-      if (response.status === 201 || response.status === 200) { 
-        try {
-          const allKeys = Object.keys(localStorage);
-          allKeys.forEach(key => {
-            if (key.startsWith('stationero_cart')) {
-              console.log(`Force deleting storage residue node: ${key}`);
-              localStorage.removeItem(key);
+      if (response.status === 201 || response.status === 200) {
+
+        const source = localStorage.getItem('checkout_source');
+
+
+        if (source === "cart") {
+
+          const storedUser = localStorage.getItem('stationero_logged_user');
+
+          if (storedUser) {
+
+            const user = JSON.parse(storedUser);
+
+            const email = (
+              user.email ||
+              user.user_email ||
+              user.customer_email ||
+              ""
+            ).trim();
+
+            if (email) {
+              localStorage.removeItem(`stationero_cart_${email}`);
             }
-          });
-        } catch (storageErr) {
-          console.error("Global storage purge exception handler: ", storageErr);
+          }
+
         }
 
-        localStorage.removeItem('cart');
-        localStorage.removeItem('cartItems');
+
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
-        
+
         window.location.href = '/history';
       }
     } catch (error) {
@@ -210,7 +223,7 @@ const OrderPage = () => {
         <StationeroNavbar showSearch={false} />
       </AuthProvider>
 
-        <main style={styles.mainContent}>
+      <main style={styles.mainContent}>
         {checkoutItems.length === 0 ? (
           <div style={styles.emptyOrderContainer}>
             <h2 style={styles.emptyOrderText}>Your Order is Empty</h2>
@@ -270,11 +283,11 @@ const OrderPage = () => {
                   <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>Product Name</span>
                   <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
                   <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-                  
+
                   {pricingSummary.discount > 0 && (
                     <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>
                   )}
-                  
+
                   <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '14%' : '19%' }}>Total Amount</span>
                 </div>
 
@@ -288,13 +301,13 @@ const OrderPage = () => {
                       <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
                       <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
                       <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
-                      
+
                       {pricingSummary.discount > 0 && (
                         <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>
                           {computedRowDiscount.toLocaleString()}
                         </span>
                       )}
-                      
+
                       <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>
                         {(item.amount || 0).toLocaleString()} MMK
                       </span>
@@ -312,7 +325,7 @@ const OrderPage = () => {
                     </span>
                   </div>
                 )}
-                
+
                 <div style={{ ...styles.summaryRow, marginTop: '10px' }}>
                   <span style={styles.summaryLabel}>Net Amount :</span>
                   <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '16px', fontWeight: 'bold' }}>
@@ -387,4 +400,4 @@ const styles = {
   shopBtnHover: { backgroundColor: '#d93a5f', color: 'white' },
   selectInput: { padding: '6px 12px', borderRadius: '5px', border: '1px solid #ddd', outline: 'none', fontSize: '14px', color: '#333', cursor: 'pointer', fontFamily: 'inherit' }
 };
-  export default OrderPage;
+export default OrderPage;

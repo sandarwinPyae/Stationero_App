@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext'; 
 import { StationeroNavbar } from './StationeroPage'; 
-
+import axios from 'axios';
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -15,27 +15,49 @@ const ShoppingCart = () => {
   const [editingId, setEditingId] = useState(null);
   const [editQuantity, setEditQuantity] = useState(1);
 
-  const getCartKey = () => {
+const getCartKey = () => {
     let userEmail = 'guest';
+
     try {
       const savedProfile = localStorage.getItem('stationero_logged_user');
-      if (savedProfile && savedProfile !== "undefined") {
+
+      if(savedProfile && savedProfile !== "undefined") {
+
         const parsed = JSON.parse(savedProfile);
-        userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
+
+        userEmail = (
+          parsed.email ||
+          parsed.user_email ||
+          parsed.customer_email ||
+          'guest'
+        ).trim();
+
       }
-    } catch (e) { }
+
+    } catch(e){
+      console.log(e);
+    }
+
     return `stationero_cart_${userEmail}`;
-  };
+};
 
   useEffect(() => {
-    const savedCart = localStorage.getItem(getCartKey());
-    setCartItems(savedCart ? JSON.parse(savedCart) : []); // Data မရှိရင် Array အလွတ် [] သတ်မှတ်ပေးခြင်း
-  }, []);
 
-  const startEditing = (item) => {
-    setEditingId(item.id);
-    setEditQuantity(item.quantity);
-  };
+    const cartKey = getCartKey();
+
+    if (cartKey) {
+
+        const savedCart = localStorage.getItem(cartKey);
+
+        setCartItems(
+            savedCart ? JSON.parse(savedCart) : []
+        );
+
+    } else {
+        setCartItems([]);
+    }
+
+}, []);
 
   const saveQuantityEdit = (id) => {
     const updatedCart = cartItems.map(item =>
@@ -61,9 +83,30 @@ const ShoppingCart = () => {
     setItemToDelete(null);
   };
 
-  const handleOrderCheckout = async () => {
-    if (cartItems.length === 0) return;
-    setCheckoutMessage('');
+ const handleOrderCheckout = async () => {
+
+  if (cartItems.length === 0) return;
+
+  try {
+
+    for (const item of cartItems) {
+
+      const res = await axios.get(
+        `http://localhost:8000/api/products/${item.id}`
+      );
+
+      const currentStock = res.data.current_qty;
+
+      if (item.quantity > currentStock) {
+
+        alert(
+          `${item.name} only has ${currentStock} items available`
+        );
+
+        return;
+      }
+    }
+
     const formattedCheckoutItems = cartItems.map((item, index) => ({
       product_id: item.id,
       no: index + 1,
@@ -74,11 +117,23 @@ const ShoppingCart = () => {
       amount: item.quantity * item.price
     }));
 
+    localStorage.setItem(
+      'stationero_active_checkout',
+      JSON.stringify(formattedCheckoutItems)
+    );
 
-    localStorage.setItem('stationero_active_checkout', JSON.stringify(formattedCheckoutItems));
-    localStorage.setItem('checkout_source', 'cart'); // OrderPage က Cart ကိုဖျက်ဖို့အတွက် ခွဲခြားမှတ်သားခြင်း
+    localStorage.setItem('checkout_source', 'cart');
+
     navigate('/order');
-  };
+
+  } catch (error) {
+
+    console.error("Stock checking error:", error);
+
+    alert("Unable to check product stock. Please try again.");
+
+  }
+};
   return (
     <div style={styles.container}>
       <AuthProvider>
