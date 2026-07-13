@@ -42,10 +42,7 @@ const ProductDetail = () => {
 
   const handleAction = (actionType) => {
     if (!product) return;
-    if(quantity > product.current_qty){
-      alert(`Only ${product.current_qty} items available`);
-      return;
-  }
+
     if (actionType === 'BUY_NOW') {
       const checkoutData = [
         {
@@ -64,25 +61,14 @@ const ProductDetail = () => {
     }
 
     if (actionType === 'ADD_TO_CART') {
-   let userEmail = 'guest';
-
-try {
-  const savedProfile = localStorage.getItem('stationero_logged_user');
-
-  if (savedProfile && savedProfile !== "undefined") {
-    const parsed = JSON.parse(savedProfile);
-
-    userEmail = (
-      parsed.email ||
-      parsed.user_email ||
-      parsed.customer_email ||
-      'guest'
-    ).trim();
-  }
-
-} catch(error){
-  console.log(error);
-}
+      let userEmail = 'guest';
+      try {
+        const savedProfile = localStorage.getItem('stationero_logged_user');
+        if (savedProfile && savedProfile !== "undefined") {
+          const parsed = JSON.parse(savedProfile);
+          userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
+        }
+      } catch (e) { }
 
       const cartKey = `stationero_cart_${userEmail}`;
       const savedCart = localStorage.getItem(cartKey);
@@ -150,17 +136,7 @@ try {
             <div style={styles.quantitySelectorRow}>
               <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={styles.qtyBtn}>-</button>
               <span style={styles.qtyDisplay}>{quantity}</span>
-
-             <button 
-  onClick={() => {
-    if (quantity < product.current_qty) {
-      setQuantity(q => q + 1);
-    }
-  }} 
-  style={styles.qtyBtn}
->
-+
-</button>
+              <button onClick={() => setQuantity(q => q + 1)} style={styles.qtyBtn}>+</button>
             </div>
 
             <button onClick={() => handleAction('BUY_NOW')} style={styles.buyNowBtn}>Buy Now</button>

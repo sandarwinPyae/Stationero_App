@@ -225,16 +225,13 @@ const CategoryOffers = () => {
 };
 
 
-const ProductCard = ({ product, onProductClick }) => {
+// ပြင်ဆင်ပြီးသော ProductCard
+const ProductCard = ({ product, onProductClick }) => { // 🌟 onProductClick ကို Props အနေနဲ့ လက်ခံပါမယ်
       return (
             <div
+                  onClick={() => onProductClick(product.product_id)} // 🌟 Link အစား onClick ကိုပြောင်းသုံးပြီး id ကို လှမ်းပို့ပါမယ်
                   className="product-card"
-                  style={{
-                        cursor: "pointer",
-                        textDecoration: "none",
-                        color: "inherit",
-                  }}
-                  onClick={() => onProductClick(product.product_id)}
+                  style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
             >
                   <div className="product-img-box">
                         <img
@@ -242,7 +239,6 @@ const ProductCard = ({ product, onProductClick }) => {
                               alt={product.product_name}
                         />
                   </div>
-
                   <h3 className="product-name">{product.product_name}</h3>
                   <p className="product-price-tag">{product.display_price}</p>
             </div>
