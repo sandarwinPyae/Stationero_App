@@ -390,6 +390,9 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         )
         db.add(new_payment_record)
 
+        # 3. GENERATE SALE ORDERS DETAILS CHILD ROWS
+    # 3. GENERATE SALE ORDERS DETAILS CHILD ROWS
+        # 3. GENERATE SALE ORDERS DETAILS CHILD ROWS
         for item in payload.items:
             new_order_detail = SaleOrdersDetails(
                 sale_order_id=new_order_header.sale_order_id, 
@@ -400,8 +403,8 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
             )
             db.add(new_order_detail)
 
-        db.commit() 
-        print("====== COBOL FINANCIAL LEDGER WRITE SUCCESS ======")
+        db.commit()
+        print("====== COBOL FINANCIAL LEDGER WRITE SUCCESS & DATABASE SAVE SUCCESS ======")
         
         # 🎯 100% PURE RAW SUCCESS FORWARDER
         return {"message": cobol_success_message, "invoice_number": generated_system_invoice}

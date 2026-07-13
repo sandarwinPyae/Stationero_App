@@ -225,12 +225,16 @@ const CategoryOffers = () => {
 };
 
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onProductClick }) => {
       return (
-            <Link
-                  to="/product"
+            <div
                   className="product-card"
-                  style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
+                  style={{
+                        cursor: "pointer",
+                        textDecoration: "none",
+                        color: "inherit",
+                  }}
+                  onClick={() => onProductClick(product.product_id)}
             >
                   <div className="product-img-box">
                         <img
@@ -238,9 +242,10 @@ const ProductCard = ({ product }) => {
                               alt={product.product_name}
                         />
                   </div>
+
                   <h3 className="product-name">{product.product_name}</h3>
                   <p className="product-price-tag">{product.display_price}</p>
-            </Link>
+            </div>
       );
 };
 
