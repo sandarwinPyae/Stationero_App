@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { AuthContext } from "../../context/AuthContext";
 
 const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
   <div 
@@ -15,6 +16,7 @@ const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
 
 
 const Sidebar = () => {
+  const { setIsLoggedIn } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
   const [isProductOpen, setIsProductOpen] = useState(true);
@@ -117,8 +119,13 @@ const Sidebar = () => {
             icon="fa-solid fa-right-from-bracket" 
             label="Logout" 
             className="text-red-500" 
-            onClick={() => {
-              localStorage.clear(); 
+            onClick={(e) => {
+              e.preventDefault(); 
+              
+              setIsLoggedIn(false); 
+              
+              localStorage.removeItem('stationero_logged_user'); 
+
               window.location.href = 'http://localhost:5173'; 
             }} 
           />
