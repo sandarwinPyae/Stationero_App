@@ -12,6 +12,7 @@ const SaleReturnReport = () => {
   const [selectedId, setSelectedId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
   const recordsPerPage = 5;
 
   useEffect(() => {
@@ -146,6 +147,7 @@ const SaleReturnReport = () => {
                   <th className="py-4 px-6 font-semibold">Invoice</th>
                   <th className="py-4 px-6 font-semibold">Return Amount (Ks)</th>
                   <th className="py-4 px-6 font-semibold">Payment Method</th>
+                  <th className="p-4">Image</th>
                   <th className="py-4 px-6 font-semibold">Reason</th>
                   <th className="py-4 px-6 font-semibold">Date</th>
                 </tr>
@@ -157,12 +159,22 @@ const SaleReturnReport = () => {
                       <td className="p-4 font-bold text-blue-600">{s.invoice_number}</td>
                       <td className="p-4 font-semibold">{s.total_returned_amount.toLocaleString()}</td>
                       <td className="p-4 text-gray-600">{s.sale_return_payment_method}</td>
+                      <td className="p-4">
+                        {s.return_img_url ? (
+                          <img 
+                            src={`http://localhost:8000/return-images/${s.return_img_url}`} 
+                            alt="Return Proof" 
+                            className="w-12 h-12 object-cover rounded shadow cursor-pointer border hover:scale-105 transition"
+                            onClick={(e) => { e.stopPropagation(); setSelectedImage(s.return_img_url); }}
+                          />
+                        ) : <span className="text-gray-400 text-xs">No Image</span>}
+                      </td>
                       <td className="p-4 text-gray-600">{s.return_reason}</td>
                       <td className="p-4 text-gray-500">{formatDate(s.sale_return_date)}</td>
                     </tr>
                     {selectedId === s.sale_return_id && (
                       <tr>
-                        <td colSpan="5" className="p-4 bg-gray-50">
+                        <td colSpan="6" className="p-4 bg-gray-50">
                           <table className="w-full text-xs bg-white border rounded-lg">
                             <thead className="bg-gray-100">
                                 <tr className="text-gray-600">
@@ -192,6 +204,13 @@ const SaleReturnReport = () => {
             </table>
           ) : <div className="p-10 text-center text-gray-500">No matching records found.</div>}
         </div>
+        {/* Full Screen Image Modal */}
+        {selectedImage && (
+          <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
+            <img src={`http://localhost:8000/return-images/${selectedImage}`} alt="Full View" className="max-w-full max-h-full rounded-lg shadow-2xl" />
+            <button className="absolute top-5 right-5 text-white text-3xl font-bold" onClick={() => setSelectedImage(null)}>&times;</button>
+          </div>
+        )}
 
         {/* Pagination */}
         {nPages > 1 && (

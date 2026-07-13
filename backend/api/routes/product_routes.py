@@ -1,3 +1,6 @@
+from pathlib import Path
+import subprocess
+
 from fastapi import APIRouter, Depends, Form, UploadFile, File, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
@@ -88,7 +91,6 @@ def get_product_by_id(product_id: int, db: Session = Depends(get_db)):
     if not product:
         raise HTTPException(status_code=404, detail="Product မတွေ့ပါ။")
     
-    # 🌟 ဒီ Condition လေးကို စစ်ပါ (Description မရှိရင် Default စာသား ထည့်ပေးလိုက်ပါ)
     product_data = {
         "product_id": product.product_id,
         "product_name": product.product_name,
@@ -136,33 +138,135 @@ async def edit_product(
     return {"message": "Product updated successfully"}
 
 
-@router.get("/stock-report") # <-- FIX: Changed path from "/stock-report" to "/products/stock-report"
+# stock report
+@router.get("/stock-report")
 def get_admin_full_stock_report(db: Session = Depends(get_db)):
     try:
-        # FIX: Changed Product to models.Product
-        products = db.query(models.Product).filter(models.Product.del_flag == 0).all()
-        report_list = []
-        for p in products:
-            p_id = f"P{p.product_id:03d}" if p.product_id else "P001"
-            p_name = p.product_name if p.product_name else "Unnamed Product"
-            p_qty = p.current_qty if p.current_qty is not None else 0
-            
-            p_category = "General"
-            if p.category_id:
-                # FIX: Changed Category to models.Category
-                category_row = db.query(models.Category).filter(models.Category.category_id == p.category_id).first()
-                if category_row and category_row.category_name:
-                    p_category = category_row.category_name
 
+        products = (
+            db.query(models.Product)
+            .filter(models.Product.del_flag == 0)
+            .all()
+        )
+        cobol_lines = [str(len(products))]
+
+        for product in products:
+            qty = product.current_qty if product.current_qty else 0
+            unit_price = product.unit_price if product.unit_price else 0
+
+            cobol_lines.append(str(qty))
+            cobol_lines.append(str(unit_price))
+
+        cobol_input = "\n".join(cobol_lines) + "\n"
+
+        base_dir = Path(__file__).resolve().parent.parent.parent
+        cobol_exe = base_dir / "bin" / "INVENTORYREPORT.exe"
+
+        inventory_values = []
+        grand_total = 0
+
+
+        if not cobol_exe.exists():
+
+            print(f"COBOL executable not found : {cobol_exe}")
+
+            for product in products:
+                qty = product.current_qty if product.current_qty else 0
+                price = product.unit_price if product.unit_price else 0
+
+                value = qty * price
+
+                inventory_values.append(value)
+                grand_total += value
+        else:
+            process = subprocess.run(
+                [str(cobol_exe)],
+                input=cobol_input,
+                text=True,
+                capture_output=True,
+                check=True
+            )
+            lines = process.stdout.strip().splitlines()
+            # Last Line = Grand Total
+            grand_total = float(lines[-1])
+            # Previous Lines = Inventory Values
+            inventory_values = [
+                float(x) for x in lines[:-1]
+            ]
+
+        report_list = []
+
+        for index, product in enumerate(products):
+
+            category_name = "General"
+
+            if product.category_id:
+
+                category = (
+                    db.query(models.Category)
+                    .filter(
+                        models.Category.category_id
+                        == product.category_id
+                    )
+                    .first()
+                )
+
+                if category:
+                    category_name = category.category_name
             report_list.append({
-                "product_id": p_id,
-                "product_name": p_name,
-                "category": p_category,
-                "qty": p_qty
+                "product_id":
+                    f"P{product.product_id:03d}",
+                "product_name":
+                    product.product_name,
+                "category":
+                    category_name,
+                "qty":
+                    product.current_qty,
+                "unit_price":
+                    product.unit_price,
+                "inventory_value":
+                    inventory_values[index]
             })
-        return {"status": "Success", "inventory": report_list}
+        return {
+            "status": "Success",
+            "grand_total_inventory_value":
+                grand_total,
+            "inventory":
+                report_list
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
+# @router.get("/stock-report") # <-- FIX: Changed path from "/stock-report" to "/products/stock-report"
+# def get_admin_full_stock_report(db: Session = Depends(get_db)):
+#     try:
+#         # FIX: Changed Product to models.Product
+#         products = db.query(models.Product).filter(models.Product.del_flag == 0).all()
+#         report_list = []
+#         for p in products:
+#             p_id = f"P{p.product_id:03d}" if p.product_id else "P001"
+#             p_name = p.product_name if p.product_name else "Unnamed Product"
+#             p_qty = p.current_qty if p.current_qty is not None else 0
+            
+            
+#             p_category = "General"
+#             if p.category_id:
+#                 # FIX: Changed Category to models.Category
+#                 category_row = db.query(models.Category).filter(models.Category.category_id == p.category_id).first()
+#                 if category_row and category_row.category_name:
+#                     p_category = category_row.category_name
+
+#             report_list.append({
+#                 "product_id": p_id,
+#                 "product_name": p_name,
+#                 "category": p_category,
+#                 "qty": p_qty
+#             })
+#         return {"status": "Success", "inventory": report_list}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Database error: {str(e)}")
 
 
 # ---- 2. FIXED LOW STOCK ENDPOINT ----

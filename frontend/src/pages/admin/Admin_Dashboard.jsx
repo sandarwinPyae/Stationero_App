@@ -20,7 +20,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:8000/dashboard")
+    fetch("http://localhost:8000/admin/dashboard")
       .then((res) => res.json())
       .then((data) => {
         setDashboardData(data);

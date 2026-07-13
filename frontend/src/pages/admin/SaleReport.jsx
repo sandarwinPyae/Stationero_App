@@ -162,9 +162,9 @@ const SaleReport = () => {
                     <tr className="cursor-pointer hover:bg-gray-50 border-b" onClick={() => setSelectedId(selectedId === s.sale_order_id ? null : s.sale_order_id)}>
                       <td className="p-5 font-medium">{s.invoice_number}</td>
                       <td className="p-5">{s.customer_name}</td>
-                      <td className="p-5">{s.total_amount}</td>
+                      <td className="p-5">{s.total_amount + s.discount}</td>
                       <td className="p-5">{s.discount}</td>
-                      <td className="p-5">{s.total_amount - s.discount}</td>
+                      <td className="p-5">{s.total_amount}</td>
                       <td className="p-5">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${s.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{s.status}</span>
                       </td>

@@ -35,7 +35,13 @@ export default function Sidebar() {
       </div>
       
       <nav className="mt-4 px-3 space-y-1 flex-1" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-        <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/dashboard')} active={isActive('/dashboard')} />
+        {/* <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/admin/dashboard')} active={isActive('/admin/dashboard')} /> */}
+        <NavItem 
+          icon="fa-solid fa-chart-line" 
+          label="Dashboard" 
+          onClick={() => navigate('/admin/dashboard')} 
+          active={isActive('/admin/dashboard')} 
+        />
         <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => navigate('/customers')} active={isActive('/customers')} />
         <NavItem icon="fa-solid fa-check-double" label="Confirmed Order" onClick={() => navigate('/confirm-orders')} active={isActive('/confirm-orders')} />
         <NavItem icon="fa-solid fa-users" label="Suppliers" onClick={() => navigate('/suppliers')} active={isActive('/suppliers')} />
