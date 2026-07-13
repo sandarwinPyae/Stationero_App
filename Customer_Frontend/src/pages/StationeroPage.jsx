@@ -11,10 +11,20 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
       const navigate = useNavigate();
 
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
-      const isUserAuthenticated = isLoggedIn || (() => {
-            const activeSessionToken = localStorage.getItem('stationero_logged_user');
-            return activeSessionToken !== null && activeSessionToken !== "undefined";
-      })();
+      const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+      useEffect(() => {
+      try {
+            const savedProfile = localStorage.getItem('stationero_logged_user');
+            if (savedProfile && savedProfile !== "undefined") {
+                  const parsedUser = JSON.parse(savedProfile);
+                  const isCustomerRole = (parsedUser.role === 'customer' || !parsedUser.role);
+                  setIsUserAuthenticated(isLoggedIn || isCustomerRole);
+                  if (parsedUser.role === 'admin') { setIsUserAuthenticated(false); } // 👈 Admin ဒေတာ ညှပ်နေပါက Guest Nav သို့ တိုက်ရိုက် အတင်းပြောင်းလဲစေခြင်းဖြစ်သည်
+            } else {
+                  setIsUserAuthenticated(isLoggedIn);
+            }
+      } catch (e) { setIsUserAuthenticated(isLoggedIn); }
+      }, [isLoggedIn, location.pathname]);
       const [navSearchQuery, setNavSearchQuery] = useState("");
       const handleLogin = () => {
             navigate('/login');
@@ -98,8 +108,6 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                           <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
                                           <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
                                           <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
-                                          <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Shopping Cart</Link></li>
-                                          <li><Link to="/order" className={location.pathname === "/order" ? "active" : ""}>Order</Link></li>
                                           <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
                                           <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
                                           <li><Link to="/profile" className={location.pathname === "/profile" ? "active" : ""}>Profile</Link></li>

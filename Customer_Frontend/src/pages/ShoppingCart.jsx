@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthProvider } from '../context/AuthContext'; 
 import { StationeroNavbar } from './StationeroPage'; 
-
+import { ArrowLeft } from 'lucide-react';
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -81,10 +81,16 @@ const ShoppingCart = () => {
   };
   return (
     <div style={styles.container}>
-      <AuthProvider>
-          <StationeroNavbar showSearch={false} />
-      </AuthProvider>
-
+      <header style={styles.navbar}>
+        <div style={styles.logo}>Stationero</div>
+          <div 
+        onClick={() => navigate('/product')} 
+        style={styles.backButtonWrapper}
+      >
+        <span style={styles.backArrow}>←</span> 
+        <span style={styles.backText}>Back</span>
+      </div>
+      </header>
       <main style={styles.mainContent}>
         <h1 style={styles.mainHeading}>Shopping Cart</h1>
 
@@ -191,10 +197,12 @@ const ShoppingCart = () => {
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
-  logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
+  logo: { fontFamily: "Azeret Mono, monospace", color: '#f25278', fontSize: '30px', fontWeight: '800', letterSpacing: '-1.5px', margin: 0, textTransform: 'none' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
+  backArrow: { color: '#f25278', fontWeight: 'bold'},
+  backText: { color: '#f25278', fontWeight: 'bold'},
   mainContent: { padding: '40px 80px', maxWidth: '1400px', margin: '0 auto' },
   mainHeading: { fontSize: '28px', color: '#111', margin: '0 0 30px 0', fontWeight: 'bold' },
   successBanner: { backgroundColor: '#eef9f0', color: '#1e7e34', padding: '15px', borderRadius: '8px', marginBottom: '25px', border: '1px solid #c3e6cb', fontWeight: 'bold', textAlign: 'center' },

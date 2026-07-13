@@ -206,10 +206,15 @@ const OrderPage = () => {
 
   return (
     <div style={styles.container}>
-      <AuthProvider>
-        <StationeroNavbar showSearch={false} />
-      </AuthProvider>
-
+        <header style={styles.navbar}>
+          <div style={styles.logo}>Stationero</div>
+            <div 
+          onClick={() => navigate('/cart')} 
+        >
+          <span style={styles.backArrow}>←</span> 
+          <span style={styles.backText}>Back</span>
+        </div>
+        </header>
         <main style={styles.mainContent}>
         {checkoutItems.length === 0 ? (
           <div style={styles.emptyOrderContainer}>
@@ -353,7 +358,7 @@ const OrderPage = () => {
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
-  logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
+  logo: { fontFamily: "Azeret Mono, monospace", color: '#f25278', fontSize: '30px', fontWeight: '800', letterSpacing: '-1.5px', margin: 0, textTransform: 'none' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
@@ -371,6 +376,9 @@ const styles = {
   tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '13px', alignItems: 'center' },
   thCell: { textAlign: 'left' },
   tdCell: { textAlign: 'left' },
+  activeLink: { color: '#f25278', fontWeight: 'bold' },
+  backArrow: { color: '#f25278', fontWeight: 'bold'},
+  backText: { color: '#f25278', fontWeight: 'bold'},
   summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px' },
   summaryRow: { display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '14px', color: '#444' },
   summaryLabel: { fontWeight: 'bold', color: '#555' },
