@@ -32,6 +32,8 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
         .filter(models.SaleOrdersHeader.sale_order_id == order_id)
         .first()
     )
+    print("customer_id =", order.customer_id)
+    print("customer =", order.customer)
 
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
