@@ -32,7 +32,7 @@ const Sidebar = () => {
       </div>
       
       <nav className="mt-4 px-3 space-y-1 flex-1">
-        <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/dashboard')} active={isActive('dashboard')} />
+        <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/admin/dashboard')} active={isActive('/admin/dashboard')} />
         <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => navigate('/customers')} active={isActive('customer')} />
         <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => navigate('/confirm-orders')} active={isActive('confirm-order')} />
         
@@ -113,7 +113,15 @@ const Sidebar = () => {
         )}
         
         <div className="mt-auto pt-10">
-          <NavItem icon="fa-solid fa-right-from-bracket" label="Logout" className="text-red-500" onClick={() => console.log('Logout')} />
+          <NavItem 
+            icon="fa-solid fa-right-from-bracket" 
+            label="Logout" 
+            className="text-red-500" 
+            onClick={() => {
+              localStorage.clear(); 
+              window.location.href = 'http://localhost:5173'; 
+            }} 
+          />
         </div>
       </nav>
     </div>

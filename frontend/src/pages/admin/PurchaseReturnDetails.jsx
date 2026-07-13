@@ -34,7 +34,7 @@ const PurchaseReturnDetails = () => {
         </button>
         
         <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500 text-sm"></i>
+          <i className="fa-solid fa-user text-gray-500 text-sm" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
 

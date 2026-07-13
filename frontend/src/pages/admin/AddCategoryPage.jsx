@@ -34,7 +34,7 @@ const AddCategoryPage = () => {
             <i className="fa-solid fa-arrow-left mr-2"></i> Back
           </button>
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
-            <i className="fa-solid fa-user text-gray-600"></i>
+            <i className="fa-solid fa-user text-gray-600" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </div>
 

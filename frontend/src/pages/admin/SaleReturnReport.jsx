@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const SaleReturnReport = () => {
+  const navigate = useNavigate();
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   
@@ -101,7 +103,7 @@ const SaleReturnReport = () => {
     <div className="min-h-screen bg-gray-50">
       <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-200">
         <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
-          <i className="fa-solid fa-user text-gray-500"></i>
+          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 

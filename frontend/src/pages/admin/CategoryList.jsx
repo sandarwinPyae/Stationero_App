@@ -58,7 +58,7 @@ const CategoryList = () => {
     <div className="min-h-screen bg-gray-50 pb-10">
       <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-100 shadow-sm mb-8">
         <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500"></i>
+          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
