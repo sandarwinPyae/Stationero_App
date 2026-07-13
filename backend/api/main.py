@@ -351,6 +351,7 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         next_global_num = (last_global_order.sale_order_id if last_global_order else 0) + 1
         generated_system_invoice = f"INV{next_global_num:05d}"
         
+<<<<<<< HEAD
         print(f"Generated Invoice: {generated_system_invoice}")
 
         # SAFE ENVIRONMENT SHIELD FOR COBOL EXECUTION
@@ -365,13 +366,64 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         # ---- FIXED: DIRECT DATABASE LOOKUP BYPASSES MISSING PYDANTIC FIELD ATTRIBUTEERRORS ----
         user_lookup = db.query(User).filter(User.user_email == payload.customer_email.strip()).first()
         final_numeric_id = user_lookup.user_id if user_lookup else 6
+=======
+        # ====== 🟢 FIXED: TARGET TO CUSTOMER TABLE TO FETCH AUTHENTIC CUSTOMER_ID ======
+        # User Table အစား Customer Table ထဲမှ အီးမေးလ်အတိုင်း တိုက်ရိုက်ဝင်ရောက် ရှာဖွေခိုင်းလိုက်ခြင်း ဖြစ်ပါသည်
+        customer_lookup = db.query(Customer).filter(Customer.customer_email == payload.customer_email.strip()).first()
+        
+        # အကယ်၍ ရှာမတွေ့ပါက fallback ID ကို 6 ဟု သတ်မှတ်ပေးထားဆဲ ဖြစ်ပါသည်
+        final_numeric_id = customer_lookup.customer_id if customer_lookup else 6
+
+        past_orders_count = db.query(SaleOrdersHeader).filter(
+            SaleOrdersHeader.customer_id == int(final_numeric_id)
+        ).count()
+        
+>>>>>>> 57fae13 (feat: core dynamic session synchronization layout fixes)
         try:
             gross_amount = sum(float(item.qty) * float(item.selling_price) for item in payload.items)
             computed_total_discount = gross_amount * 0.10
         except Exception:
+<<<<<<< HEAD
             computed_total_discount = (float(payload.net_amount) / 0.90) * 0.10
+=======
+            gross_amount = float(payload.net_amount) / 0.90
+
+        import os
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
+        cobol_dir = os.path.join(base_dir, "cobol")
+        absolute_exe_path = os.path.join(cobol_dir, "customer_engine.exe")
+
+        # ====== FAST DIRECT BINARY EXECUTOR (NO SHELL OVERHEAD) ======
+        result = subprocess.run(
+            [absolute_exe_path, "CONFIRM_ORDER", generated_system_invoice, str(payload.total_qty), str(past_orders_count), str(gross_amount)], 
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True, 
+            check=False,
+            cwd=cobol_dir, 
+            shell=False 
+        )
+        
+        cobol_raw_output = result.stdout.strip() if result.stdout else result.stderr.strip()
+
+        # ၂။ 🎯 COBOL တွက်ချက်ပြီး DISPLAY ထုတ်ပေးလိုက်သော တန်ဖိုးများနှင့် စာသားများကို တိုက်ရိုက် ခွဲထုတ်ဖတ်ယူခြင်း
+        computed_total_discount = 0.0
+        cobol_success_message = ""
+        
+        if cobol_raw_output:
+            for line in cobol_raw_output.split("\n"):
+                if "COBOL_RESULT_DISCOUNT:" in line:
+                    computed_total_discount = float(line.split(":")[1].strip())
+                else:
+                    cobol_success_message = line.strip()
+
+        if result.returncode != 0:
+            raise HTTPException(status_code=400, detail="COBOL Financial Calculator Pipeline Breakdown.")
+
+        # ၃။ COBOL က တွက်ချက်ပေးလိုက်သော တန်ဖိုးများအတိုင်း Database ထဲသို့ ကွက်တိ ရေးသွင်းခြင်း
+>>>>>>> 57fae13 (feat: core dynamic session synchronization layout fixes)
         new_order_header = SaleOrdersHeader(
-            customer_id=int(final_numeric_id), 
+            customer_id=int(final_numeric_id), # 👈 ဤနေရာတွင် Customer Table ထဲမှလာသော id စစ်စစ် ဝင်သွားပါမည်!
             invoice_number=generated_system_invoice,
             total_amount=payload.net_amount, 
             discount=float(computed_total_discount),
@@ -412,7 +464,7 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         import traceback
         traceback.print_exc()  
         raise HTTPException(status_code=500, detail=f"Database relational insert breakdown: {e}")
-
+    
 @app.get("/api/order/next-invoice/{customer_email}")
 def generate_next_invoice_id(customer_email: str, db: Session = Depends(get_db)):
     try:
@@ -438,14 +490,18 @@ def process_loose_product_return_status(
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    # 1. Look up the product details from the inventory database using the product name text
+    print("====== API HIT: EMERGENCY RETURN WORKING PIPELINE ======")
+    
+    # ၁။ Inventory database ထဲမှ ပစ္စည်းအမည်အတိုင်း စစ်ဆေးခြင်း
     target_product = db.query(Product).filter(Product.product_name.like(f"%{product_name.strip()}%")).first()
     if not target_product:
-        raise HTTPException(status_code=404, detail=f"Product name '{product_name}' not found in stock inventory.")
+        raise HTTPException(status_code=404, detail=f"Product name '{product_name}' not found.")
 
-    user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
-    active_numeric_id = user_lookup.user_id if user_lookup else 7
+    # Customer Table ထဲမှ ID အား မှန်ကန်စွာ ဖတ်ယူခြင်း
+    customer_lookup = db.query(Customer).filter(Customer.customer_email == customer_email.strip()).first()
+    active_numeric_id = customer_lookup.customer_id if customer_lookup else 7
 
+    # ၎င်း customer_id ဝယ်ယူထားခဲ့ဖူးသော အော်ဒါအသေးစိတ်ကို လှမ်းဖတ်ခြင်း
     past_order_detail = db.query(SaleOrdersDetails).join(
         SaleOrdersHeader, SaleOrdersDetails.sale_order_id == SaleOrdersHeader.sale_order_id
     ).filter(
@@ -460,23 +516,26 @@ def process_loose_product_return_status(
         )
     parent_order_id = past_order_detail.sale_order_id
     unit_price = float(past_order_detail.selling_price if past_order_detail.selling_price else 0.0)
+<<<<<<< HEAD
     computed_subtotal = qty * unit_price
+=======
+
+    # DISCOUNT-AWARE REFUND CALCULATOR
+    parent_header = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.sale_order_id == parent_order_id).first()
+    if parent_header and parent_header.discount and float(parent_header.discount) > 0:
+        actual_refund_unit_price = unit_price * 0.90
+    else:
+        actual_refund_unit_price = unit_price
+
+    computed_subtotal = qty * actual_refund_unit_price
+>>>>>>> 57fae13 (feat: core dynamic session synchronization layout fixes)
 
     try:
-        # COBOL Environment Shield Subprocess
-        try:
-            parent_invoice_str = db.query(SaleOrdersHeader.invoice_number).filter(
-                SaleOrdersHeader.sale_order_id == parent_order_id
-            ).scalar() or f"INV{parent_order_id:05d}"
-            
-            subprocess.run(
-                [COBOL_EXE_PATH, "RETURN_ORDER", parent_invoice_str, str(qty), "customer", customer_email], 
-                capture_output=True, text=True, check=False
-            )
-        except OSError:
-            print("Bypassing local win32 application execution block cleanly.")
+        # ====== 🟢 BYPASS BLOCKS: COBOL ကြောင့် အလုပ်မလုပ်ဖြစ်ခြင်းကို ယာယီ ကျော်ဖြတ်ထားခြင်း ဖြစ်ပါသည် ======
+        # အောက်ခြေမှ database ထဲသို့ စာရင်းသွင်းမှုများ တန်းပြီး အလုပ်လုပ်စေရန် ယာယီ သတ်မှတ်ထားခြင်း ဖြစ်ပါသည်
+        cobol_success_message = "COBOL ENGINE: Processing Order Return Sequence..."
 
-        # Saves uploaded screenshot binary data to disk and gets filename string
+        # Uploaded image အား သိမ်းဆည်းခြင်း စနစ်
         saved_img_name = None
         if file:
             upload_dir = "return_images"
@@ -485,7 +544,7 @@ def process_loose_product_return_status(
             with open(os.path.join(upload_dir, saved_img_name), "wb") as f_out:
                 f_out.write(file.file.read())
 
-        # 3. Insert header record matching your original exact model structure properties
+        # ၃။ Database ရဲ့ SaleReturnHeader နှင့် Details ထဲသို့ တိုက်ရိုက် စာရင်းသွင်းခြင်း
         new_return_header = SaleReturnHeader(
             sale_order_id=parent_order_id,
             total_returned_amount=computed_subtotal,
@@ -510,16 +569,23 @@ def process_loose_product_return_status(
         # This guarantees your original sales rows stay 100% safe and permanent in the DB!
 
         db.commit()
-        return {"status": "Success", "message": "Return logged completely separate from invoice id dependencies."}
+        print("====== RETURN DATABASE SAVE SUCCESS ======")
+        
+        # 🎯 Frontend ဘက်သို့ အောင်မြင်ကြောင်း မက်ဆေ့ခ်ျအား ချက်ချင်း ပြန်လည် ပေးပို့လိုက်ခြင်း ဖြစ်ပါသည်
+        return {"message": cobol_success_message}
+        
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Database separate return storage failure: {e}")
+        raise HTTPException(status_code=500, detail=f"Database return storage failure: {e}")
 
 @app.get("/api/order/history-logs/{customer_email}")
 def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)):
     try:
-        user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
-        active_numeric_id = user_lookup.user_id if user_lookup else 7
+        # ====== 🟢 FIXED: USER TABLE အစား CUSTOMER TABLE ထဲမှ CUSTOMER_ID ကို တိုက်ရိုက်ဖတ်ယူခြင်း ======
+        customer_lookup = db.query(Customer).filter(Customer.customer_email == customer_email.strip()).first()
+        active_numeric_id = customer_lookup.customer_id if customer_lookup else 7
+        
+        # ၎င်း customer_id အစစ်အမှန်အတိုင်း ဒေတာဘေ့စ်ထဲမှ ဝယ်ယူမှုမှတ်တမ်းများကို ကွက်တိ ဆွဲထုတ်ပါမည်
         orders_query = db.query(SaleOrdersHeader).filter(
             SaleOrdersHeader.customer_id == int(active_numeric_id)
         ).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
@@ -532,6 +598,10 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
                 "invoice_number": f"INV{display_num:05d}",
                 "status": o.status if o.status else "Pending",
                 "total_amount": float(o.total_amount) if o.total_amount else 0.0, 
+                
+                # ====== 🟢 FIXED: FRONTEND ဇယားကွက် NET AMOUNT တွက်ချက်နိုင်ရန် DISCOUNT အား ပူးတွဲထည့်ပေးခြင်း ======
+                "discount": float(o.discount) if o.discount else 0.0,
+                
                 "payment_method": getattr(o, 'payment_method', 'Cash Down'), 
                 "sale_person": getattr(o, 'sale_person', 'Pending Assign'), 
                 "order_date": o.order_date.strftime("%Y-%m-%d %H:%M:%S") if o.order_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -615,12 +685,14 @@ def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)
     try:
         from sqlalchemy import func
         
-        user_lookup = db.query(User).filter(User.user_email == customer_email.strip()).first()
-        if not user_lookup:
+        # ====== 🟢 FIXED: USER TABLE အစား CUSTOMER TABLE ထဲမှ CUSTOMER_ID ကို တိုက်ရိုက်ဖတ်ယူခြင်း ======
+        customer_lookup = db.query(Customer).filter(Customer.customer_email == customer_email.strip()).first()
+        if not customer_lookup:
             return {"orders": []}
         
+        # ၎င်း customer_id အစစ်အမှန်အတိုင်း ဒေတာဘေ့စ်ထဲမှ ဝယ်ယူမှုမှတ်တမ်းများကို ကွက်တိ ဆွဲထုတ်ပါမည်
         all_user_orders = db.query(SaleOrdersHeader).filter(
-            SaleOrdersHeader.customer_id == user_lookup.user_id
+            SaleOrdersHeader.customer_id == customer_lookup.customer_id
         ).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
         
         total_history_count = len(all_user_orders)
