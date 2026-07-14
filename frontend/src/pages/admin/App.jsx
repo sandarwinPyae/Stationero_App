@@ -37,7 +37,7 @@ function App() {
       <div className="flex">
         <Sidebar />
         
-        <div className="flex-1">
+        <div className="flex-1 ml-64">
           <Routes>
             <Route path="/suppliers" element={<SupplierPage />} />
             <Route path="/add-supplier" element={<AddSupplierPage />} />

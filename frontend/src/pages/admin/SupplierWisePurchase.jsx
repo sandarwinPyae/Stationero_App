@@ -61,13 +61,13 @@ const SupplierWisePurchase = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full mb-8">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="px-8 pb-8">
+      <div className="px-8 pt-24 pb-8">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">Supplier-wise Purchase Report</h2>
           <div className="relative">
@@ -93,19 +93,19 @@ const SupplierWisePurchase = () => {
         </div>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          {currentRecords.length > 0 ? (
-            <table className="w-full text-left">
-              <thead className="bg-gray-200 text-gray-600">
-                <tr>
-                  <th className="p-5">Supplier ID</th>
-                  <th className="p-5">Supplier Name</th>
-                  <th className="p-5">Total Order</th>
-                  <th className="p-5">Total Quantity</th>
-                  <th className="p-5">Total Amount (Ks)</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {currentRecords.map((item) => (
+          <table className="w-full text-left">
+            <thead className="bg-gray-200 text-gray-600 uppercase text-sm">
+              <tr>
+                <th className="p-5">Supplier ID</th>
+                <th className="p-5">Supplier Name</th>
+                <th className="p-5">Total Order</th>
+                <th className="p-5">Total Quantity</th>
+                <th className="p-5">Total Amount (Ks)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {currentRecords.length > 0 ? (
+                currentRecords.map((item) => (
                   <tr key={item.supplier_id} className="hover:bg-gray-50 transition">
                     <td className="p-5 font-medium text-gray-700">{item.supplier_id}</td>
                     <td className="p-5 font-medium text-gray-800">{item.supplier_name}</td>
@@ -113,12 +113,16 @@ const SupplierWisePurchase = () => {
                     <td className="p-5">{item.total_qty}</td>
                     <td className="p-5 font-bold text-gray-800">{item.total_amount.toLocaleString()}</td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="p-10 text-center text-gray-500 font-medium">No data found</div>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="p-10 text-center text-gray-500 font-medium">
+                    No data found
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Pagination */}

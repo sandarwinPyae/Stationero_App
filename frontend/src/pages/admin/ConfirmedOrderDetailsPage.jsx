@@ -2,55 +2,60 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+// 1. Modal Component
+const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-2xl shadow-xl w-96 mx-4">
+        <h3 className="text-lg font-bold text-gray-800 mb-2">{title}</h3>
+        <p className="text-gray-600 mb-6">{message}</p>
+        <div className="flex justify-end gap-3">
+          <button onClick={onCancel} className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 bg-[#F25278] text-white font-semibold rounded-lg hover:bg-pink-600 transition">Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const ConfirmedOrderDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Modal states
+  const [showModal, setShowModal] = useState(false);
+  const [statusMessage, setStatusMessage] = useState("");
 
-  useEffect(() => {
-    const fetchOrderDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/confirm-orders/details/${id}`);
-        setOrder(response.data);
-        setLoading(false);
-      } catch (error) {
-        console.error("Error fetching order details:", error);
-        setLoading(false);
-      }
-    };
-    fetchOrderDetails();
-  }, [id]);
-
-  useEffect(() => {
   const fetchOrderDetails = async () => {
     try {
       const response = await axios.get(`http://localhost:8000/confirm-orders/details/${id}`);
-      console.log("API Response Data:", response.data); 
       setOrder(response.data);
       setLoading(false);
-    } 
-    catch (error) {
-      console.error(error);
+    } catch (error) {
+      console.error("Error fetching order details:", error);
       setLoading(false);
     }
   };
-  fetchOrderDetails();
+
+  useEffect(() => {
+    fetchOrderDetails();
   }, [id]);
 
-
   const handleConfirmSale = async () => {
-    if (!window.confirm("Are you sure you want to confirm this sale?")) return;
-
     try {
       const response = await axios.put(`http://localhost:8000/confirm-sale/${id}`);
       if (response.status === 200) {
-        alert("Sale confirmed successfully!");
-        window.location.reload(); 
+        setStatusMessage("Sale confirmed successfully!");
+        setShowModal(false);
+        fetchOrderDetails(); // Refresh order status
       }
     } catch (error) {
       const errorMsg = error.response?.data?.detail || "Something went wrong!";
-      alert(errorMsg);
+      setStatusMessage(errorMsg);
+      setShowModal(false);
     }
   };
 
@@ -59,7 +64,7 @@ const ConfirmedOrderDetailsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="h-16 flex justify-between items-center px-8 bg-white border-b border-gray-200 shadow-sm w-full">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <button 
           onClick={() => navigate('/confirm-orders')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center gap-1"
@@ -73,8 +78,16 @@ const ConfirmedOrderDetailsPage = () => {
         </div>
       </header>
 
-      {/* Content Area  */}
-      <div className="p-8">
+      {/* Success/Error Toast Message */}
+      {statusMessage && (
+        <div className="fixed top-20 right-8 z-50 p-4 bg-white border-l-4 border-[#F25278] shadow-lg rounded-r-lg flex items-center justify-between min-w-[300px]">
+          <p className="text-sm font-medium text-gray-700">{statusMessage}</p>
+          <button onClick={() => setStatusMessage("")} className="ml-4 text-gray-400 hover:text-gray-600">×</button>
+        </div>
+      )}
+
+      {/* Content Area */}
+      <div className="p-8 pt-24">
         <div className="max-w-4xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-gray-100">
           
           {/* Header Info */}
@@ -86,13 +99,13 @@ const ConfirmedOrderDetailsPage = () => {
               <p className="text-sm text-gray-500">Invoice ID : <span className="font-semibold text-gray-800">{order.header.invoice_number}</span></p>
               <p className="text-sm text-gray-500">Sale Date : 
                 <span className="font-semibold text-gray-800">
-                  {new Date(order.header.order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                  {new Date(order.header.order_date).toLocaleString('en-GB')}
                 </span>
               </p>
             </div>
           </div>
 
-          {/* Customer Information */}
+          {/* Customer & Payment Info */}
           <div className="bg-gray-50 p-6 rounded-lg mb-8">
             <h3 className="font-bold text-gray-700 mb-4">Customer Information :</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
@@ -147,12 +160,10 @@ const ConfirmedOrderDetailsPage = () => {
 
           {/* Buttons */}
           <div className="flex justify-center gap-4 mt-8">  
-            
-            
             {order.header.status !== 'Confirmed' && (
               <button 
-                onClick={handleConfirmSale}
-                className="px-8 py-2 bg-[#F25278] text-white rounded-lg hover:bg-[#d64566]"
+                onClick={() => setShowModal(true)}
+                className="px-8 py-2 bg-[#F25278] text-white rounded-lg hover:bg-[#d64566] transition"
               >
                 Confirm Sale
               </button>
@@ -160,6 +171,15 @@ const ConfirmedOrderDetailsPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal 
+        isOpen={showModal}
+        title="Confirm Sale"
+        message="Are you sure you want to confirm this sale?"
+        onConfirm={handleConfirmSale}
+        onCancel={() => setShowModal(false)}
+      />
     </div>
   );
 };

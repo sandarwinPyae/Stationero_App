@@ -57,22 +57,26 @@ const PurchaseOrderDetail = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="h-16 flex items-center justify-between px-8 bg-[#F8FAFC] border-b border-gray-200">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+  
+        {/* Back Button (Left side) */}
         <button 
           onClick={() => navigate('/purchase')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
+
+        {/* User Icon (Right side) */}
+        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+          <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6">
+      <div className="max-w-5xl mx-auto px-6 pt-24">
 
         <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-bold mb-6">Purchase Order Details</h2>
+          <h2 className="text-xl font-bold mb-6">Purchase Order Details</h2>
           
           {/* Order Info Grid */}
           <div className="grid grid-cols-2 gap-y-4 gap-x-8 mb-8 bg-gray-100 p-6 rounded-2xl">
@@ -130,11 +134,11 @@ const PurchaseOrderDetail = () => {
           </table>
 
           <div className="text-right border-t pt-4">
-            <p className="text-xl font-bold mb-4">Total Amount: {calculateTotal().toFixed(2)}</p>
+            <p className="text-l font-bold mb-4">Total Amount: {calculateTotal().toFixed(2)}</p>
             {!isConfirmed && (
               <button 
                 onClick={handleUpdateOrder}
-                className="bg-[#F25278] text-white px-8 py-2 rounded-xl hover:bg-pink-600 transition"
+                className="bg-[#F25278] text-white px-8 py-2.5 rounded-xl hover:bg-pink-600 transition"
               >
                 Confirmed Received
               </button>

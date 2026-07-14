@@ -103,18 +103,22 @@ const AddPurchaseOrderPage = () => {
 
   return (
     <div className="pt-4 pb-4 bg-gray-50 min-h-screen">
-      <div className="h-16 flex items-center justify-between px-6 bg-[#F8FAFC] border-b border-gray-200 mb-4">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+  
+        {/* Back Button (Left side) */}
         <button 
           onClick={() => navigate('/purchase')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
+
+        {/* User Icon (Right side) */}
+        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+          <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+      <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100 pt-20">
         <h2 className="text-xl font-bold mb-6">Create Purchase Order</h2>
         
         <div className="grid grid-cols-2 gap-4 mb-4">

@@ -28,12 +28,12 @@ const Sidebar = () => {
   const isActive = (keyword) => location.pathname.toLowerCase().includes(keyword.toLowerCase());
 
   return (
-    <div className="w-64 bg-[#F8FAFC] min-h-screen border-r border-gray-200 shadow-sm flex flex-col">
-      <div className="p-6">
+    <div className="w-64 bg-[#F8FAFC] h-screen border-r border-gray-200 shadow-sm flex flex-col fixed left-0 top-0 overflow-y-auto z-50">
+      <div className="py-4 px-6">
         <h1 className=" font-azeret text-2xl font-bold text-[#F25278]">Stationero</h1>
       </div>
       
-      <nav className="mt-4 px-3 space-y-1 flex-1">
+      <nav className="mt-2 px-3 space-y-1 flex-1">
         <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/admin/dashboard')} active={isActive('/admin/dashboard')} />
         <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => navigate('/customers')} active={isActive('customer')} />
         <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => navigate('/confirm-orders')} active={isActive('confirm-order')} />

@@ -76,14 +76,14 @@ const PurchasePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Header - Full Width */}
-      <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-100 shadow-sm mb-8 w-full">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border border-gray-200">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
       {/* Main Container - Centered */}
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="max-w-7xl mx-auto px-6 pt-24">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">Purchase Page</h2>
           <button 
@@ -131,7 +131,12 @@ const PurchasePage = () => {
                 type="date" 
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-500 outline-none focus:border-gray-400" 
                 value={startDate}
-                onChange={(e) => setStartDate(e.target.value)} 
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  if (endDate && e.target.value > endDate) {
+                    setEndDate(""); 
+                  }
+                }}
               />
             </div>
 
@@ -140,6 +145,7 @@ const PurchasePage = () => {
               <label className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1 block">End Date</label>
               <input 
                 type="date" 
+                min={startDate}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-500 outline-none focus:border-gray-400" 
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)} 

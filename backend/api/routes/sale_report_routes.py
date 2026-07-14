@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from sqlalchemy import String, cast, func
+from sqlalchemy import String, cast, desc, func
 from db import models
 from db.database import get_db
 
@@ -18,6 +18,7 @@ def get_sale_reports(db: Session = Depends(get_db)):
         models.SaleOrdersHeader.total_amount,
         models.SaleOrdersHeader.discount
     ).join(models.Customer, models.SaleOrdersHeader.customer_id == models.Customer.customer_id)\
+     .order_by(desc(models.SaleOrdersHeader.sale_order_id))\
      .all()
 
     output = []

@@ -26,20 +26,24 @@ const AddCategoryPage = () => {
       {/* --- MAIN CONTENT --- */}
       <div className="flex-1">
         {/* --- NAVBAR --- */}
-        <div className="h-16 flex justify-between items-center px-8 shadow-sm bg-[#F8FAFC]">
+        <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+  
+          {/* Back Button (Left side) */}
           <button 
             onClick={() => navigate('/categories')}
             className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
           >
             <i className="fa-solid fa-arrow-left mr-2"></i> Back
           </button>
+
+          {/* User Icon (Right side) */}
           <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
-            <i className="fa-solid fa-user text-gray-600" onClick={() => navigate('/admin/dashboard')}></i>
+            <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </div>
 
         {/* --- FORM CONTENT --- */}
-        <div className="p-8">
+        <div className="pt-24 p-8">
           <h2 className="text-2xl font-bold mb-6">Add New Category</h2>
           <div className="bg-white p-8 rounded-lg shadow-sm max-w-xl">
             <div className="space-y-4">

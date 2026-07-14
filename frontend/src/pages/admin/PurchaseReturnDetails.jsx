@@ -25,7 +25,7 @@ const PurchaseReturnDetails = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 mb-6 border-b border-gray-200">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <button 
           onClick={() => navigate('/purchase/returns')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center gap-2"
@@ -39,9 +39,9 @@ const PurchaseReturnDetails = () => {
       </div>
 
       {/* Main Container */}
-      <div className="p-8 flex-grow">
+      <div className="p-8 flex-grow pt-20">
         <div className="max-w-5xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
-          <h2 className="text-2xl font-bold mb-6 text-gray-800">Purchase Order Returns</h2>
+          <h2 className="text-xl font-bold mb-6 text-gray-800">Purchase Order Returns</h2>
           
           {/* Header Information */}
           <div className="grid grid-cols-2 gap-y-4 mb-8 text-sm">

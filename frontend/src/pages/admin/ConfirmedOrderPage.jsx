@@ -66,14 +66,14 @@ const ConfirmedOrderPage = () => {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       {/* Header */}
-      <header className="h-16 flex justify-end items-center px-8 bg-white border-b border-gray-200 shadow-sm w-full shrink-0">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer hover:bg-gray-200 transition-colors">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto p-8">
+      <main className="flex-1 overflow-y-auto p-8 pt-24">
         <div className="max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold mb-6 text-gray-800">Confirmed Orders</h2>
 
@@ -109,7 +109,12 @@ const ConfirmedOrderPage = () => {
               type="date" 
               value={startDate}
               className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" 
-              onChange={(e) => setStartDate(e.target.value)} 
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate && e.target.value > endDate) {
+                  setEndDate(""); 
+                }
+              }}
             />
           </div>
           
@@ -118,8 +123,10 @@ const ConfirmedOrderPage = () => {
             <input 
               type="date" 
               value={endDate}
+              min={startDate}
               className="px-4 py-2 border border-gray-200 rounded-lg text-gray-600 focus:ring-2 focus:ring-blue-100" 
               onChange={(e) => setEndDate(e.target.value)} 
+              
             />
           </div>
 

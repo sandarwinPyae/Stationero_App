@@ -82,14 +82,14 @@ const ProductList = () => {
       
       <div className="flex-1 flex flex-col w-full overflow-x-hidden">
         {/* Header Section */}
-        <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full">
+        <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
           <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
             <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </header>
 
         {/* Main Content */}
-        <div className="p-8">
+        <div className="p-8 pt-24">
           <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Product List</h2>
             <button 

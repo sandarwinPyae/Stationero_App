@@ -96,13 +96,13 @@ const SaleReport = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="p-8">
+      <div className="p-8 pt-24">
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-2xl font-bold text-gray-800">Sale Report</h2>
           <div className="relative">
@@ -134,39 +134,46 @@ const SaleReport = () => {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" 
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate && e.target.value > endDate) {
+                  setEndDate(""); 
+                }
+              }}  
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
+            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
           </div>
           <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
-          {currentRecords.length > 0 ? (
-            <table className="w-full text-left">
-              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
-                <tr>
-                  <th className="py-4 px-6 font-semibold">Invoice</th>
-                  <th className="py-4 px-6 font-semibold">Customer</th>
-                  <th className="py-4 px-6 font-semibold">Total Amount (Ks)</th>
-                  <th className="py-4 px-6 font-semibold">Discount Amount (Ks)</th>
-                  <th className="py-4 px-6 font-semibold">Net Amount (Ks)</th>
-                  <th className="py-4 px-6 font-semibold">Status</th>
-                  <th className="py-4 px-6 font-semibold">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentRecords.map((s) => (
+          <table className="w-full text-left">
+            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
+              <tr>
+                <th className="py-4 px-6 font-semibold">Invoice</th>
+                <th className="py-4 px-6 font-semibold">Customer</th>
+                <th className="py-4 px-6 font-semibold">Total Amount (Ks)</th>
+                <th className="py-4 px-6 font-semibold">Discount Amount (Ks)</th>
+                <th className="py-4 px-6 font-semibold">Net Amount (Ks)</th>
+                <th className="py-4 px-6 font-semibold">Status</th>
+                <th className="py-4 px-6 font-semibold">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {currentRecords.length > 0 ? (
+                currentRecords.map((s) => (
                   <React.Fragment key={s.sale_order_id}>
                     <tr className="cursor-pointer hover:bg-gray-50 border-b" onClick={() => setSelectedId(selectedId === s.sale_order_id ? null : s.sale_order_id)}>
                       <td className="p-5 font-medium">{s.invoice_number}</td>
                       <td className="p-5">{s.customer_name}</td>
-                      <td className="p-5">{s.total_amount + s.discount}</td>
-                      <td className="p-5">{s.discount}</td>
-                      <td className="p-5">{s.total_amount}</td>
+                      <td className="p-5">{(s.total_amount + s.discount).toLocaleString()}</td>
+                      <td className="p-5">{s.discount.toLocaleString()}</td>
+                      <td className="p-5">{s.total_amount.toLocaleString()}</td>
                       <td className="p-5">
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${s.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{s.status}</span>
                       </td>
@@ -192,10 +199,16 @@ const SaleReport = () => {
                       </tr>
                     )}
                   </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          ) : <div className="p-10 text-center text-gray-500">No matching records found.</div>}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="7" className="p-10 text-center text-gray-500">
+                    No matching records found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Pagination */}

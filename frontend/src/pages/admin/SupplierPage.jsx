@@ -85,13 +85,13 @@ const SupplierPage = () => {
       {/* RIGHT CONTENT */}
       <div className="flex-1 flex flex-col w-full overflow-hidden">
         {/* HEADER */}
-        <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] shadow-sm w-full">
+        <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
             <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </header>
 
-        <main className="p-8 w-full max-w-7xl mx-auto flex-grow">
+        <main className="p-8 pt-24 w-full max-w-7xl mx-auto flex-grow">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Suppliers List</h2>
 
           {/* CONTROLS */}
