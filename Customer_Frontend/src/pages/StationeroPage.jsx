@@ -9,7 +9,7 @@ import Footer from "../components/Footer";
 export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = true }) => {
       const location = useLocation();
       const navigate = useNavigate();
-
+      const [showLogoutModal, setShowLogoutModal] = useState(false);
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
       const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
       useEffect(() => {
@@ -19,7 +19,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                   const parsedUser = JSON.parse(savedProfile);
                   const isCustomerRole = (parsedUser.role === 'customer' || !parsedUser.role);
                   setIsUserAuthenticated(isLoggedIn || isCustomerRole);
-                  if (parsedUser.role === 'admin') { setIsUserAuthenticated(false); } // 👈 Admin ဒေတာ ညှပ်နေပါက Guest Nav သို့ တိုက်ရိုက် အတင်းပြောင်းလဲစေခြင်းဖြစ်သည်
+                  if (parsedUser.role === 'admin') { setIsUserAuthenticated(false); } 
             } else {
                   setIsUserAuthenticated(isLoggedIn);
             }
@@ -30,12 +30,19 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
             navigate('/login');
       };
 
-      const handleLogout = (e) => {
-            e.preventDefault();
-            setIsLoggedIn(false);
-            localStorage.removeItem('stationero_logged_user');
-            navigate('/');
-      };
+  const handleLogoutClick = (e) => {
+    e.preventDefault();
+    setShowLogoutModal(true); 
+  };
+
+  const handleActualLogoutConfirm = () => {
+    setShowLogoutModal(false); 
+    setIsLoggedIn(false);
+    localStorage.removeItem('stationero_logged_user');
+    navigate('/');
+    e.preventDefault(); 
+    setShowLogoutModal(true);
+  };
 
       const handleSearchSubmit = async (e) => {
             if (e.key !== "Enter") return;
@@ -111,7 +118,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                           <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
                                           <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
                                           <li><Link to="/profile" className={location.pathname === "/profile" ? "active" : ""}>Profile</Link></li>
-                                          <li><Link to="/" onClick={handleLogout}>Logout</Link></li>
+                                          <li><Link to="/" onClick={handleLogoutClick}>Logout</Link></li>
                                     </ul>
                               </>
                         ) : (
@@ -129,7 +136,37 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                               </>
                         )}
                   </div>
+                  {showLogoutModal && (
+                  <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw',height: '100vh', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 99999}}>
+                  <div style={{ backgroundColor: '#ffffff', borderRadius: '15px', padding: '20px 30px', maxWidth: '250px', width: '90%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+                        
+                        <h3 style={{ fontFamily: "'Poppins', sans-serif", fontSize: '18px', fontWeight: 'bold', color: '#111111', margin: '0 0 15px 0' }}>Are you sure to logout?</h3>                        
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '20px' }}>
+                        <button 
+                        type="button" 
+                        onClick={() => setShowLogoutModal(false)}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                        style={{ backgroundColor: '#ffffff', color: '#555555', border: '1px solid #dddddd', padding: '10px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' }}
+                        >
+                        Cancel
+                        </button>
+                        <button 
+                        type="button" 
+                        onClick={handleActualLogoutConfirm} 
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#d92d47'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f25278'}
+                        style={{ backgroundColor: '#f25278', color: '#ffffff', border: 'none', padding: '10px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' }}
+                        >
+                        Logout
+                        </button>
+                        </div>
+
+                  </div>
+                  </div>
+                  )}
             </nav>
+
       );
 };
 
@@ -233,11 +270,10 @@ const CategoryOffers = () => {
 };
 
 
-// ပြင်ဆင်ပြီးသော ProductCard
-const ProductCard = ({ product, onProductClick }) => { // 🌟 onProductClick ကို Props အနေနဲ့ လက်ခံပါမယ်
+const ProductCard = ({ product }) => {
       return (
-            <div
-                  onClick={() => onProductClick(product.product_id)} // 🌟 Link အစား onClick ကိုပြောင်းသုံးပြီး id ကို လှမ်းပို့ပါမယ်
+            <Link
+                  to="/product"
                   className="product-card"
                   style={{ cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}
             >
@@ -249,7 +285,7 @@ const ProductCard = ({ product, onProductClick }) => { // 🌟 onProductClick �
                   </div>
                   <h3 className="product-name">{product.product_name}</h3>
                   <p className="product-price-tag">{product.display_price}</p>
-            </div>
+            </Link>
       );
 };
 

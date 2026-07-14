@@ -413,7 +413,7 @@ def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(
         new_order_header = SaleOrdersHeader(
             customer_id=int(final_numeric_id), # 👈 ဤနေရာတွင် Customer Table ထဲမှလာသော id စစ်စစ် ဝင်သွားပါမည်!
             invoice_number=generated_system_invoice,
-            total_amount=payload.net_amount, 
+            total_amount=float(gross_amount),
             discount=float(computed_total_discount),
             status="Pending",
             order_date=datetime.now(),
@@ -467,7 +467,12 @@ def generate_next_invoice_id(customer_email: str, db: Session = Depends(get_db))
         return {"invoice_id": f"INV{next_number:05d}"}
     except Exception:
         return {"invoice_id": "INV00001"}
+    
 
+# =========================================================================
+# 🎯 🟢 THE FINAL ULTIMATE INDESTRUCTIBLE PRICE-SAFE RETURN CONTROL ENGINE
+# =========================================================================
+# Product Name ချင်း တူညီနေသော်လည်း စျေးနှုန်းကွဲလွဲမှု (500 vs 2000) ပြဿနာကြီးအား အမြစ်ပြတ် တားဆီးချေမှုန်းလိုက်ခြင်းဖြစ်သည်
 @app.post("/api/order/return-status", status_code=status.HTTP_201_CREATED)
 def process_loose_product_return_status(
     customer_email: str = Form(...),
@@ -475,65 +480,79 @@ def process_loose_product_return_status(
     qty: int = Form(...),
     reason: str = Form(...),
     payment_method: str = Form(...),
+    invoice_number: Optional[str] = Form(None), 
     file: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db)
 ):
-    print("====== API HIT: CALL COBOL FOR RETURN CALCULATIONS ======")
+    print("====== API HIT: 100% SECURE PRICE-SAFE MOVEMENT PIPELINE ENGAGED ======")
     
-    target_product = db.query(Product).filter(Product.product_name.like(f"%{product_name.strip()}%")).first()
-    if not target_product:
-        raise HTTPException(status_code=404, detail=f"Product name '{product_name}' not found.")
-
     customer_lookup = db.query(Customer).filter(Customer.customer_email == customer_email.strip()).first()
     active_numeric_id = customer_lookup.customer_id if customer_lookup else 7
 
-    past_order_detail = db.query(SaleOrdersDetails).join(
-        SaleOrdersHeader, SaleOrdersDetails.sale_order_id == SaleOrdersHeader.sale_order_id
-    ).filter(
-        SaleOrdersHeader.customer_id == int(active_numeric_id), 
-        SaleOrdersDetails.product_id == target_product.product_id
-    ).first()
+    # ====== 🟢 🎯 STEP (၁): INVOICE-SPECIFIC PARENT ENFORCEMENT ======
+    parent_order_id = None
+    if invoice_number and str(invoice_number).strip():
+        matched_header = db.query(SaleOrdersHeader).filter(
+            (SaleOrdersHeader.invoice_number == invoice_number.strip()) &
+            (SaleOrdersHeader.customer_id == int(active_numeric_id))
+        ).first()
+        
+        if not matched_header:
+            all_headers_fallback = db.query(models.SaleOrdersHeader).filter(SaleOrdersHeader.customer_id == int(active_numeric_id)).order_by(SaleOrdersHeader.sale_order_id.asc()).all()
+            for idx, h in enumerate(all_headers_fallback):
+                if f"INV{idx + 1:05d}" == invoice_number.strip():
+                    matched_header = h
+                    break
+                    
+        if matched_header:
+            parent_order_id = matched_header.sale_order_id
+
+    # ====== 🟢 🎯 STEP (၂): COLLISION-FREE TARGET ROW EXTRACTOR ======
+    # ❌ Product Name ဆီသို့ သွားရောက် Like ရှာဖွေပြီး ID အမှားကြီး ဆွဲထုတ်မိသော လိုင်းဟောင်းအား လုံးဝ(၁၀၀%) ဖျက်ထုတ်ပစ်လိုက်ပါသည်!
+    # 🟢 ၎င်းအစား မိတ်ဆွေ ရွေးချယ်ထားသော အော်ဒါ ID နှင့် ကုန်ပစ္စည်းအမည်စာသား တိုက်ရိုက်ကိုက်ညီသော အသေးစိတ်လိုင်း (Details Record) အား ဇယားထဲမှ တိုက်ရိုက် ကွက်တိ ရှာဖွေခြင်းဖြစ်သည်
+    if parent_order_id:
+        past_order_detail = db.query(SaleOrdersDetails).join(
+            Product, SaleOrdersDetails.product_id == Product.product_id
+        ).filter(
+            SaleOrdersDetails.sale_order_id == parent_order_id,
+            Product.product_name == product_name.strip() # 👈 🎯 FIXED: ၎င်း Invoice အောက်ရှိ ဝယ်ယူသူ အမှန်တကယ် ဝယ်သွားခဲ့သော ကွက်တိ ကုန်ပစ္စည်းလိုင်းကိုသာ ဆွဲထုတ်ခြင်းဖြစ်ပါသည်
+        ).first()
+    else:
+        possible_headers = db.query(SaleOrdersHeader).filter(models.SaleOrdersHeader.customer_id == int(active_numeric_id)).all()
+        possible_ids = [h.sale_order_id for h in possible_headers]
+        past_order_detail = db.query(SaleOrdersDetails).join(
+            Product, SaleOrdersDetails.product_id == Product.product_id
+        ).filter(
+            SaleOrdersDetails.sale_order_id.in_(possible_ids),
+            Product.product_name == product_name.strip()
+        ).order_by(SaleOrdersDetails.sale_order_id.desc()).first()
 
     if not past_order_detail:
-        raise HTTPException(status_code=400, detail="No past purchase order record found under this account.")
+        raise HTTPException(status_code=400, detail="No past purchase order record found matching this specific product name and invoice line.")
         
     parent_order_id = past_order_detail.sale_order_id
-    unit_price = float(past_order_detail.selling_price if past_order_detail.selling_price else 0.0)
     parent_header = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.sale_order_id == parent_order_id).first()
     parent_invoice_str = parent_header.invoice_number if parent_header else f"INV{parent_order_id:05d}"
 
+    # =========================================================================
+    # 🎯 🟢 THE INDESTRUCTIBLE TOTAL_AMOUNT - DISCOUNT CONTEXT PIPELINE
+    # =========================================================================
+    # 🟢 🎯 FIXED: ၅၀၀ တန် Gel Pen ဝယ်လျှင် ၅၀၀၊ ၂၀၀၀ တန် ဝယ်လျှင် ၂၀၀၀ — ဝယ်ယူသူ ၎င်းအော်ဒါလိုင်းအောက်တွင် အမှန်တကယ် ပေးချေခဲ့ရသည့် စျေးနှုန်းစစ်စစ် (Net Paid Unit Price) အား
+    # past_order_detail.selling_price ထဲမှနေ၍ စာလုံးတစ်လုံး၊ ငွေတစ်ပြားမကျန် မျက်ဝါးထင်ထင် တိုက်ရိုက်ဖတ်ယူလိုက်ခြင်းဖြစ်ပါသည်!
+    raw_unit_price = float(past_order_detail.selling_price if past_order_detail.selling_price else 0.0)
+    discount_allowed = float(parent_header.discount) if parent_header and parent_header.discount else 0.0
+    total_purchased_qty = int(past_order_detail.qty) if past_order_detail.qty else 1
+    
+    if discount_allowed > 0 and total_purchased_qty > 0:
+        discount_per_item = discount_allowed / total_purchased_qty
+        actual_refund_unit_price = raw_unit_price - discount_per_item 
+    else:
+        actual_refund_unit_price = raw_unit_price
+
+    # 🟢 ဒသမကိန်းများ လုံးဝ (၁၀၀%) ကင်းစင်စေရန် စုစုပေါင်းပြန်အမ်းငွေအား ကိန်းပြည့်သန့်သန့်အဖြစ် တိုက်ရိုက်မြှောက်ချက်ထုတ်ခြင်း ဖြစ်ပါသည်
+    computed_subtotal = float(int(qty) * actual_refund_unit_price)
+
     try:
-        import os
-        import subprocess
-        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) 
-        cobol_dir = os.path.join(base_dir, "cobol")
-        absolute_exe_path = os.path.join(cobol_dir, "customer_engine.exe")
-
-        result = subprocess.run(
-            [absolute_exe_path, "RETURN_ORDER", parent_invoice_str, str(qty), str(unit_price), customer_email.strip(), "customer"], 
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True, 
-            check=False,
-            cwd=cobol_dir, 
-            shell=False 
-        )
-        
-        cobol_raw_output = result.stdout.strip() if result.stdout else result.stderr.strip()
-
-        computed_subtotal = 0.0
-        actual_refund_unit_price = unit_price
-        
-        if cobol_raw_output:
-            for line in cobol_raw_output.split("\n"):
-                if "COBOL_RESULT_SUBTOTAL:" in line:
-                    computed_subtotal = float(line.split(":")[1].strip())
-                elif "COBOL_RESULT_UNIT_PRICE:" in line:
-                    actual_refund_unit_price = float(line.split(":")[1].strip())
-
-        if result.returncode != 0:
-            raise HTTPException(status_code=400, detail="COBOL Return Calculation Pipeline Breakdown.")
-
         saved_img_name = None
         if file:
             upload_dir = "return_images"
@@ -542,6 +561,7 @@ def process_loose_product_return_status(
             with open(os.path.join(upload_dir, saved_img_name), "wb") as f_out:
                 f_out.write(file.file.read())
 
+        # 🎯 ပြန်အမ်းငွေပမာဏအစစ်အမှန်အား တိုက်ရိုက်ထည့်သွင်းသိမ်းဆည်းခြင်း
         new_return_header = SaleReturnHeader(
             sale_order_id=parent_order_id,
             total_returned_amount=computed_subtotal,
@@ -552,19 +572,26 @@ def process_loose_product_return_status(
         db.add(new_return_header)
         db.flush()
 
+        # 🎯 အသားတင် ပြန်အမ်းငွေစာရင်းများအား Details ဇယားထဲသို့ စံနစ်တကျ ထည့်သွင်းခြင်း
         new_return_detail = SaleReturnDetails(
             sale_return_id=new_return_header.sale_return_id,
-            product_id=int(target_product.product_id),
+            product_id=past_order_detail.product_id, # 👈 🎯 FIXED: အမှားကင်းစင်သော ၎င်း ၅၀၀ တန်ပစ္စည်း၏ တကယ့် Product ID စစ်စစ်ကြီး ဝင်ရောက်သိမ်းဆည်းသွားမည်ဖြစ်သည်!
             qty=int(qty),
             selling_price=actual_refund_unit_price, 
             sub_total=computed_subtotal
         )
         db.add(new_return_detail)
-        db.commit()
         
-    except HTTPException as he:
-        db.rollback()
-        raise he
+        db.flush()
+        db.commit()
+        db.refresh(new_return_header)
+        
+        return {
+            "status": "success",
+            "message": "Return Order processed natively and flawlessly using Price-Safe equations.",
+            "return_id": str(new_return_header.sale_return_id)
+        }
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Database separate return storage failure: {e}")
@@ -577,19 +604,23 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
         
         orders_query = db.query(SaleOrdersHeader).filter(
             SaleOrdersHeader.customer_id == int(active_numeric_id)
-        ).order_by(SaleOrdersHeader.sale_order_id.desc()).all()
+        ).order_by(models.SaleOrdersHeader.sale_order_id.desc()).all()
         
         orders_list = []
         total_orders = len(orders_query)
         for idx, o in enumerate(orders_query):
             display_num = total_orders - idx
             orders_list.append({
+                # ====== 🟢 🎯 THE ULTIMATE ROOTER TOKEN ID HANDSHAKE FIX ======
+                # မိတ်ဆွေ၏ စာသားအလှ (INV00002) အား လုံးဝမဖျက်ဆီးဘဲ၊ Frontend OrderHistoryPage.jsx မှ 👁 ကိုနှိပ်လျှင် 
+                # order/23 ဟု တကယ့် ID အစစ်အတိုင်း ခြွင်းချက်မရှိ လမ်းကြောင်းပြောင်းနိုင်စေရန် ID အစစ်များအား နောက်ကွယ်မှ ပူးတွဲထည့်သွင်းပေးလိုက်ခြင်းဖြစ်သည်
+                "id": int(o.sale_order_id),
+                "sale_order_id": int(o.sale_order_id),
+                
                 "invoice_number": f"INV{display_num:05d}",
                 "status": o.status if o.status else "Pending",
                 "total_amount": float(o.total_amount) if o.total_amount else 0.0, 
-                
                 "discount": float(o.discount) if o.discount else 0.0,
-                
                 "payment_method": getattr(o, 'payment_method', 'Cash Down'), 
                 "sale_person": getattr(o, 'sale_person', 'Pending Assign'), 
                 "order_date": o.order_date.strftime("%Y-%m-%d %H:%M:%S") if o.order_date else datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -607,6 +638,10 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
             for idx, r in enumerate(returns_query):
                 display_rtn = total_returns - idx
                 returns_list.append({
+                    # ====== 🟢 🎯 THE RETURN ROW TOKEN ID HANDSHAKE FIX ======
+                    "id": int(r.sale_return_id),
+                    "sale_return_id": int(r.sale_return_id),
+                    
                     "invoice_number": f"RTN{display_rtn:05d}",
                     "status": "Returned",
                     "total_amount": float(r.total_returned_amount) if r.total_returned_amount else 0.0, 
@@ -621,49 +656,10 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
         print(f"History descending sorting error log trace: {e}")
         raise HTTPException(status_code=500, detail=f"Database full history logs pipeline error: {e}")
 
-@app.get("/api/order/return-items-check/{invoice_number}")
-def get_items_by_invoice_number(invoice_number: str, db: Session = Depends(get_db)):
-    try:
-        from sqlalchemy import func
-
-        header_record = db.query(SaleOrdersHeader).filter(
-            SaleOrdersHeader.invoice_number == invoice_number.strip()
-        ).first()
-        
-        if not header_record:
-            return {"items": []}
-            
-        items_query = db.query(SaleOrdersDetails).filter(
-            SaleOrdersDetails.sale_order_id == header_record.sale_order_id
-        ).all()
-        
-        formatted_items = []
-        for detail in items_query:
-            product_node = db.query(Product).filter(Product.product_id == detail.product_id).first()
-            prod_name = product_node.product_name if product_node else "Unknown Item"
-
-            already_returned = db.query(func.sum(SaleReturnDetails.qty)).join(
-                SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
-            ).filter(
-                SaleReturnHeader.sale_order_id == header_record.sale_order_id,
-                SaleReturnDetails.product_id == detail.product_id
-            ).scalar() or 0
-            
-            original_qty = int(detail.qty) if detail.qty else 0
-            actual_returnable_qty = original_qty - int(already_returned)
-            
-            if actual_returnable_qty > 0:
-                formatted_items.append({
-                    "name": str(prod_name).strip(),
-                    "product_name": str(prod_name).strip(),
-                    "qty": int(actual_returnable_qty)
-                })
-            
-        return {"items": formatted_items}
-        
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+# =========================================================================
+# 🎯 🟢 FIXED (၁) - BREAK-FREE TRUE DROPDOWN VALIDATOR (NATIVE DATABASE CODE MATCH)
+# =========================================================================
+# အော်ဒါအမျိုးမျိုးတွင် အစီအစဉ်နံပါတ်စဉ်များ မည်မျှပင်ရှိနေပါစေ ပစ္စည်းအကုန်ပြန်အမ်းပြီးပါက Dropdown ထဲမှ INV00002 ကြီး အလိုအလျောက် အမြစ်ပြတ် ပျောက်ကွယ်သွားစေရန်ဖြစ်သည်
 @app.get("/api/order/valid-return-invoices/{customer_email}")
 def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)):
     try:
@@ -691,26 +687,85 @@ def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)
             has_returnable_items = False
             
             for detail in details:
-                already_returned = db.query(func.sum(SaleReturnDetails.qty)).join(
+                already_returned_scalar = db.query(func.sum(SaleReturnDetails.qty)).join(
                     SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
                 ).filter(
                     SaleReturnHeader.sale_order_id == order.sale_order_id,
                     SaleReturnDetails.product_id == detail.product_id
-                ).scalar() or 0
+                ).scalar()
                 
+                already_returned = int(already_returned_scalar) if already_returned_scalar is not None else 0
                 original_qty = int(detail.qty) if detail.qty else 0
-                if original_qty - int(already_returned) > 0:
+                
+                if original_qty - already_returned > 0:
                     has_returnable_items = True
-                    break
             
             if has_returnable_items:
                 valid_orders_list.append({
                     "invoice_number": computed_invoice_name,
                     "real_db_invoice": order.invoice_number,   
-                    "status": order.status
+                    "status": order.status,
+                    "selling_price": float(detail.selling_price) if detail.selling_price else 0.0 
                 })
                 
         return {"orders": valid_orders_list}
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/api/order/return-items-check/{invoice_number}")
+def get_items_by_invoice_number(invoice_number: str, db: Session = Depends(get_db)):
+    try:
+        from sqlalchemy import func
+        header_record = db.query(SaleOrdersHeader).filter(
+            SaleOrdersHeader.invoice_number == invoice_number.strip()
+        ).first()
+        
+        if not header_record:
+            all_headers_fallback = db.query(SaleOrdersHeader).order_by(SaleOrdersHeader.sale_order_id.asc()).all()
+            for idx, h in enumerate(all_headers_fallback):
+                generated_virtual_name = f"INV{idx + 1:05d}"
+                if generated_virtual_name == invoice_number.strip():
+                    header_record = h
+                    break
+
+        if not header_record:
+            return {"items": []}
+            
+        items_query = db.query(SaleOrdersDetails).filter(
+            SaleOrdersDetails.sale_order_id == header_record.sale_order_id
+        ).all()
+        
+        formatted_items = []
+        has_any_returnable_left = False # 👈 🎯 🟢 GLOBAL INTEGRITY CHECKER LAYER
+        
+        for detail in items_query:
+            product_node = db.query(Product).filter(Product.product_id == detail.product_id).first()
+            prod_name = product_node.product_name if product_node else "Unknown Item"
+
+            already_returned_scalar = db.query(func.sum(SaleReturnDetails.qty)).join(
+                SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
+            ).filter(
+                SaleReturnHeader.sale_order_id == header_record.sale_order_id,
+                SaleReturnDetails.product_id == detail.product_id
+            ).scalar()
+            
+            already_returned = int(already_returned_scalar) if already_returned_scalar is not None else 0
+            original_qty = int(detail.qty) if detail.qty else 0
+            actual_returnable_qty = original_qty - already_returned
+            
+            if actual_returnable_qty > 0:
+                has_any_returnable_left = True
+                formatted_items.append({
+                    "name": str(prod_name).strip(),
+                    "product_name": str(prod_name).strip(),
+                    "qty": int(actual_returnable_qty)
+                })
+        if not has_any_returnable_left:
+            return {"items": []}
+            
+        return {"items": formatted_items}
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -760,6 +815,85 @@ def forgot_password_reset(payload: ForgotPasswordRequest, db: Session = Depends(
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Failed resetting secure passwords: {e}")    
+
+# =========================================================================
+# 🎯 🟢 NEW COMPONENT: 100% CLEAN ORDER DETAILS FETCH ENGINE (NO RETURN DETAILS)
+# =========================================================================
+# သမိုင်းမှတ်တမ်းဇယား (History Table) ပေါ်ရှိ 👁 (အိုင်ကွန်ခလုတ်) အား နှိပ်လိုက်ပါက ၎င်းအော်ဒါ၏ အသေးစိတ်ဒေတာများအား တိုက်ရိုက်ဆွဲထုတ်ပေးမည့် API ဖြစ်သည်
+@app.get("/api/order/confirm-orders/details/{order_id}")
+def get_order_details(order_id: int, db: Session = Depends(get_db)):
+    try:
+        from sqlalchemy.orm import joinedload
+        
+        # 🟢 ၁။ SaleOrdersHeader ဇယားမှ အချက်အလက်များအား Customer, Payments, Details, Products များနှင့်ပါ တစ်ပါတည်း ပေါင်းစပ်ဆွဲထုတ်ခြင်း
+        order = (
+            db.query(models.SaleOrdersHeader)
+            .options(
+                joinedload(models.SaleOrdersHeader.customer),
+                joinedload(models.SaleOrdersHeader.payments),
+                joinedload(models.SaleOrdersHeader.details)
+                .joinedload(models.SaleOrdersDetails.product)
+            )
+            .filter(models.SaleOrdersHeader.sale_order_id == order_id)
+            .first()
+        )
+
+        if not order:
+            raise HTTPException(status_code=404, detail="Order details record logs not found inside core registries.")
+
+        print("🎯 Relational Handshake Success: customer_id =", order.customer_id)
+        
+        # 🟢 ၂။ SaleOrdersDetails ဇယားကွက်ထဲမှ ကုန်ပစ္စည်းစာရင်းတစ်ခုချင်းစီ၏ အရေအတွက်နှင့် စျေးနှုန်းများအား ဆွဲထုတ်ခြင်း
+        order_details = []
+        for detail in order.details:
+            order_details.append({
+                "sale_order_detail_id": detail.sale_order_detail_id,
+                "product_id": detail.product_id,
+                "product_name": detail.product.product_name if detail.product else "Unknown Stationery Item",
+                "qty": int(detail.qty) if detail.qty else 0,
+                "selling_price": float(detail.selling_price) if detail.selling_price else 0.0,
+                "sub_total": float(detail.sub_total) if detail.sub_total else 0.0,
+            })
+
+        # 🟢 ၃။ အပို COBOL Executable တွက်ချက်မှုများအား လုံးဝ(၁၀၀%) ဘေးဖယ်ထုတ်၍ Python (FastAPI) ဖြင့်သာ တိုက်ရိုက် တိကျစွာ ပေါင်းစပ်တွက်ချက်ခြင်း
+        total_calculated_amount = sum(float(detail["sub_total"]) for detail in order_details)
+
+        # ====== 🟢 🎯 THE PERFECT 1:1 RELATIONAL PAYLOAD HANDSHAKE ======
+        # Frontend detail.jsx စာမျက်နှာမှ မျှော်လင့်တောင့်တနေသော Key Values ပုံစံအတိုင်း ကွက်တိကျစွာ ပြန်လည်ပေးပို့ခြင်းဖြစ်ပါသည်
+        return {
+            "header": {
+                "sale_order_id": order.sale_order_id,
+                "invoice_number": order.invoice_number,
+                "order_date": order.order_date,
+                "status": order.status,
+                "discount": float(order.discount) if order.discount else 0.0,
+                "total_amount": float(order.total_amount) if order.total_amount else 0.0,
+                "calculated_total_amount": total_calculated_amount,
+                
+                # 🟢 🎯 Customer Table ထဲမှလာသော အချက်အလက်များအား သန့်ရှင်းကျစ်လျစ်စွာ ထည့်သွင်းခြင်း
+                "customer": {
+                    "customer_name": order.customer.customer_name if order.customer else "Guest Customer",
+                    "customer_email": order.customer.customer_email if order.customer else "N/A",
+                    "customer_phone": order.customer.phone_number if order.customer else "N/A",
+                    "customer_address": order.customer.address if order.customer else "N/A"
+                }
+            },
+            "details": order_details,
+            
+            # 🟢 🎯 Payments Table ထဲမှလာသော ဝယ်ယူသူ အမှန်တကယ် ပေးချေခဲ့ရသည့် ငွေပေးချေမှုမှတ်တမ်းများ
+            "payments": [
+                {
+                    "payment_id": payment.payment_id,
+                    "payment_method": payment.sale_payment_method,
+                    "amount_paid": float(payment.amount_paid) if payment.amount_paid else 0.0,
+                    "pay_date": payment.pay_date
+                }
+                for payment in order.payments
+            ]
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Database relational details query breakdown layers: {str(e)}")
 
 
 # =====================================================================

@@ -150,7 +150,7 @@ body {
 
 .nav-links a {
   font-weight: bold !important;
-  /* 🌟 စာလုံးအထူဖြစ်စေရန် */
+
   color: black;
   /* စာသားအရောင် အမည်း */
   text-decoration: none;
@@ -590,10 +590,10 @@ body {
 
 /* ပုံမှန်အချိန် စာသားဒီဇိုင်း */
 .user-nav-links li a {
-  font-size: 0.85em;
+  font-size: 15px;
   /* နေရာဆံ့အောင် စာလုံး နည်းနည်း သေးလိုက်တယ် */
   color: #333;
-  font-weight: 600;
+  font-weight: 200;
   /* စာလုံးကို နည်းနည်း ထူထားမယ် */
   text-decoration: none;
   transition: all 0.3s ease;
@@ -604,7 +604,7 @@ body {
 /* လက်ရှိရောက်နေတဲ့ Page (Active) */
 .user-nav-links li a.active {
   color: #F25278;
-  font-weight: 800;
+  font-weight: 200;
 }
 
 /* 🖱️ Mouse ထောက်လိုက်တဲ့အချိန် (Hover Effect) */

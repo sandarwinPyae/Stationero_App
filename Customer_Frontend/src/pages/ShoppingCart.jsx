@@ -6,10 +6,11 @@ import { AlignCenter, ArrowLeft } from 'lucide-react';
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
-
+  const [hoveredBtn, setHoveredBtn] = useState(null);
+  const [hoveredLink, setHoveredLink] = useState(null);
+  const [hoveredSubmitBtn, setHoveredSubmitBtn] = useState(false);
   const [cartItems, setCartItems] = useState([]);
   const [checkoutMessage, setCheckoutMessage] = useState('');
-  const [hoveredLink, setHoveredLink] = useState(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -81,19 +82,24 @@ const ShoppingCart = () => {
   };
   return (
     <div style={styles.container}>
-      <header style={styles.navbar}>
-        <div style={styles.logo}>Stationero</div>
-          <div 
-        onClick={() => navigate('/product')} 
-        style={styles.backButtonWrapper}
-      >
-        <span style={styles.backArrow}>←</span> 
-        <span style={styles.backText}>Back</span>
-      </div>
-      </header>
+      <StationeroNavbar showSearch={false} />      
       <main style={styles.mainContent}>
         <h1 style={styles.mainHeading}>Shopping Cart</h1>
-
+          <div style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', marginBottom: '15px' }}>
+            <button 
+              type="button" 
+              onMouseEnter={() => setHoveredSubmitBtn('add')}
+              onMouseLeave={() => setHoveredSubmitBtn(false)}
+              style={{
+                ...styles.submitReturnBtn,
+                ...(hoveredSubmitBtn === 'add' ? styles.submitReturnBtnHover : {}),
+                margin:0
+              }}
+              onClick={() => navigate('/product')}
+            >
+              Add Product
+            </button>
+          </div>
         {checkoutMessage && <div style={styles.successBanner}>{checkoutMessage}</div>}
 
         {cartItems.length === 0 ? (
@@ -115,7 +121,7 @@ const ShoppingCart = () => {
             {cartItems.map((item) => (
               <div key={item.id} style={styles.tableBodyRow}>
                 <div style={{ ...styles.bodyCell, width: '15%' }}><img src={item.image} alt={item.name} style={styles.productThumb} /></div>
-                <div style={{ ...styles.bodyCell, width: '25%', fontWeight: 'bold' }}>{item.name}</div>
+                <div style={{ ...styles.bodyCell, width: '25%', fontWeight: 200}}>{item.name}</div>
                 <div style={{ ...styles.bodyCell, width: '15%' }}>{(item.price || 0).toLocaleString()} MMK</div>
                 <div style={{ ...styles.bodyCell, width: '15%' }}>
 
@@ -139,7 +145,7 @@ const ShoppingCart = () => {
                     item.quantity
                   )}
                 </div>
-                <div style={{ ...styles.bodyCell, width: '15%', fontWeight: 'bold' }}>{((item.price || 0) * item.quantity).toLocaleString()} MMK</div>
+                <div style={{ ...styles.bodyCell, width: '15%', fontWeight: 200 }}>{((item.price || 0) * item.quantity).toLocaleString()} MMK</div>
                 <div style={{ ...styles.bodyCell, width: '15%', display: 'flex', justifyContent: 'center', gap: '20px', alignItems: 'center' }}>
                 {editingId === item.id ? (
                   <button type="button" onClick={() => saveQuantityEdit(item.id)} style={styles.saveBtn}>Save</button>
@@ -174,7 +180,20 @@ const ShoppingCart = () => {
 
               </div>
             ))}
-            <div style={styles.footerActionRow}><button type="button" onClick={handleOrderCheckout} style={styles.orderSubmitBtn}>Order</button></div>
+            <div style={styles.footerActionRow}>
+            <button
+              type="submit"
+              onClick={handleOrderCheckout}
+              onMouseEnter={() => setHoveredSubmitBtn('order')}
+              onMouseLeave={() => setHoveredSubmitBtn(false)}
+              style={{
+                ...styles.submitReturnBtn,
+                ...(hoveredSubmitBtn === 'order'? styles.submitReturnBtnHover : {})
+              }}
+            >
+              Order
+            </button>
+          </div>
           </div>
         )}
       </main>
@@ -202,29 +221,29 @@ const styles = {
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
   backButtonWrapper: { display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '8px 14px', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', zIndex: 10, transition: 'all 0.2s ease' },
-  backArrow: { color: '#f25278', fontWeight: 'bold'},
-  backText: { color: '#f25278', fontWeight: '700', fontSize: '14px', fontFamily: "Poppins, sans-serif" },
   mainContent: { padding: '40px 80px',maxWidth: '1400px', margin: '0 auto' },
-  mainHeading: { fontSize: '28px', color: '#111', margin: '0 0 30px 0', fontWeight: 'bold' },
-  successBanner: { backgroundColor: '#eef9f0', color: '#1e7e34', padding: '15px', borderRadius: '8px', marginBottom: '25px', border: '1px solid #c3e6cb', fontWeight: 'bold', textAlign: 'center' },
+  mainHeading: { fontSize: '25px', color: '#111', margin: '0 0 30px 0', fontWeight: 300 },
+  successBanner: { backgroundColor: '#eef9f0', color: '#1e7e34', padding: '15px', borderRadius: '8px', marginBottom: '25px', border: '1px solid #c3e6cb', fontWeight: 200, textAlign: 'center' },
   tableWrapper: { display: 'flex', flexDirection: 'column', gap: '15px' },
   tableHeaderRow: { display: 'flex', backgroundColor: '#e8e8e8', padding: '15px 20px', borderRadius: '30px', alignItems: 'center' },
-  headerCell: { fontSize: '14px', color: '#444', fontWeight: 'bold' },
-  tableBodyRow: { display: 'flex', backgroundColor: '#fff', padding: '15px 20px', borderRadius: '10px', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.03)' },
-  bodyCell: { fontSize: '14px', color: '#333' },
-  productThumb: { width: '55px', height: '55px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #eee' },
+  headerCell: { fontSize: '15px', color: '#444', fontWeight: 200 },
+  tableBodyRow: { display: 'flex', backgroundColor: '#fff', padding: '5px 5px 5px', borderRadius: '10px', alignItems: 'center', boxShadow: '0 2px 5px rgba(0,0,0,0.03)' },
+  bodyCell: { fontSize: '15px', color: '#333' },
+  productThumb: { width: '55px', height: '50px', borderRadius: '8px', objectFit: 'cover', border: '1px solid #eee' , alignItems: 'center'},
   actionIconBtn: { background: 'none', border: 'none', cursor: 'pointer', fontSize: '16px', outline: 'none' },
   qtyInput: { width: '60px', padding: '5px', borderRadius: '5px', border: '1px solid #ccc', fontSize: '14px', textAlign: 'center' },
-  saveBtn: { backgroundColor: '#4caf50', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  saveBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '5px 10px', borderRadius: '5px', cursor: 'pointer', fontSize: '13px', fontWeight: 200 },
   footerActionRow: { display: 'flex', justifyContent: 'flex-end', marginTop: '30px' },
-  orderSubmitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '18px 60px', borderRadius: '40px', fontSize: '20px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 15px rgba(242, 82, 120, 0.3)' },
+  orderSubmitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none',marginRight:'10px' },
   shopMoreBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '10px 25px', borderRadius: '20px', cursor: 'pointer', marginTop: '15px', fontWeight: 'bold' },
-  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1000 },
+  modalOverlay: { position: 'fixed', top: 0, left: 0, width: '100vw',height: '100vh', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 99999},
   modalContentBox: { backgroundColor: '#fff', padding: '30px 40px', borderRadius: '15px', boxShadow: '0 5px 20px rgba(0,0,0,0.15)', textAlign: 'center', maxWidth: '400px', width: '90%' },
   modalHeading: { margin: '0 0 20px 0', fontSize: '20px', color: '#111', fontWeight: 'bold' },
   modalActionsRow: { display: 'flex', justifyContent: 'center', gap: '20px' },
+  submitReturnBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none'},
+  submitReturnBtnHover: { backgroundColor: '#e04167', boxShadow: '0 4px 15px rgba(242,82,120,0.3)' },
   cancelBtn: { backgroundColor: '#e0e0e0', color: '#333', border: 'none', padding: '10px 25px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold' },
-  confirmDeleteBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer' },
+  confirmDeleteBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '10px 25px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer' },
 };
 
 export default ShoppingCart;

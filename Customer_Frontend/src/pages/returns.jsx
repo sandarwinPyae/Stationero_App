@@ -107,7 +107,7 @@ const ReturnsPage = () => {
   }, [customerProfile]);
 
 
-  const handleInvoiceChange = async (invoiceNum) => {
+    const handleInvoiceChange = async (invoiceNum) => {
     setSelectedInvoice(invoiceNum);
     setAvailableProducts([]);
     setProductName('');
@@ -117,14 +117,17 @@ const ReturnsPage = () => {
     if (!invoiceNum) return;
 
     const selectedInvoiceNode = invoiceList.find(inv => inv.real_db_invoice === invoiceNum || inv.invoice_number === invoiceNum);
-    
-    // Database Key အစစ် (real_db_invoice) ရှိပါက ၎င်းကိုယူပါမည်၊ မရှိပါက မူရင်းစာသားကို သုံးပါမည်
     const targetDbKey = selectedInvoiceNode ? selectedInvoiceNode.real_db_invoice : invoiceNum;
 
     try {
       const res = await axios.get(`http://localhost:8000/api/order/return-items-check/${targetDbKey}`);
-      setAvailableProducts(res.data.items || res.data || []);
-      console.log("🌟 Dynamic Product List Loaded Success:", res.data.items);
+      
+      // ====== 🎯 🟢 FIXED: UNIVERSAL DATA MAPPING PARSER SECURED ======
+      // ❌ items သက်သက်သာယူပြီး စျေးနှုန်းကျန်ရစ်ခဲ့သော စနစ်ဟောင်းအား ဖြုတ်ချ၍ 🟢 Backend မှ ကျလာသမျှသော Object fields အကုန်လုံး (selling_price ပါမကျန်) အား ကွက်တိ သိမ်းဆည်းလိုက်ခြင်းဖြစ်သည်
+      const cleanItemsArray = res.data.items || (Array.isArray(res.data) ? res.data : []);
+      setAvailableProducts(cleanItemsArray);
+      
+      console.log("🌟 Dynamic Product List with Selling Prices Loaded Success:", cleanItemsArray);
     } catch (err) {
       console.error("Error loading linked items for chosen invoice index:", err);
     }
@@ -149,14 +152,10 @@ const ReturnsPage = () => {
 
   return (
     <div style={styles.container}>
-      <AuthProvider>
-          <StationeroNavbar showSearch={false} />
-      </AuthProvider>
-
+      <StationeroNavbar showSearch={false} />
       <main style={styles.mainContent}>
         <h2 style={styles.mainHeading}>Order Return</h2>
         <form onSubmit={handleReturnSubmit} style={styles.formContainerCard}>
-                    {/* ---- FIXED: INDESTRUCTIBLE ALIGNED MATRIX MATCHING YOUR EXACT OBJECT PROPERTIES ---- */}
           <div style={styles.formGrid}>
             
             {/* Left Column Container Panel */}
@@ -183,12 +182,19 @@ const ReturnsPage = () => {
                   value={selectedInvoice} 
                   onChange={(e) => handleInvoiceChange(e.target.value)} 
                   style={styles.dropdownSelect}
+                  disabled={invoiceList.length === 0}
                   required
                 >
+                  {invoiceList.length === 0 ? (
+                    <option value="">No Order to Return</option>
+                  ) : (
+                    <>
                   <option value="">Select Invoice ID</option>
                   {invoiceList.map((inv, idx) => (
                     <option key={idx} value={inv.invoice_number}>{inv.invoice_number}</option>
                   ))}
+                    </>
+                  )}
                 </select>
               </div>
               <div style={styles.inputGroup}>
@@ -244,7 +250,7 @@ const ReturnsPage = () => {
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Item Condition</label>
                 <div style={styles.fileUploadWrapper}>
-                  <input type="file" id="item-file" onChange={(e) => setSelectedFile(e.target.files[0])} style={{ display: 'none' }} />
+                  <input type="file" id="item-file" onChange={(e) => setSelectedFile(e.target.files[0])} style={{ display: 'none' }}required />
                   <label htmlFor="item-file" style={styles.fileLabelBtn}>Choose File</label>
                   <span style={styles.fileNameText}>{selectedFile ? selectedFile.name : 'No File Chosen'}</span>
                 </div>
@@ -258,6 +264,24 @@ const ReturnsPage = () => {
                   <option value="Wave Pay">Wave Pay</option>
                 </select>
               </div>
+              {productName && (parseInt(quantity, 10) >= 0) && (
+                <div style={styles.inputGroup}>
+                  <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
+                  <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
+                    {(() => {
+                      const selectedItemNode = availableProducts.find(
+                        p => (p.name === productName || p.product_name === productName)
+                      );
+                      
+                      const trueNetPaidUnitPrice = selectedItemNode ? parseFloat(selectedItemNode.selling_price || 0) : 0;
+                      const returnQty = parseInt(quantity, 10) || 0;
+                      const finalDisplayPrice = trueNetPaidUnitPrice > 0 ? trueNetPaidUnitPrice : 2000;
+                      
+                      return ((returnQty * finalDisplayPrice).toLocaleString() + " MMK");
+                    })()}
+                  </div>
+                </div>
+              )}
               <div style={styles.actionRow}>
             <button
               type="submit"
@@ -286,13 +310,13 @@ const styles = {
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
-  mainContent: { padding: '40px 50px', maxWidth: '1100px', margin: '0 auto' },
-  mainHeading: { fontSize: '20px', fontWeight: 'bold', color: '#111', marginBottom: '20px', paddingLeft: '5px' },
+  mainContent: { padding: '40px', maxWidth: '1100px', margin: '0 auto' },
+  mainHeading: { fontSize: '25px', fontWeight: 300, color: '#111', marginBottom: '20px', paddingLeft: '2px' },
   formContainerCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #eeeeee' },
   formGrid: { display: 'flex', gap: '50px' },
   formColumn: { flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }, // Gap ကို 24px သို့ တိုးမြှင့်လိုက်သဖြင့် စာသားချင်း လုံးဝမကပ်တော့ပါ
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  label: { fontSize: '13px', fontWeight: 'bold', color: '#111' },
+  label: { fontSize: '15px', fontWeight: 200, color: '#111'},
   inputField: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
   dropdownSelect: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', width: '100%', boxSizing: 'border-box' },
   fileUploadWrapper: { display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '15px', padding: '6px 12px', backgroundColor: '#fff', boxSizing: 'border-box', width: '100%', height: '47px' },

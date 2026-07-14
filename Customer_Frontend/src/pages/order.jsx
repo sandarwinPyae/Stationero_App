@@ -9,7 +9,7 @@ const OrderPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { userProfile } = useContext(AuthContext); 
-
+  const [isBackHovered, setIsBackHovered] = useState(null);
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
   const [checkoutItems, setCheckoutItems] = useState([]);
@@ -206,16 +206,33 @@ const OrderPage = () => {
 
   return (
     <div style={styles.container}>
-        <header style={styles.navbar}>
-          <div style={styles.logo}>Stationero</div>
-            <div 
-          onClick={() => navigate('/cart')} 
-        >
-          <span style={styles.backArrow}>←</span> 
-          <span style={styles.backText}>Back</span>
-        </div>
-        </header>
+        <StationeroNavbar showSearch={false} />
         <main style={styles.mainContent}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '-5px', paddingLeft: '5px' }}>
+          <button 
+            type="button"
+            onClick={() => navigate('/cart')} 
+            onMouseEnter={() => setIsBackHovered(true)}  
+            onMouseLeave={() => setIsBackHovered(false)}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: isBackHovered ? '#f25278' : '#555555', 
+              fontSize: '16px',
+              fontWeight: 200,
+              fontFamily: "'Poppins', sans-serif",
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '4px 8px',
+              outline: 'none',
+              transition: 'color 0.2s ease, transform 0.2s ease' // 👈 စာသားအရောင် ပြောင်းလဲမှုကို အလွန်နူးညံ့ချောမွေ့သွားစေရန် ဖြစ်သည်
+            }}
+          >
+            <span>←</span> <span>Back</span>
+          </button>
+        </div>
         {checkoutItems.length === 0 ? (
           <div style={styles.emptyOrderContainer}>
             <h2 style={styles.emptyOrderText}>Your Order is Empty</h2>
@@ -364,30 +381,30 @@ const styles = {
   activeLink: { color: '#f25278', fontWeight: 'bold' },
   mainContent: { padding: '30px 20px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '25px' },
   invoiceCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0' },
-  brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '24px', fontWeight: 'bold', textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
-  metaRow: { display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: '#333', borderBottom: '1px solid #f9f9f9', paddingBottom: '15px', marginBottom: '20px' },
+  brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: 200, textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
+  metaRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px', color: '#333', borderBottom: '1px solid #f9f9f9', paddingBottom: '15px', marginBottom: '20px' },
   sectionBlock: { marginBottom: '25px' },
   sectionHeading: { fontSize: '15px', fontWeight: 'bold', color: '#111', margin: '0 0 12px 0' },
-  infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '14px', color: '#444', paddingLeft: '5px' },
-  infoLabel: { fontWeight: 'bold', color: '#555' },
+  infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '15px', color: '#444', paddingLeft: '5px' },
+  infoLabel: { fontWeight: 200, color: '#555' },
   infoValue: { color: '#222' },
   tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e0e0e0', paddingTop: '20px' },
-  tableHeaderRow: { display: 'flex', backgroundColor: '#f8f9fa', padding: '12px 15px', borderRadius: '5px', fontWeight: 'bold', color: '#444', fontSize: '13px' },
-  tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '13px', alignItems: 'center' },
+  tableHeaderRow: { display: 'flex', backgroundColor: '#f8f9fa', padding: '12px 15px', borderRadius: '5px', fontWeight: 200, color: '#444', fontSize: '15px' },
+  tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '15px', alignItems: 'center' },
   thCell: { textAlign: 'left' },
   tdCell: { textAlign: 'left' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
   backButtonWrapper: { display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '8px 14px', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', zIndex: 10, transition: 'all 0.2s ease' },
-  backArrow: { color: '#f25278', fontWeight: 'bold'},
-  backText: { color: '#f25278', fontWeight: '700', fontSize: '14px', fontFamily: "Poppins, sans-serif" },
+  backArrow: { color: '#f25278', fontWeight: 200},
+  backText: { color: '#f25278', fontWeight: 200, fontSize: '15px', fontFamily: "Poppins, sans-serif" },
   summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px' },
   summaryRow: { display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '14px', color: '#444' },
   summaryLabel: { fontWeight: 'bold', color: '#555' },
   summaryValue: { color: '#111' },
   actionButtonsRow: { display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '10px', marginBottom: '30px' },
-  cancelBtn: { backgroundColor: '#e0e0e0', color: '#444', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
+  cancelBtn: { backgroundColor: '#e0e0e0', color: '#444', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   cancelBtnHover: { backgroundColor: '#d5d5d5', color: '#111' },
-  confirmBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
+  confirmBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   confirmBtnHover: { backgroundColor: '#d93a5f', color: 'white' },
   emptyOrderContainer: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '60px 40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' },
   emptyOrderText: { color: '#111', fontSize: '20px', margin: 0, fontWeight: 'bold' },

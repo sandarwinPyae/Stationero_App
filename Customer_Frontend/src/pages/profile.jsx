@@ -74,10 +74,7 @@ const ProfilePage = () => {
 
   return (
     <div style={styles.container}>
-      <AuthProvider>
         <StationeroNavbar showSearch={false} />
-      </AuthProvider>
-
       <main style={styles.mainContent}>
         <div style={styles.profileCard}>
           <h2 style={styles.heading}>Account Profile</h2>
@@ -123,12 +120,12 @@ const styles = {
   heading: { fontSize: '22px', fontWeight: 'bold', marginBottom: '25px', color: '#111', borderBottom: '2px solid #fdf2f4', paddingBottom: '10px' },
   form: { display: 'flex', flexDirection: 'column', gap: '20px' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '13px', fontWeight: 'bold', color: '#555' },
-  inputField: { padding: '12px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '14px', outline: 'none', backgroundColor: '#fff' },
+  label: { fontSize: '15px', fontWeight: 200, color: '#555' },
+  inputField: { padding: '12px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '15px', outline: 'none', backgroundColor: '#fff' },
   btnRow: { display: 'flex', gap: '15px', marginTop: '10px', justifyContent: 'center' },
   editBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' },
   cancelBtn: { backgroundColor: '#e2e8f0', color: '#4a5568', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' },
-  saveBtn: { backgroundColor: '#48bb78', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' }
+  saveBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer' }
 };
 
 export default ProfilePage;

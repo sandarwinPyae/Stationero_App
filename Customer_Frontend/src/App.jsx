@@ -13,6 +13,7 @@ import OrderPage from './pages/order';
 import OrderHistoryPage from './pages/history';
 import ReturnsPage from './pages/returns';
 import ProfilePage from './pages/profile';
+import OrderDetailPage from './pages/orderdetail';
 
 // ---- FIXED: PROTECTED ROUTE CHECKS LOCAL STORAGE TO PRESERVE VIEW ON CTRL+S ----
 const ProtectedRoute = ({ children }) => {
@@ -40,6 +41,7 @@ function App() {
           <Route path="/history" element={<ProtectedRoute><OrderHistoryPage /></ProtectedRoute>} />
           <Route path="/returns" element={<ProtectedRoute><ReturnsPage /></ProtectedRoute>} />
           <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+          <Route path="/order/:order_id" element={<ProtectedRoute><OrderDetailPage /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
