@@ -60,8 +60,13 @@ const ConfirmedOrderPage = () => {
   const currentRecords = filteredOrders.slice(indexOfFirstRecord, indexOfLastRecord);
   const nPages = Math.ceil(filteredOrders.length / recordsPerPage);
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen text-red-500">{error}</div>;
+  if (loading) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
+
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">

@@ -53,13 +53,19 @@ const ConfirmedOrderDetailsPage = () => {
         fetchOrderDetails(); // Refresh order status
       }
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || "Something went wrong!";
+      const errorMsg = error.response?.data?.detail || "An error occurred during confirmation";
       setStatusMessage(errorMsg);
       setShowModal(false);
     }
   };
 
-  if (loading) return <div className="p-10">Loading...</div>;
+  if (loading) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
+  
   if (!order) return <div className="p-10">Order not found.</div>;
 
   return (
@@ -80,11 +86,25 @@ const ConfirmedOrderDetailsPage = () => {
 
       {/* Success/Error Toast Message */}
       {statusMessage && (
-        <div className="fixed top-20 right-8 z-50 p-4 bg-white border-l-4 border-[#F25278] shadow-lg rounded-r-lg flex items-center justify-between min-w-[300px]">
-          <p className="text-sm font-medium text-gray-700">{statusMessage}</p>
-          <button onClick={() => setStatusMessage("")} className="ml-4 text-gray-400 hover:text-gray-600">×</button>
+        <div 
+          className={`fixed top-16 left-64 right-0 z-40 p-4 border-b-4 flex items-center justify-between shadow-sm
+            ${statusMessage.toLowerCase().includes("success") 
+              ? "bg-green-50 border-green-500 text-green-700" 
+              : "bg-red-50 border-[#F25278] text-[#F25278]"
+            }`}
+        >
+          <p className="text-sm font-semibold">
+            {statusMessage}
+          </p>
+          <button 
+            onClick={() => setStatusMessage("")} 
+            className="text-gray-500 hover:text-gray-700 font-bold px-2"
+          >
+            ×
+          </button>
         </div>
       )}
+    
 
       {/* Content Area */}
       <div className="p-8 pt-24">
