@@ -61,13 +61,13 @@ const InventoryStockReport = () => {
 
   return (
     <main className="w-full max-w-7xl mx-auto flex-grow">
-      <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="px-8 py-6">
+      <div className="px-8 py-6 pt-24">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Inventory Stock Report</h2>
 
         {/* CONTROLS */}
@@ -75,7 +75,7 @@ const InventoryStockReport = () => {
           <input
             type="text"
             placeholder="Search by ID, name, or category..."
-            className="p-2.5 border border-gray-200 rounded-lg outline-none w-80 focus:ring-2 focus:ring-[#F25278]/20"
+            className="p-2.5 text-sm border border-gray-200 rounded-lg outline-none w-80 focus:ring-2 focus:ring-[#F25278]/20"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
           />
@@ -126,7 +126,7 @@ const InventoryStockReport = () => {
               {currentRecords.map((p, index) => (
                 <tr key={index} className="hover:bg-gray-50/50 transition-colors">
                   <td className="py-4 px-6 text-gray-700">{p.product_id}</td>
-                  <td className="py-4 px-6 font-medium text-gray-800">{p.product_name}</td>
+                  <td className="py-4 px-6 text-gray-800">{p.product_name}</td>
                   <td className="py-4 px-6 text-gray-500">{p.category}</td>
                   <td className="py-4 px-6 text-center text-gray-800">{p.qty}</td>
                   <td className="py-4 px-6 text-center text-gray-800">{p.unit_price}</td>

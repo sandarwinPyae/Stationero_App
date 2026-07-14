@@ -14,6 +14,25 @@ const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
   </div>
 );
 
+const LogoutModal = ({ isOpen, onConfirm, onCancel }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="bg-white p-8 rounded-2xl shadow-xl w-80 text-center animate-in fade-in zoom-in duration-300">
+        <div className="w-16 h-16 bg-red-100 text-[#F25278] rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
+          <i className="fa-solid fa-arrow-right-from-bracket"></i>
+        </div>
+        <h3 className="text-lg font-bold text-gray-800 mb-2">Logout</h3>
+        <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+        <div className="flex gap-3 justify-center">
+          <button onClick={onCancel} className="px-4 py-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200">Cancel</button>
+          <button onClick={onConfirm} className="px-4 py-2 bg-[#F25278] text-white rounded-lg">Logout</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const Sidebar = () => {
   const { setIsLoggedIn } = useContext(AuthContext);
@@ -26,14 +45,21 @@ const Sidebar = () => {
   const [isPurchaseReportOpen, setIsPurchaseReportOpen] = useState(false);
 
   const isActive = (keyword) => location.pathname.toLowerCase().includes(keyword.toLowerCase());
+  const [isLogoutOpen, setIsLogoutOpen] = useState(false);
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem('stationero_logged_user');
+    window.location.href = 'http://localhost:5173';
+  };
 
   return (
-    <div className="w-64 bg-[#F8FAFC] min-h-screen border-r border-gray-200 shadow-sm flex flex-col">
-      <div className="p-6">
+    <div className="w-64 bg-[#F8FAFC] h-screen border-r border-gray-200 shadow-sm flex flex-col fixed left-0 top-0 overflow-y-auto z-50">
+      <div className="py-4 px-6">
         <h1 className=" font-azeret text-2xl font-bold text-[#F25278]">Stationero</h1>
       </div>
       
-      <nav className="mt-4 px-3 space-y-1 flex-1">
+      <nav className="mt-2 px-3 space-y-1 flex-1">
         <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => navigate('/admin/dashboard')} active={isActive('/admin/dashboard')} />
         <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => navigate('/customers')} active={isActive('customer')} />
         <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => navigate('/confirm-orders')} active={isActive('confirm-order')} />
@@ -119,17 +145,14 @@ const Sidebar = () => {
             icon="fa-solid fa-right-from-bracket" 
             label="Logout" 
             className="text-red-500" 
-            onClick={(e) => {
-              e.preventDefault(); 
-              
-              setIsLoggedIn(false); 
-              
-              localStorage.removeItem('stationero_logged_user'); 
-
-              window.location.href = 'http://localhost:5173'; 
-            }} 
+            onClick={() => setIsLogoutOpen(true)} 
           />
         </div>
+        <LogoutModal 
+          isOpen={isLogoutOpen} 
+          onConfirm={handleLogout} 
+          onCancel={() => setIsLogoutOpen(false)} 
+        />
       </nav>
     </div>
   );

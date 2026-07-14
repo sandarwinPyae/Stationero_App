@@ -2,23 +2,34 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
+const ErrorMessage = ({ message }) => {
+  if (!message) return null;
+  return (
+    <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-6 animate-pulse">
+      <i className="fa-solid fa-triangle-exclamation mr-2"></i>
+      {message}
+    </div>
+  );
+};
+
 const AddPurchaseOrderPage = () => {
   const navigate = useNavigate();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [products, setProducts] = useState([]);
-  const [availableProducts, setAvailableProducts] = useState([]); 
-  const [suppliers, setSuppliers] = useState([]); 
+  const [availableProducts, setAvailableProducts] = useState([]);
+  const [suppliers, setSuppliers] = useState([]);
   const [selectedSupplier, setSelectedSupplier] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState('Cash');
+  const [paymentMethod, setPaymentMethod] = useState(''); 
+  const [errorMessage, setErrorMessage] = useState(''); 
 
   const fetchData = async () => {
     try {
       const res = await axios.get('http://localhost:8000/products');
-      const suppRes = await axios.get('http://localhost:8000/suppliers'); 
+      const suppRes = await axios.get('http://localhost:8000/suppliers');
       setAvailableProducts(res.data);
       setSuppliers(suppRes.data);
     } catch (err) {
-      console.error("Error fetching products:", err);
+      setErrorMessage("Failed to load initial data. Please check your server connection.");
     }
   };
 
@@ -59,24 +70,32 @@ const AddPurchaseOrderPage = () => {
   const handleInputChange = (index, field, value) => {
     const updated = [...products];
     updated[index][field] = value;
-    
     if (field === 'qty' || field === 'unitPrice') {
       updated[index].total = Number(updated[index].qty) * Number(updated[index].unitPrice);
     }
     setProducts(updated);
   };
 
-  const calculateGrandTotal = () => {
-    return products.reduce((sum, p) => sum + Number(p.total), 0);
-  };
+  const calculateGrandTotal = () => products.reduce((sum, p) => sum + Number(p.total), 0);
 
   const handleSaveOrder = async () => {
+    setErrorMessage(''); 
+
     if (!selectedSupplier) {
-      alert("Supplier is needed to select.");
+      setErrorMessage("Error: Please select a Supplier.");
+      return;
+    }
+    if (!paymentMethod) {
+      setErrorMessage("Error: Please select a Payment Method.");
       return;
     }
     if (products.length === 0 || !products[0].id) {
-      alert("At least One Product is required.");
+      setErrorMessage("Error: At least one product is required.");
+      return;
+    }
+    const isInvalid = products.some(p => !p.id || Number(p.qty) <= 0 || Number(p.unitPrice) <= 0);
+    if (isInvalid) {
+      setErrorMessage("Error: Please ensure all product rows have valid ID, Quantity, and Price.");
       return;
     }
 
@@ -92,65 +111,50 @@ const AddPurchaseOrderPage = () => {
     };
 
     try {
-      const res = await axios.post('http://localhost:8000/purchase-orders', payload);
-      navigate(-1); 
+      await axios.post('http://localhost:8000/purchase-orders', payload);
+      navigate(-1);
     } catch (err) {
-      console.error("Error creating PO:", err);
-      alert("Error in Purchase Order Creation။");
+      setErrorMessage("Error: Failed to save the Purchase Order. Please try again.");
     }
   };
 
-
   return (
     <div className="pt-4 pb-4 bg-gray-50 min-h-screen">
-      <div className="h-16 flex items-center justify-between px-6 bg-[#F8FAFC] border-b border-gray-200 mb-4">
-        <button 
-          onClick={() => navigate('/purchase')}
-          className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
-        >
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+        <button onClick={() => navigate('/purchase')} className="text-gray-600 hover:text-[#F25278] font-medium flex items-center">
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
-        </div>
       </div>
-      <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+
+      <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100 pt-20">
         <h2 className="text-xl font-bold mb-6">Create Purchase Order</h2>
         
+        {/* Error Message Component */}
+        <ErrorMessage message={errorMessage} />
+
         <div className="grid grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Supplier</label>
-            <select 
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none"
-              value={selectedSupplier}
-              onChange={(e) => setSelectedSupplier(e.target.value)}
-            >
+            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" value={selectedSupplier} onChange={(e) => setSelectedSupplier(e.target.value)}>
               <option value="">Select a Supplier</option>
-              {suppliers.map(s => (
-                <option key={s.supplier_id} value={s.supplier_id}>
-                  {s.supplier_name}
-                </option>
-              ))}
+              {suppliers.map(s => <option key={s.supplier_id} value={s.supplier_id}>{s.supplier_name}</option>)}
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
-            <input 
-              type="text"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none"
-              value={paymentMethod}
-              placeholder="Enter payment method (e.g. Kpay)"
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            />
+            <select className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none bg-white" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+              <option value="">Select Payment Method</option>
+              <option value="Cash">Cash</option>
+              <option value="Kpay">KBZ pay</option>
+              <option value="AYA Pay">AYA Pay</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+            </select>
           </div>
         </div>
 
         {!isFormVisible ? (
-          <button 
-            onClick={() => { setIsFormVisible(true); addProductRow(); }} 
-            className="bg-[#F25278] text-white border  px-6 py-2 rounded-xl mb-6 font-semibold shadow-sm"
-          >
+          <button onClick={() => { setIsFormVisible(true); addProductRow(); }} className="bg-[#F25278] text-white px-6 py-2 rounded-xl mb-6 font-semibold shadow-sm">
             + Add Products
           </button>
         ) : (
@@ -172,18 +176,8 @@ const AddPurchaseOrderPage = () => {
                 {products.map((p, index) => (
                   <tr key={index}>
                     <td className="p-4">{index + 1}</td>
-                    <td className="p-4">
-                      <select onChange={(e) => handleProductSelect(index, e.target.value, 'id')} value={p.id} className="border rounded px-2 py-1 w-28">
-                        <option value="">Select ID</option>
-                        {availableProducts.map(item => <option key={item.product_id} value={item.product_id}>{item.product_id}</option>)}
-                      </select>
-                    </td>
-                    <td className="p-4">
-                      <select onChange={(e) => handleProductSelect(index, e.target.value, 'name')} value={p.name} className="border rounded px-2 py-1 w-48">
-                        <option value="">Select Product Name</option>
-                        {availableProducts.map(item => <option key={item.product_id} value={item.product_name}>{item.product_name}</option>)}
-                      </select>
-                    </td>
+                    <td className="p-4"><select onChange={(e) => handleProductSelect(index, e.target.value, 'id')} value={p.id} className="border rounded px-2 py-1 w-28"><option value="">Select ID</option>{availableProducts.map(item => <option key={item.product_id} value={item.product_id}>{item.product_id}</option>)}</select></td>
+                    <td className="p-4"><select onChange={(e) => handleProductSelect(index, e.target.value, 'name')} value={p.name} className="border rounded px-2 py-1 w-48"><option value="">Select Product Name</option>{availableProducts.map(item => <option key={item.product_id} value={item.product_name}>{item.product_name}</option>)}</select></td>
                     <td className="p-4"><input type="number" value={p.qty} onChange={(e) => handleInputChange(index, 'qty', e.target.value)} className="w-16 border rounded px-1" /></td>
                     <td className="p-4"><input type="number" value={p.unitPrice} onChange={(e) => handleInputChange(index, 'unitPrice', e.target.value)} className="w-20 border rounded px-1" /></td>
                     <td className="p-4"><input type="number" value={p.sellingPrice} onChange={(e) => handleInputChange(index, 'sellingPrice', e.target.value)} className="w-20 border rounded px-1" /></td>
@@ -194,34 +188,19 @@ const AddPurchaseOrderPage = () => {
                     </td>
                   </tr>
                 ))}
-                
               </tbody>
             </table>
           </div>
-
-          
         )}
+
         <div className="bg-gray-50 p-6 rounded-xl border border-gray-200">
-          <div className="flex justify-between py-2">
-            <span className="font-semibold">Total Amount</span>
-            <span>{calculateGrandTotal()} MMK</span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="font-semibold">Payment Method</span>
-            <span>{paymentMethod || "-"}</span>
-          </div>
-          <div className="flex justify-between py-2">
-            <span className="font-semibold">Purchase Order Date</span>
-            <span>{new Date().toLocaleDateString()}</span>
-          </div>
+           <div className="flex justify-between py-2"><span className="font-semibold">Total Amount</span><span>{calculateGrandTotal()} MMK</span></div>
+           <div className="flex justify-between py-2"><span className="font-semibold">Payment Method</span><span>{paymentMethod || "-"}</span></div>
         </div>
 
         {isFormVisible && (
           <div className="flex gap-4 mt-6">
-            
-            <button type="button" onClick={handleSaveOrder} className="bg-[#F25278] text-white px-8 py-2 rounded-lg font-semibold">
-              Save Purchase Order
-            </button>
+            <button type="button" onClick={handleSaveOrder} className="bg-[#F25278] text-white px-8 py-2 rounded-lg font-semibold">Save Purchase Order</button>
           </div>
         )}
       </div>

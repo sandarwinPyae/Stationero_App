@@ -97,17 +97,23 @@ const SaleReturnReport = () => {
   const indexOfFirst = indexOfLast - recordsPerPage;
   const currentRecords = filteredData.slice(indexOfFirst, indexOfLast);
 
-  if (loading) return <div className="p-10 text-center text-gray-500">Loading...</div>;
+  if (loading) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
+
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="h-16 flex justify-end items-center px-8 bg-gray-50 border-b border-gray-200">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="p-6">
+      <div className="p-6 pt-24">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Sale Return Report</h2>
           <div className="relative">
@@ -131,33 +137,40 @@ const SaleReturnReport = () => {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setStartDate(e.target.value)} value={startDate} />
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" 
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate && e.target.value > endDate) {
+                  setEndDate(""); 
+                }
+              }}   
+            />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
+            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate}/>
           </div>
           <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          {currentRecords.length > 0 ? (
-            <table className="w-full text-left text-sm">
-              <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
-                <tr>
-                  <th className="py-4 px-6 font-semibold">Invoice</th>
-                  <th className="py-4 px-6 font-semibold">Return Amount (Ks)</th>
-                  <th className="py-4 px-6 font-semibold">Payment Method</th>
-                  <th className="p-4">Image</th>
-                  <th className="py-4 px-6 font-semibold">Reason</th>
-                  <th className="py-4 px-6 font-semibold">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentRecords.map((s) => (
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
+              <tr>
+                <th className="py-4 px-6 font-semibold">Invoice</th>
+                <th className="py-4 px-6 font-semibold">Return Amount (Ks)</th>
+                <th className="py-4 px-6 font-semibold">Payment Method</th>
+                <th className="p-4">Image</th>
+                <th className="py-4 px-6 font-semibold">Reason</th>
+                <th className="py-4 px-6 font-semibold">Date</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {currentRecords.length > 0 ? (
+                currentRecords.map((s) => (
                   <React.Fragment key={s.sale_return_id}>
-                    <tr className="cursor-pointer hover:bg-gray-50 border-b transition-colors" onClick={() => setSelectedId(selectedId === s.sale_return_id ? null : s.sale_return_id)}>
+                    <tr className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setSelectedId(selectedId === s.sale_return_id ? null : s.sale_return_id)}>
                       <td className="p-4 font-bold text-blue-600">{s.invoice_number}</td>
                       <td className="p-4 font-semibold">{s.total_returned_amount.toLocaleString()}</td>
                       <td className="p-4 text-gray-600">{s.sale_return_payment_method}</td>
@@ -179,21 +192,19 @@ const SaleReturnReport = () => {
                         <td colSpan="6" className="p-4 bg-gray-50">
                           <table className="w-full text-xs bg-white border rounded-lg">
                             <thead className="bg-gray-100">
-                                <tr className="text-gray-600">
-                                    <th className="p-3">Product</th>
-                                    <th className="p-3">Selling Price</th>
-                                    <th className="p-3 text-center">Qty</th>
-                                    <th className="p-3 text-right">Subtotal</th>
-                                </tr>
+                              <tr className="text-gray-600">
+                                <th className="p-3">Product</th>
+                                <th className="p-3">Selling Price</th>
+                                <th className="p-3 text-center">Qty</th>
+                                <th className="p-3 text-right">Subtotal</th>
+                              </tr>
                             </thead>
                             <tbody className="divide-y">{s.details.map((d, i) => (
                               <tr key={i}>
                                 <td className="p-3">{d.product_name}</td>
                                 <td className="p-3">{d.selling_price}</td>
                                 <td className="p-3 text-center">{d.qty}</td>
-                                <td className="p-3 text-right font-bold">
-                                  {d.sub_total.toLocaleString()}
-                                </td>
+                                <td className="p-3 text-right font-bold">{d.sub_total.toLocaleString()}</td>
                               </tr>
                             ))}</tbody>
                           </table>
@@ -201,10 +212,16 @@ const SaleReturnReport = () => {
                       </tr>
                     )}
                   </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          ) : <div className="p-10 text-center text-gray-500">No matching records found.</div>}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="6" className="p-10 text-center text-gray-500">
+                    No matching records found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
         {/* Full Screen Image Modal */}
         {selectedImage && (

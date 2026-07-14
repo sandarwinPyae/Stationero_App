@@ -38,12 +38,18 @@ const ViewProductDetails = () => {
     }
   };
 
-  if (!product) return <div className="p-8">Loading...</div>;
+  // if (!product) return <div className="p-8">Loading...</div>;
+  if (!product) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="h-16 flex justify-between items-center px-8 bg-[#F8FAFC] border-b border-gray-100 shadow-sm">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <button 
           onClick={() => navigate('/products')} //
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
@@ -56,7 +62,7 @@ const ViewProductDetails = () => {
       </div>
 
       {/* Main Content Card */}
-      <div className="p-6">
+      <div className="p-6 pt-24">
         <div className="max-w-5xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-10">
           
           {/* Image Side */}
@@ -65,7 +71,7 @@ const ViewProductDetails = () => {
               <img 
                 src={`http://localhost:8000/${product.product_img_url}`} 
                 alt={product.product_name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => { e.target.src = '/placeholder.png'; }} 
               />
             ) : (

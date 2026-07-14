@@ -9,6 +9,8 @@ const PurchaseReturnsPage = () => {
   const [loading, setLoading] = useState(true);
   const [refundMethod, setRefundMethod] = useState(''); 
   const [returnQtys, setReturnQtys] = useState({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   // const [refundMethod, setRefundMethod] = useState('');
 
   useEffect(() => {
@@ -34,7 +36,48 @@ const PurchaseReturnsPage = () => {
     }, 0);
   };
 
+  const ConfirmationModal = ({ isOpen, onConfirm, onCancel }) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white p-8 rounded-2xl shadow-xl w-96 text-center">
+          <div className="w-16 h-16 bg-yellow-100 text-yellow-500 rounded-full flex items-center justify-center text-3xl mb-4 mx-auto">
+            <i className="fa-solid fa-question"></i>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Confirm Return?</h3>
+          <p className="text-gray-600 mb-6">Are you sure you want to process this return? This action will update your stock.</p>
+          
+          <div className="flex gap-3 justify-center">
+            <button 
+              onClick={onCancel}
+              className="px-6 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={onConfirm}
+              className="px-6 py-2 rounded-lg bg-[#F25278] text-white "
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ErrorMessage = ({ message }) => {
+    if (!message) return null;
+    return (
+      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-6 flex items-center">
+        <i className="fa-solid fa-circle-exclamation mr-3"></i>
+        {message}
+      </div>
+    );
+  };
+
  const handleConfirmReturn = async () => {
+    setErrorMessage('');
     const itemsToReturn = Object.keys(returnQtys).map(productId => {
       const item = order.items.find(i => i.product_id === parseInt(productId));
       return {
@@ -44,9 +87,13 @@ const PurchaseReturnsPage = () => {
       };
     }).filter(item => item.returned_qty > 0);
 
-    // ၂။ Validation
     if (itemsToReturn.length === 0) {
-      alert("Please enter at least one return quantity.");
+      setErrorMessage("Please enter at least one return quantity.");
+      return;
+    }
+
+    if (!refundMethod) {
+      setErrorMessage("Please select a Refund Payment Method.");
       return;
     }
 
@@ -57,15 +104,61 @@ const PurchaseReturnsPage = () => {
       };
 
       await axios.post(`http://localhost:8000/purchase/return/${id}`, payload);
-      alert("Successfully returned!");
-      navigate('/purchase');
+      setShowSuccessModal(true);
+      setTimeout(() => {
+        setShowSuccessModal(false);
+        navigate('/purchase');
+      }, 2000);
     } catch (err) {
       console.error("Return failed:", err);
       const errorMsg = err.response?.data?.detail || "Failed to confirm return.";
-      alert(errorMsg);
+      setErrorMessage(errorMsg);
+    }
+  };
+
+  const handleConfirmClick = () => {
+    setErrorMessage('');
+    if (Object.keys(returnQtys).length === 0) {
+      setErrorMessage("Please enter at least one return quantity.");
+      return;
+    }
+    if (!refundMethod) {
+      setErrorMessage("Please select a Refund Payment Method.");
+      return;
+    }
+    setShowConfirmModal(true);
+  };
+
+  const handleExecuteReturn = async () => {
+    setShowConfirmModal(false);
+    try {
+      const itemsToReturn = Object.keys(returnQtys).map(productId => {
+        const item = order.items.find(i => i.product_id === parseInt(productId));
+        return {
+          product_id: parseInt(productId),
+          returned_qty: returnQtys[productId],
+          unit_price: item ? item.unit_price : 0
+        };
+      }).filter(item => item.returned_qty > 0);
+
+      const payload = { refund_payment_method: refundMethod, items: itemsToReturn };
+
+      await axios.post(`http://localhost:8000/purchase/return/${id}`, payload);
+      navigate('/purchase'); 
+    } catch (err) {
+      setErrorMessage(err.response?.data?.detail || "Failed to confirm return.");
     }
   };
   const handleReturnQtyChange = (itemId, value, maxQty) => {
+    setErrorMessage(''); 
+
+    if (value === '') {
+      setReturnQtys(prev => ({
+        ...prev,
+        [itemId]: ''
+      }));
+      return;
+    }
     const qty = Number(value);
     if (qty <= maxQty) {
       setReturnQtys(prev => {
@@ -77,7 +170,7 @@ const PurchaseReturnsPage = () => {
         return newState;
       });
     } else {
-      alert("Return quantity cannot exceed ordered quantity.");
+      setErrorMessage("Return quantity cannot exceed ordered quantity.");
     }
   };
 
@@ -100,7 +193,7 @@ const PurchaseReturnsPage = () => {
   return (
     <div className="py-4 bg-gray-50 min-h-screen">
       {/* header */}
-      <div className="flex items-center justify-between px-4 py-4 mb-6 border-b border-gray-200">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <button 
           onClick={() => navigate('/purchase')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center gap-2"
@@ -112,9 +205,10 @@ const PurchaseReturnsPage = () => {
           <i className="fa-solid fa-user text-gray-500 text-sm" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
-      <div className="max-w-5xl mx-auto bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+      <div className="max-w-5xl mx-auto bg-white p-8 pt-24 rounded-3xl shadow-sm border border-gray-100">
         
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Purchase Order Returns</h2>
+        
         
         {/* Updated Header Information */}
         {order && (
@@ -196,33 +290,52 @@ const PurchaseReturnsPage = () => {
         </table>
 
         {/* Updated Footer Actions */}
-        <div className="flex justify-between items-start bg-gray-50 p-6 rounded-xl border border-gray-100">
-          <div>
-            <p className="font-semibold text-xl mb-4 text-[#F25278]">
-              Total Refunded Amount: {calculateTotalRefunded().toLocaleString()} MMK
-            </p>
+        <div className="bg-white p-6 mb-6 rounded-2xl border border-gray-100 shadow-sm mt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
             
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-gray-700">Refund Payment Method</label>
-              <input 
-                type="text"
-                className="px-4 py-2 border border-gray-300 rounded-lg outline-none w-64"
-                placeholder="e.g., Kpay, Bank Transfer"
-                value={refundMethod}
-                onChange={(e) => setRefundMethod(e.target.value)}
-              />
+            {/* Total Section */}
+            <div className="text-center md:text-left">
+              <p className="text-sm text-gray-500 font-medium uppercase tracking-wider mb-1">Total Refunded</p>
+              <p className="text-3xl font-bold text-[#F25278]">
+                {calculateTotalRefunded().toLocaleString()} <span className="text-xl">MMK</span>
+              </p>
+            </div>
+
+            {/* Payment Method Section */}
+            <div className="flex flex-col gap-2 w-full md:w-auto">
+              <label className="text-sm font-semibold text-gray-700 ml-1">Select Refund Method</label>
+              <div className="relative">
+                <select 
+                    className="w-full px-4 py-2 pr-2 border border-gray-300 rounded-lg outline-none bg-white focus:border-[#F25278]"
+                    value={refundMethod}
+                    onChange={(e) => setRefundMethod(e.target.value)}
+                  >
+                  <option value="">Select Payment Method</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Kpay">KBZ pay</option>
+                  <option value="Bank Transfer">AYA Pay</option>
+                  <option value="Credit">Bank Transfer</option>
+                </select>
+                {/* Dropdown Icon */}
+                
+              </div>
             </div>
           </div>
         </div>
-
+        <ErrorMessage message={errorMessage} />
         <div className="flex gap-4">
           
           <button 
-            onClick={handleConfirmReturn} 
-            className="px-6 py-2.5 bg-[#F25278] text-white rounded-lg hover:bg-pink-600 shadow-sm transition"
+            onClick={handleConfirmClick} 
+            className="px-6 py-2.5 bg-[#F25278] text-white rounded-lg"
           >
             Confirmed Returned
           </button>
+          <ConfirmationModal 
+            isOpen={showConfirmModal} 
+            onConfirm={handleExecuteReturn} 
+            onCancel={() => setShowConfirmModal(false)} 
+          />
         </div>
       </div>
     </div>

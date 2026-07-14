@@ -90,18 +90,24 @@ const PurchaseReturnSummary = () => {
   const currentRecords = filteredData.slice(indexOfFirst, indexOfLast);
   const nPages = Math.ceil(filteredData.length / recordsPerPage);
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  if (loading) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
+
 
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Header */}
-      <header className="h-16 flex justify-end items-center px-8 bg-[#F8FAFC] border-b border-gray-200 shadow-sm w-full mb-8">
+      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="px-8 pb-8">
+      <div className="px-8 pb-8 pt-24">
         <div className="flex justify-between items-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Purchase Return Summary Report</h2>
             <div className="relative">
@@ -125,71 +131,85 @@ const PurchaseReturnSummary = () => {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setStartDate(e.target.value)} />
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" 
+              onChange={(e) => {
+                setStartDate(e.target.value);
+                if (endDate && e.target.value > endDate) {
+                  setEndDate(""); 
+                }
+              }} 
+             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-sm font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" value={endDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} />
+            <input type="date" value={endDate} min={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} />
           </div>
           <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
         </div>
 
         {/* Table Section */}
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-            {currentRecords.length > 0 ? (
-                <table className="w-full text-left">
-                <thead className="bg-gray-200">
-                    <tr>
-                    <th className="p-5">PO Number</th>
-                    <th className="p-5">Return Date</th>
-                    <th className="p-5">Payment Method</th>
-                    <th className="p-5">Total Amount</th>
+          <table className="w-full text-left">
+            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
+              <tr>
+                <th className="p-5">PO Number</th>
+                <th className="p-5">Return Date</th>
+                <th className="p-5">Payment Method</th>
+                <th className="p-5">Total Amount</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {currentRecords.length > 0 ? (
+                currentRecords.map((r) => (
+                  <React.Fragment key={r.purchase_return_id}>
+                    <tr 
+                      onClick={() => setSelectedId(selectedId === r.purchase_return_id ? null : r.purchase_return_id)} 
+                      className="cursor-pointer hover:bg-gray-50 border-b"
+                    >
+                      <td className="p-5 font-medium">{r.purchase_order?.po_number}</td>
+                      <td className="p-5">{formatDate(r.purchase_return_date)}</td>
+                      <td className="p-5">{r.purchase_return_payment_method}</td>
+                      <td className="p-5 text-red-600 font-bold">{r.total_amount.toLocaleString()} Ks</td>
                     </tr>
-                </thead>
-                <tbody>
-                    {currentRecords.map((r) => (
-                    <React.Fragment key={r.purchase_return_id}>
-                        <tr onClick={() => setSelectedId(selectedId === r.purchase_return_id ? null : r.purchase_return_id)} className="cursor-pointer hover:bg-gray-50 border-b">
-                            <td className="p-5 font-medium">{r.purchase_order?.po_number}</td>
-                            <td className="p-5">{formatDate(r.purchase_return_date)}</td>
-                            <td className="p-5">{r.purchase_return_payment_method}</td>
-                            <td className="p-5 text-red-600 font-bold">{r.total_amount.toLocaleString()} Ks</td>
-                        </tr>
-                        {selectedId === r.purchase_return_id && (
-                        <tr className="bg-red-50/50">
-                            <td colSpan="4" className="p-6">
-                            <div className="bg-white rounded-xl border overflow-hidden shadow-sm">
-                                <table className="w-full text-sm">
-                                <thead className="bg-gray-100 text-gray-600">
-                                    <tr>
-                                    <th className="p-3 text-left">Product Name</th>
-                                    <th className="p-3 text-center">Returned Qty</th>
-                                    <th className="p-3 text-right">Unit Price</th>
-                                    <th className="p-3 text-right">Subtotal</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-100">
-                                    {r.details.map(d => (
-                                    <tr key={d.purchase_return_details_id} className="hover:bg-gray-50">
-                                        <td className="p-3">{d.product?.product_name}</td>
-                                        <td className="p-3 text-center">{d.returned_qty}</td>
-                                        <td className="p-3 text-right">{d.unit_price.toLocaleString()} Ks</td>
-                                        <td className="p-3 text-right font-semibold">{d.returned_amount.toLocaleString()} Ks</td>
-                                    </tr>
-                                    ))}
-                                </tbody>
-                                </table>
-                            </div>
-                            </td>
-                        </tr>
-                        )}
-                    </React.Fragment>
-                    ))}
-                </tbody>
-                </table>
-            ) : (
-                <div className="p-10 text-center text-gray-500 font-medium">No matching records found.</div>
-            )}
+                    {selectedId === r.purchase_return_id && (
+                      <tr className="bg-red-50/50">
+                        <td colSpan="4" className="p-6">
+                          <div className="bg-white rounded-xl border overflow-hidden shadow-sm">
+                            <table className="w-full text-sm">
+                              <thead className="bg-gray-100 text-gray-600">
+                                <tr>
+                                  <th className="p-3 text-left">Product Name</th>
+                                  <th className="p-3 text-center">Returned Qty</th>
+                                  <th className="p-3 text-right">Unit Price</th>
+                                  <th className="p-3 text-right">Subtotal</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-gray-100">
+                                {r.details.map(d => (
+                                  <tr key={d.purchase_return_details_id} className="hover:bg-gray-50">
+                                    <td className="p-3">{d.product?.product_name}</td>
+                                    <td className="p-3 text-center">{d.returned_qty}</td>
+                                    <td className="p-3 text-right">{d.unit_price.toLocaleString()} Ks</td>
+                                    <td className="p-3 text-right font-semibold">{d.returned_amount.toLocaleString()} Ks</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center text-gray-500 font-medium">
+                    No matching records found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
         {/* Pagination */}

@@ -55,7 +55,7 @@ const PurchaseReturnList = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="flex items-center justify-between px-4 py-4 mb-6 border-b border-gray-200">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
         <button 
           onClick={() => navigate('/purchase')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center gap-2"
@@ -67,7 +67,7 @@ const PurchaseReturnList = () => {
           <i className="fa-solid fa-user text-gray-500 text-sm" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-7xl mx-auto px-6 py-8 pt-24">
         <h2 className="text-2xl font-bold mb-8 text-gray-800">Purchase Return List</h2>
 
         {/* Filter Bar */}
@@ -77,7 +77,7 @@ const PurchaseReturnList = () => {
             <input 
               type="text" 
               placeholder="PO ID or Supplier name" 
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg outline-none focus:border-[#F25278] transition" 
+              className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#F25278] transition" 
               value={searchTerm} 
               onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}} 
             />
@@ -88,8 +88,14 @@ const PurchaseReturnList = () => {
             <input 
               type="date" 
               value={startDate}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
-              onChange={(e) => {setStartDate(e.target.value); setCurrentPage(1);}} 
+              className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
+              onChange={(e) => {
+                setStartDate(e.target.value); 
+                setCurrentPage(1);
+                if (endDate && e.target.value > endDate) {
+                  setEndDate(""); 
+                }
+              }}
             />
           </div>
           
@@ -98,7 +104,8 @@ const PurchaseReturnList = () => {
             <input 
               type="date" 
               value={endDate}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
+              min={startDate}
+              className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg text-gray-500 outline-none focus:border-[#F25278] transition" 
               onChange={(e) => {setEndDate(e.target.value); setCurrentPage(1);}} 
             />
           </div>

@@ -61,7 +61,7 @@ const UpdateSupplierPage = () => {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col">
-        <header className="h-16 flex justify-between items-center px-8 bg-[#F8FAFC] shadow-sm">
+        <header className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
           <button onClick={() => navigate(-1)} className="text-gray-600 hover:text-[#F25278] flex items-center">
             <i className="fa-solid fa-arrow-left mr-2"></i> Back
           </button>
@@ -70,7 +70,7 @@ const UpdateSupplierPage = () => {
           </div>
         </header>
 
-        <div className="p-8">
+        <div className="p-8 pt-24">
           <h2 className="text-2xl font-bold mb-6">Update Supplier</h2>
           <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl">
             <form onSubmit={handleUpdate} className="space-y-4">

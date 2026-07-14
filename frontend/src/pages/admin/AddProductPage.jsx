@@ -5,6 +5,7 @@ import axios from 'axios';
 const AddProductPage = () => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
+  const [errorMessage, setErrorMessage] = useState("");
   const [formData, setFormData] = useState({
     product_name: '',
     category_id: '',
@@ -62,6 +63,21 @@ const AddProductPage = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
+  if (Number(formData.selling_price) < Number(formData.unit_price)) {
+      setErrorMessage("Selling Price must be greater than or equal to Unit Price.");
+      return; 
+    }
+
+    if (Number(formData.unit_price) == 0) {
+      setErrorMessage("Unit Price must not be zero.");
+      return; 
+    }
+
+    if (Number(formData.selling_price) == 0) {
+      setErrorMessage("Selling Price must not be zero.");
+      return; 
+    }
+
   const data = new FormData();
   data.append("product_name", formData.product_name);
   data.append("category_id", formData.category_id);
@@ -87,20 +103,24 @@ const AddProductPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="h-16 flex items-center justify-between px-8 bg-[#F8FAFC] border-b border-gray-200">
+      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+  
+        {/* Back Button (Left side) */}
         <button 
           onClick={() => navigate('/products')}
           className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
+
+        {/* User Icon (Right side) */}
+        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+          <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="p-8">
+      <div className="p-8 pt-24">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Add New Product</h2>
         
         <form 
@@ -206,6 +226,12 @@ const AddProductPage = () => {
                 ></textarea>
                 </div>
             </div>
+            {errorMessage && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 rounded-xl text-sm font-medium flex items-center gap-2">
+                <i className="fa-solid fa-circle-exclamation"></i>
+                {errorMessage}
+              </div>
+            )}
             
             <div className="mt-10 flex">
               
@@ -215,7 +241,7 @@ const AddProductPage = () => {
                 className={`px-10 py-3.5 rounded-xl font-bold shadow-lg transition-all transform 
                   ${!isFormValid 
                     ? "bg-gray-300 cursor-not-allowed" 
-                    : "bg-[#F25278] hover:bg-pink-600 shadow-pink-200 hover:scale-105 text-white"
+                    : "bg-[#F25278] shadow-pink-200 hover:scale-105 text-white"
                   }`}
               >
                 Add Product

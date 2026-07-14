@@ -189,31 +189,26 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
 
 @router.put("/confirm-sale/{order_id}")
 def confirm_sale(order_id: int, db: Session = Depends(get_db)):
-    order = (
-        db.query(models.SaleOrdersHeader)
-        .filter(models.SaleOrdersHeader.sale_order_id == order_id)
-        .first()
-    )
+    order = db.query(models.SaleOrdersHeader).filter(models.SaleOrdersHeader.sale_order_id == order_id).first()
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     if order.status == "Confirmed":
         raise HTTPException(status_code=400, detail="Already Confirmed")
-    details = (
-        db.query(models.SaleOrdersDetails)
-        .filter(models.SaleOrdersDetails.sale_order_id == order_id)
-        .all()
-    )
+
+    details = db.query(models.SaleOrdersDetails).filter(models.SaleOrdersDetails.sale_order_id == order_id).all()
+    
     cobol_lines = [str(len(details))]
     for d in details:
-        product = db.query(models.Product).filter(
-            models.Product.product_id == d.product_id
-        ).first()
-        cobol_lines.append(str(product.product_id))
-        cobol_lines.append(str(product.current_qty))
-        cobol_lines.append(str(d.qty))
+        product = db.query(models.Product).filter(models.Product.product_id == d.product_id).first()
+        if product:
+            cobol_lines.append(str(product.product_id))
+            cobol_lines.append(str(product.current_qty))
+            cobol_lines.append(str(d.qty))
+
     cobol_input = "\n".join(cobol_lines) + "\n"
     base_dir = Path(__file__).resolve().parent.parent.parent
     cobol_exe = base_dir / "bin" / "CONFIRMSALE.exe"
+
     try:
         process = subprocess.run(
             [str(cobol_exe)],
@@ -222,28 +217,51 @@ def confirm_sale(order_id: int, db: Session = Depends(get_db)):
             capture_output=True,
             check=True
         )
-        lines = process.stdout.strip().splitlines()
+        lines = [line.strip() for line in process.stdout.strip().splitlines() if line.strip()]
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    if lines[0] == "ERROR":
+
+    if any("ERROR" in line.upper() for line in lines):
+        error_index = -1
+        for i, line in enumerate(lines):
+            if "ERROR" in line.upper():
+                error_index = i
+                break
+        
+        error_pid = lines[error_index + 1] if error_index + 1 < len(lines) else "Unknown"
+        
+        error_product = None
+        if error_pid.isdigit():
+            error_product = db.query(models.Product).filter(models.Product.product_id == int(error_pid)).first()
+        
+        product_name = error_product.product_name if error_product else f"ID: {error_pid}"
+        
         raise HTTPException(
             status_code=400,
-            detail=f"Insufficient stock for {lines[1]}"
+            detail=f"Insufficient stock for: {product_name}"
         )
+
     index = 1
     while index < len(lines):
-        product_id = int(lines[index])
-        new_qty = int(lines[index + 1])
-        product = db.query(models.Product).filter(
-            models.Product.product_id == product_id
-        ).first()
-        product.current_qty = new_qty
-        index += 2
+        try:
+            if lines[index].upper() == "OK":
+                index += 1
+                continue
+                
+            product_id = int(lines[index])
+            new_qty = int(lines[index + 1])
+            
+            product = db.query(models.Product).filter(models.Product.product_id == product_id).first()
+            if product:
+                product.current_qty = new_qty
+            index += 2
+        except (ValueError, IndexError):
+            break
+            
     order.status = "Confirmed"
     db.commit()
-    return {
-        "message": "Order Confirmed Successfully"
-    }
+    return {"message": "Order Confirmed Successfully"}
+
 
 # @router.put("/confirm-sale/{order_id}")
 # def confirm_sale(order_id: int, db: Session = Depends(get_db)):
