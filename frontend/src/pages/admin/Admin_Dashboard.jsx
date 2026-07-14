@@ -36,8 +36,26 @@ const AdminDashboard = () => {
 
   const COLORS = ["#ff5a8a", "#b97d97", "#4d2d38", "#f8cddd"];
 
-  if (loading) return <div className="p-8 ml-64">Loading Dashboard...</div>;
-  if (!dashboardData) return <div className="p-8 ml-64">Failed to load data.</div>;
+  if (loading) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
+
+// 2. Error state
+if (!dashboardData) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <i className="fa-solid fa-circle-exclamation text-4xl text-red-500 mb-4"></i>
+    <p className="text-gray-600 font-medium">Failed to load data.</p>
+    <button 
+      onClick={() => window.location.reload()} 
+      className="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm transition"
+    >
+      Try Again
+    </button>
+  </div>
+  );
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
