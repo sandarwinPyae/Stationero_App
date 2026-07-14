@@ -147,8 +147,8 @@ const AddPurchaseOrderPage = () => {
               <option value="">Select Payment Method</option>
               <option value="Cash">Cash</option>
               <option value="Kpay">KBZ pay</option>
-              <option value="Bank Transfer">AYA Pay</option>
-              <option value="Credit">Credit</option>
+              <option value="AYA Pay">AYA Pay</option>
+              <option value="Bank Transfer">Bank Transfer</option>
             </select>
           </div>
         </div>

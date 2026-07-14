@@ -98,11 +98,16 @@ def get_dashboard_data(db: Session = Depends(get_db)):
         
         # 4. Pie Chart Data
         pie_query = (
-            db.query(models.Product.product_name.label("name"), func.sum(models.SaleOrdersDetails.qty).label("value"))
+            db.query(
+                models.Product.product_name.label("name"), 
+                func.sum(models.SaleOrdersDetails.qty).label("value")
+            )
             .join(models.SaleOrdersDetails, models.Product.product_id == models.SaleOrdersDetails.product_id)
             .join(models.SaleOrdersHeader, models.SaleOrdersDetails.sale_order_id == models.SaleOrdersHeader.sale_order_id)
             .filter(models.SaleOrdersHeader.status == "Confirmed")
             .group_by(models.Product.product_name)
+            .order_by(desc(func.sum(models.SaleOrdersDetails.qty)))
+            .limit(5)
             .all()
         )
         pie_data = [{"name": item.name, "value": item.value} for item in pie_query]

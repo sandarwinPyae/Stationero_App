@@ -241,7 +241,7 @@ const AddProductPage = () => {
                 className={`px-10 py-3.5 rounded-xl font-bold shadow-lg transition-all transform 
                   ${!isFormValid 
                     ? "bg-gray-300 cursor-not-allowed" 
-                    : "bg-[#F25278] hover:bg-pink-600 shadow-pink-200 hover:scale-105 text-white"
+                    : "bg-[#F25278] shadow-pink-200 hover:scale-105 text-white"
                   }`}
               >
                 Add Product

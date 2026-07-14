@@ -71,7 +71,7 @@ const ViewProductDetails = () => {
               <img 
                 src={`http://localhost:8000/${product.product_img_url}`} 
                 alt={product.product_name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 onError={(e) => { e.target.src = '/placeholder.png'; }} 
               />
             ) : (
