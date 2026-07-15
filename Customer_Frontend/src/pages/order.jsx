@@ -233,22 +233,6 @@ const OrderPage = () => {
             <span>←</span> <span>Back</span>
           </button>
         </div>
-        {checkoutItems.length === 0 ? (
-          <div style={styles.emptyOrderContainer}>
-            <h2 style={styles.emptyOrderText}>Your Order is Empty</h2>
-            <p style={styles.emptyOrderSubtext}>You haven't selected any products to order yet. Please browse our shop to add items.</p>
-            <button
-              type="button"
-              onClick={() => navigate('/product')}
-              onMouseEnter={() => setHoveredBtn('shop')}
-              onMouseLeave={() => setHoveredBtn(null)}
-              style={{ ...styles.shopBtn, ...(hoveredBtn === 'shop' ? styles.shopBtnHover : {}) }}
-            >
-              Go to Products
-            </button>
-          </div>
-        ) : (
-          <>
             <div style={styles.invoiceCard}>
               <div style={styles.brandTitleHeader}>Stationero</div>
 
@@ -364,8 +348,6 @@ const OrderPage = () => {
                 Confirm Order
               </button>
             </div>
-          </>
-        )}
       </main>
     </div>
   );
