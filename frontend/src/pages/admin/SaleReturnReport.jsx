@@ -172,8 +172,8 @@ const SaleReturnReport = () => {
                   <React.Fragment key={s.sale_return_id}>
                     <tr className="cursor-pointer hover:bg-gray-50 transition-colors" onClick={() => setSelectedId(selectedId === s.sale_return_id ? null : s.sale_return_id)}>
                       <td className="p-4 font-bold text-blue-600">{s.invoice_number}</td>
-                      <td className="p-4 font-semibold">{s.total_returned_amount.toLocaleString()}</td>
-                      <td className="p-4 text-gray-600">{s.sale_return_payment_method}</td>
+                      <td className="p-4 font-semibold text-center">{s.total_returned_amount.toLocaleString()}</td>
+                      <td className="p-4 text-gray-600 text-center">{s.sale_return_payment_method}</td>
                       <td className="p-4">
                         {s.return_img_url ? (
                           <img 
@@ -184,7 +184,7 @@ const SaleReturnReport = () => {
                           />
                         ) : <span className="text-gray-400 text-xs">No Image</span>}
                       </td>
-                      <td className="p-4 text-gray-600">{s.return_reason}</td>
+                      <td className="p-4 text-gray-600 text-left">{s.return_reason}</td>
                       <td className="p-4 text-gray-500">{formatDate(s.sale_return_date)}</td>
                     </tr>
                     {selectedId === s.sale_return_id && (
