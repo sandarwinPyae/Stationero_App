@@ -64,9 +64,9 @@ const ReturnsPage = () => {
         }
       })
       .catch(err => console.error("Error fetching dynamic return ID strings:", err));
-  }, [navigate]);
+     }, [navigate]);
 
-  const handleReturnSubmit = async (e) => {
+    const handleReturnSubmit = async (e) => {
     e.preventDefault();
     try {
       const formData = new FormData();
@@ -75,15 +75,20 @@ const ReturnsPage = () => {
       formData.append('qty', parseInt(quantity, 10) || 1);
       formData.append('reason', reason);
       formData.append('payment_method', paymentMethod);
+      
+      // 🌟 FIX: Append the invoice tracking parameter securely to the network request
+      if (selectedInvoice) {
+        formData.append('invoice_number', selectedInvoice.trim());
+      }
 
       if (selectedFile) {
         formData.append('file', selectedFile);
       }
 
-      // 🌟 FormData ကို Axios ဖြင့် ပို့ဆောင်ခြင်း
+      // Send via Axios to your Python FastAPI backend
       const response = await axios.post('http://localhost:8000/api/order/return-status', formData, {
         headers: {
-          'Content-Type': 'multipart/form-data' // file တွေပါရင် ဒီ header လေး ထည့်ပေးရပါတယ်
+          'Content-Type': 'multipart/form-data'
         }
       });
 
@@ -95,6 +100,7 @@ const ReturnsPage = () => {
       alert('Return submission failed. Please try again.');
     }
   };
+
 
   useEffect(() => {
     if (customerProfile && customerProfile.email) {
@@ -265,23 +271,42 @@ const ReturnsPage = () => {
                 </select>
               </div>
               {productName && (parseInt(quantity, 10) >= 0) && (
-                <div style={styles.inputGroup}>
-                  <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
-                  <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
-                    {(() => {
-                      const selectedItemNode = availableProducts.find(
-                        p => (p.name === productName || p.product_name === productName)
-                      );
-                      
-                      const trueNetPaidUnitPrice = selectedItemNode ? parseFloat(selectedItemNode.selling_price || 0) : 0;
-                      const returnQty = parseInt(quantity, 10) || 0;
-                      const finalDisplayPrice = trueNetPaidUnitPrice > 0 ? trueNetPaidUnitPrice : 2000;
-                      
-                      return ((returnQty * finalDisplayPrice).toLocaleString() + " MMK");
-                    })()}
-                  </div>
-                </div>
-              )}
+  <div style={styles.inputGroup}>
+    <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
+    <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
+      {(() => {
+        // 1. Find the selected item node
+        const selectedItemNode = availableProducts.find(
+          p => (p.name === productName || p.product_name === productName)
+        );
+        
+        // 2. Find the selected invoice header to get global discounts
+        const currentInvoiceHeader = invoiceList.find(
+          inv => inv.invoice_number === selectedInvoice
+        );
+        
+        const rawUnitPrice = selectedItemNode ? parseFloat(selectedItemNode.selling_price || 0) : 0;
+        
+        // Grab the global coupon details if they exist in your invoice list payload
+        const globalDiscount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.discount || 0) : 0;
+        const grossTotalAmount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.total_amount || 0) : 0;
+        
+        // 3. Calculate proportional unit price after discount
+        let finalRefundUnitPrice = rawUnitPrice;
+        if (globalDiscount > 0 && grossTotalAmount > 0) {
+          const discountRatio = globalDiscount / grossTotalAmount;
+          finalRefundUnitPrice = rawUnitPrice * (1 - discountRatio);
+        }
+        
+        const returnQty = parseInt(quantity, 10) || 0;
+        const totalRefund = returnQty * finalRefundUnitPrice;
+        
+        return (Math.round(totalRefund).toLocaleString() + " MMK");
+      })()}
+    </div>
+  </div>
+)}
+
               <div style={styles.actionRow}>
             <button
               type="submit"

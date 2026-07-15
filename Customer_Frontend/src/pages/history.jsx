@@ -118,7 +118,7 @@ const OrderHistoryPage = () => {
   const totalPagesCount = Math.ceil(filteredRecords.length / recordsPerPage) || 1;
   const todayLimitString = new Date().toISOString().split('T')[0];
 
-  return (
+return (
     <div style={styles.container}>
       <StationeroNavbar showSearch={false} />
       <main style={styles.mainContent}>
@@ -167,7 +167,8 @@ const OrderHistoryPage = () => {
             <span style={{ flex: 1.2 }}>Total Amount</span>
             <span style={{ flex: 1.5 }}>Payment Method</span>
             <span style={{ flex: 1.8 }}>{activeTab === 'All' ? 'Sale Date' : 'Transaction Date'}</span>
-            <span style={{ flex: 0.6, textAlign: 'center' }}>Action</span>
+            {/* 🌟 Hides "Action" Header conditionally */}
+            {activeTab === 'All' && <span style={{ flex: 0.6, textAlign: 'center' }}>Action</span>}
           </div>
 
           {currentRecordsView.length === 0 ? (
@@ -187,19 +188,23 @@ const OrderHistoryPage = () => {
                   </span>
                   <span style={{ flex: 1.5, color: '#444' }}>{record.payment_method}</span>
                   <span style={{ flex: 1.8, color: '#777', fontSize: '13px' }}>{record.order_date || record.sale_return_date}</span>
-                  <span style={{ flex: 0.6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-                    <button
-                      type="button"
-                      onClick={() => {
-                          navigate(`/order/${record.sale_order_id || record.id}`); 
-                        } 
-                      }
-                      title="View Details"
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', padding: '4px', color: '#f25278', outline: 'none' }}
-                    >
-                      👁
-                    </button>
-                  </span>
+                  
+                  {/* 🌟 Hides Eye Icon Element conditionally */}
+                  {activeTab === 'All' && (
+                    <span style={{ flex: 0.6, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                      <button
+                        type="button"
+                        onClick={() => {
+                            navigate(`/order/${record.sale_order_id || record.id}`); 
+                          } 
+                        }
+                        title="View Details"
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '15px', padding: '4px', color: '#f25278', outline: 'none' }}
+                      >
+                        👁
+                      </button>
+                    </span>
+                  )}
                 </div>
               );
             })

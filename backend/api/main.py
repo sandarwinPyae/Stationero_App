@@ -276,20 +276,19 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
 
 @app.post("/api/login")
 def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db)):
-    # 1. Look up the credentials inside your SQLite database tables first
-    user_record = db.query(User).filter(User.user_email == payload.email).first()
+    print("====== API HIT: COBOL-INTEGRATED AUTHENTICATION PIPELINE ENGAGED ======")
     
-    # Compute precise verification states to prevent unhandled AttributeErrors
+    # 1. Look up the credentials inside your database tables first
+    user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
+    
+    # Compute precise verification states to pass to the COBOL executable environment safely
     is_registered = "Y" if user_record else "N"
-    is_password_correct = "N"
+    is_password_correct = "Y" if (user_record and user_record.user_password == payload.password) else "N"
     user_role = user_record.role if user_record else "customer"
-    
-    if user_record and user_record.user_password == payload.password:
-        is_password_correct = "Y"
 
     try:
         # 2. ENVIRONMENT SHIELD: Interface cleanly with your compiled COBOL binary executable
-        cobol_message = "Success"
+        cobol_message = ""
         try:
             result = subprocess.run(
                 [COBOL_EXE_PATH, "LOGIN", is_registered, is_password_correct, payload.email, user_role], 
@@ -311,15 +310,15 @@ def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db))
             else:
                 cobol_message = "Login successful!"
 
-        # 3. ---- FIXED: RELIABLE EXCEPTION GATES PREVENT 500 INTERNAL SERVER CRASHES ----
-        # Checks the evaluation string flags explicitly to handle failures gracefully
-        if "Incorrect password" in cobol_message or is_password_correct == "N":
-            raise HTTPException(status_code=400, detail="Incorrect password. Please try again.")
-            
-        if "not registered" in cobol_message or is_registered == "N":
+        # 3. ---- FIXED: CORRECT COBOL RESPONSE EVALUATION ORDER ----
+        # 🌟 CRITICAL FIX: Check if the user is registered BEFORE checking the password state!
+        if "not registered" in cobol_message.lower() or is_registered == "N":
             raise HTTPException(status_code=400, detail="You are not registered, please sign up!")
+            
+        if "incorrect password" in cobol_message.lower() or is_password_correct == "N":
+            raise HTTPException(status_code=400, detail="Incorrect password. Please try again.")
 
-      
+        # Determine route redirection values based on authenticated user types
         if user_role == "admin":
             redirect_destination = "http://localhost:5174/admin/dashboard"
         else:
@@ -339,7 +338,8 @@ def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db))
         raise he
     except Exception as e:
         print(f"Login structural crash handler trace: {e}")
-        raise HTTPException(status_code=400, detail="Incorrect password. Please try again.")
+        # 🌟 FIX: Stop hardcoding "Incorrect password" inside your global fallback catch block!
+        raise HTTPException(status_code=400, detail="Authentication server processing error. Please try again.")
 
 @app.post("/api/order/confirm", status_code=status.HTTP_201_CREATED)
 def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(get_db)):
@@ -488,8 +488,6 @@ def process_loose_product_return_status(
     
     customer_lookup = db.query(Customer).filter(Customer.customer_email == customer_email.strip()).first()
     active_numeric_id = customer_lookup.customer_id if customer_lookup else 7
-
-    # ====== 🟢 🎯 STEP (၁): INVOICE-SPECIFIC PARENT ENFORCEMENT ======
     parent_order_id = None
     if invoice_number and str(invoice_number).strip():
         matched_header = db.query(SaleOrdersHeader).filter(
@@ -507,15 +505,12 @@ def process_loose_product_return_status(
         if matched_header:
             parent_order_id = matched_header.sale_order_id
 
-    # ====== 🟢 🎯 STEP (၂): COLLISION-FREE TARGET ROW EXTRACTOR ======
-    # ❌ Product Name ဆီသို့ သွားရောက် Like ရှာဖွေပြီး ID အမှားကြီး ဆွဲထုတ်မိသော လိုင်းဟောင်းအား လုံးဝ(၁၀၀%) ဖျက်ထုတ်ပစ်လိုက်ပါသည်!
-    # 🟢 ၎င်းအစား မိတ်ဆွေ ရွေးချယ်ထားသော အော်ဒါ ID နှင့် ကုန်ပစ္စည်းအမည်စာသား တိုက်ရိုက်ကိုက်ညီသော အသေးစိတ်လိုင်း (Details Record) အား ဇယားထဲမှ တိုက်ရိုက် ကွက်တိ ရှာဖွေခြင်းဖြစ်သည်
     if parent_order_id:
         past_order_detail = db.query(SaleOrdersDetails).join(
             Product, SaleOrdersDetails.product_id == Product.product_id
         ).filter(
             SaleOrdersDetails.sale_order_id == parent_order_id,
-            Product.product_name == product_name.strip() # 👈 🎯 FIXED: ၎င်း Invoice အောက်ရှိ ဝယ်ယူသူ အမှန်တကယ် ဝယ်သွားခဲ့သော ကွက်တိ ကုန်ပစ္စည်းလိုင်းကိုသာ ဆွဲထုတ်ခြင်းဖြစ်ပါသည်
+            Product.product_name == product_name.strip() 
         ).first()
     else:
         possible_headers = db.query(SaleOrdersHeader).filter(models.SaleOrdersHeader.customer_id == int(active_numeric_id)).all()
@@ -533,24 +528,24 @@ def process_loose_product_return_status(
     parent_order_id = past_order_detail.sale_order_id
     parent_header = db.query(SaleOrdersHeader).filter(SaleOrdersHeader.sale_order_id == parent_order_id).first()
     parent_invoice_str = parent_header.invoice_number if parent_header else f"INV{parent_order_id:05d}"
-
-    # =========================================================================
-    # 🎯 🟢 THE INDESTRUCTIBLE TOTAL_AMOUNT - DISCOUNT CONTEXT PIPELINE
-    # =========================================================================
-    # 🟢 🎯 FIXED: ၅၀၀ တန် Gel Pen ဝယ်လျှင် ၅၀၀၊ ၂၀၀၀ တန် ဝယ်လျှင် ၂၀၀၀ — ဝယ်ယူသူ ၎င်းအော်ဒါလိုင်းအောက်တွင် အမှန်တကယ် ပေးချေခဲ့ရသည့် စျေးနှုန်းစစ်စစ် (Net Paid Unit Price) အား
-    # past_order_detail.selling_price ထဲမှနေ၍ စာလုံးတစ်လုံး၊ ငွေတစ်ပြားမကျန် မျက်ဝါးထင်ထင် တိုက်ရိုက်ဖတ်ယူလိုက်ခြင်းဖြစ်ပါသည်!
     raw_unit_price = float(past_order_detail.selling_price if past_order_detail.selling_price else 0.0)
     discount_allowed = float(parent_header.discount) if parent_header and parent_header.discount else 0.0
-    total_purchased_qty = int(past_order_detail.qty) if past_order_detail.qty else 1
-    
-    if discount_allowed > 0 and total_purchased_qty > 0:
-        discount_per_item = discount_allowed / total_purchased_qty
-        actual_refund_unit_price = raw_unit_price - discount_per_item 
+    order_gross_total = float(parent_header.total_amount) if parent_header and parent_header.total_amount else 0.0
+
+    # 🌟 2. Calculate the item price after its proportional share of the global discount
+    if discount_allowed > 0 and order_gross_total > 0:
+        # Determine what percentage of the total order value this single unit represents
+        discount_ratio = discount_allowed / order_gross_total
+        
+        # Deduct that exact percentage from this item's raw price
+        actual_refund_unit_price = raw_unit_price * (1.0 - discount_ratio)
     else:
         actual_refund_unit_price = raw_unit_price
 
-    # 🟢 ဒသမကိန်းများ လုံးဝ (၁၀၀%) ကင်းစင်စေရန် စုစုပေါင်းပြန်အမ်းငွေအား ကိန်းပြည့်သန့်သန့်အဖြစ် တိုက်ရိုက်မြှောက်ချက်ထုတ်ခြင်း ဖြစ်ပါသည်
+    # Round the price to prevent floating-point decimals in your currency
+    actual_refund_unit_price = round(actual_refund_unit_price, 2)
     computed_subtotal = float(int(qty) * actual_refund_unit_price)
+
 
     try:
         saved_img_name = None
@@ -561,7 +556,6 @@ def process_loose_product_return_status(
             with open(os.path.join(upload_dir, saved_img_name), "wb") as f_out:
                 f_out.write(file.file.read())
 
-        # 🎯 ပြန်အမ်းငွေပမာဏအစစ်အမှန်အား တိုက်ရိုက်ထည့်သွင်းသိမ်းဆည်းခြင်း
         new_return_header = SaleReturnHeader(
             sale_order_id=parent_order_id,
             total_returned_amount=computed_subtotal,
@@ -572,10 +566,9 @@ def process_loose_product_return_status(
         db.add(new_return_header)
         db.flush()
 
-        # 🎯 အသားတင် ပြန်အမ်းငွေစာရင်းများအား Details ဇယားထဲသို့ စံနစ်တကျ ထည့်သွင်းခြင်း
         new_return_detail = SaleReturnDetails(
             sale_return_id=new_return_header.sale_return_id,
-            product_id=past_order_detail.product_id, # 👈 🎯 FIXED: အမှားကင်းစင်သော ၎င်း ၅၀၀ တန်ပစ္စည်း၏ တကယ့် Product ID စစ်စစ်ကြီး ဝင်ရောက်သိမ်းဆည်းသွားမည်ဖြစ်သည်!
+            product_id=past_order_detail.product_id, 
             qty=int(qty),
             selling_price=actual_refund_unit_price, 
             sub_total=computed_subtotal
@@ -656,10 +649,6 @@ def get_customer_history_logs(customer_email: str, db: Session = Depends(get_db)
         print(f"History descending sorting error log trace: {e}")
         raise HTTPException(status_code=500, detail=f"Database full history logs pipeline error: {e}")
 
-# =========================================================================
-# 🎯 🟢 FIXED (၁) - BREAK-FREE TRUE DROPDOWN VALIDATOR (NATIVE DATABASE CODE MATCH)
-# =========================================================================
-# အော်ဒါအမျိုးမျိုးတွင် အစီအစဉ်နံပါတ်စဉ်များ မည်မျှပင်ရှိနေပါစေ ပစ္စည်းအကုန်ပြန်အမ်းပြီးပါက Dropdown ထဲမှ INV00002 ကြီး အလိုအလျောက် အမြစ်ပြတ် ပျောက်ကွယ်သွားစေရန်ဖြစ်သည်
 @app.get("/api/order/valid-return-invoices/{customer_email}")
 def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)):
     try:
@@ -680,6 +669,7 @@ def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)
             display_num = total_history_count - idx
             computed_invoice_name = f"INV{display_num:05d}"
             
+            # This is your condition checking that the order is confirmed
             if not order.status or str(order.status).strip().lower() != "confirmed":
                 continue
                 
@@ -687,6 +677,7 @@ def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)
             has_returnable_items = False
             
             for detail in details:
+                # 🌟 FIXED: Keep track of every historical return record that exists for this order item
                 already_returned_scalar = db.query(func.sum(SaleReturnDetails.qty)).join(
                     SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
                 ).filter(
@@ -705,7 +696,8 @@ def get_valid_return_invoices(customer_email: str, db: Session = Depends(get_db)
                     "invoice_number": computed_invoice_name,
                     "real_db_invoice": order.invoice_number,   
                     "status": order.status,
-                    "selling_price": float(detail.selling_price) if detail.selling_price else 0.0 
+                    "discount": float(order.discount) if order.discount else 0.0,
+                    "total_amount": float(order.total_amount) if order.total_amount else 0.0
                 })
                 
         return {"orders": valid_orders_list}
@@ -738,14 +730,17 @@ def get_items_by_invoice_number(invoice_number: str, db: Session = Depends(get_d
         ).all()
         
         formatted_items = []
-        has_any_returnable_left = False # 👈 🎯 🟢 GLOBAL INTEGRITY CHECKER LAYER
+        has_any_returnable_left = False 
         
         for detail in items_query:
             product_node = db.query(Product).filter(Product.product_id == detail.product_id).first()
             prod_name = product_node.product_name if product_node else "Unknown Item"
 
+            # 🌟 FIXED: Counts previously returned quantities across all statuses so users cannot return them again
             already_returned_scalar = db.query(func.sum(SaleReturnDetails.qty)).join(
                 SaleReturnHeader, SaleReturnDetails.sale_return_id == SaleReturnHeader.sale_return_id
+                # 💡 If your SaleReturnHeader table uses a specific column to track its processing stage (e.g., status),
+                # you can chain an explicit check here if needed: `.filter(SaleReturnHeader.status != 'Rejected')`
             ).filter(
                 SaleReturnHeader.sale_order_id == header_record.sale_order_id,
                 SaleReturnDetails.product_id == detail.product_id
@@ -755,13 +750,16 @@ def get_items_by_invoice_number(invoice_number: str, db: Session = Depends(get_d
             original_qty = int(detail.qty) if detail.qty else 0
             actual_returnable_qty = original_qty - already_returned
             
+            # 🌟 Only include the item if there is remaining returnable balance left
             if actual_returnable_qty > 0:
                 has_any_returnable_left = True
                 formatted_items.append({
                     "name": str(prod_name).strip(),
                     "product_name": str(prod_name).strip(),
-                    "qty": int(actual_returnable_qty)
+                    "qty": int(actual_returnable_qty),
+                    "selling_price": float(detail.selling_price) if detail.selling_price else 0.0
                 })
+                
         if not has_any_returnable_left:
             return {"items": []}
             
