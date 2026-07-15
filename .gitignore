@@ -15,6 +15,7 @@ dist/
 # img
 uploads/
 images/
+return_images/
 
 # Executables
 *.exe
