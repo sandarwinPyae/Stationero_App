@@ -3,7 +3,7 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../../components/admin/Sidebar';
 
-const SupplierPage = () => {
+const SupplierPage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [suppliers, setSuppliers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,25 +85,30 @@ const SupplierPage = () => {
       {/* RIGHT CONTENT */}
       <div className="flex-1 flex flex-col w-full overflow-hidden">
         {/* HEADER */}
-        <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
+        <header className="fixed top-0 left-0 md:left-64 right-0 h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+          {/* Mobile Sidebar Toggle */}
+          <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+            <i className="fa-solid fa-bars"></i>
+          </button>
+
+          <div className="ml-auto w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
             <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </header>
 
-        <main className="p-8 pt-24 w-full max-w-7xl mx-auto flex-grow">
+        <main className="p-4 md:p-8 pt-20 md:pt-20 w-full max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Suppliers List</h2>
 
           {/* CONTROLS */}
-          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-col sm:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100 gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Search suppliers..."
-                className="p-2.5 border border-gray-200 rounded-lg outline-none w-72 focus:ring-2 focus:ring-[#F25278]/20"
+                className="p-2.5 border border-gray-200 rounded-lg outline-none w-full sm:w-72 focus:ring-2 focus:ring-[#F25278]/20"
                 onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               />
-              <div className="flex bg-gray-100 rounded-lg p-1">
+              <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
                 {['active', 'deleted'].map((tab) => (
                   <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-2 rounded-md ${activeTab === tab ? 'bg-white text-[#F25278] shadow-sm' : 'text-gray-500'}`}>
                     {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -111,14 +116,14 @@ const SupplierPage = () => {
                 ))}
               </div>
             </div>
-            <button onClick={() => navigate('/add-supplier')} className="bg-[#F25278] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md">
+            <button onClick={() => navigate('/add-supplier')} className="bg-[#F25278] text-white px-6 py-2.5 rounded-lg font-semibold shadow-md w-full sm:w-auto">
               <i className="fa-solid fa-plus mr-2"></i> Add Supplier
             </button>
           </div>
 
           {/* TABLE */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <table className="w-full text-left">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table className="w-full min-w-[600px] text-left">
               <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
                   <th className="py-4 px-6">ID</th>

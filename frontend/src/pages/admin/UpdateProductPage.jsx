@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const UpdateProductPage = () => {
+const UpdateProductPage = ({toggleSidebar}) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [product, setProduct] = useState({
@@ -73,18 +73,19 @@ const UpdateProductPage = () => {
   const isFormValid = product.product_name && product.category_id && product.unit_price && product.selling_price;
 
   return (
-    // h-screen နှင့် flex-col သုံး၍ Page ကို အသေထားသည်
     <div className="h-screen bg-slate-50 flex flex-col overflow-hidden">
       
       {/* Navbar (Fixed) */}
       <div className="flex-shrink-0 px-8 py-6 bg-slate-50">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
+          <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+            <i className="fa-solid fa-bars"></i>
+          </button>
           <h2 className="text-2xl font-extrabold text-slate-800">Edit Product</h2>
-          <button onClick={() => navigate(-1)} className="text-slate-500 hover:text-[#F25278] font-medium">← Back</button>
+          <button onClick={() => navigate(-1)} className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center gap-2">← Back</button>
         </div>
       </div>
 
-      {/* Scrollable Content (ဒီအပိုင်းပဲ ရွေ့ပါလိမ့်မယ်) */}
       <div className="flex-1 overflow-y-auto px-4 pb-10">
         <div className="max-w-4xl mx-auto">
           <form onSubmit={handleUpdate} className="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 md:p-10">

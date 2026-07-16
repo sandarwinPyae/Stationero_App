@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Sidebar from '../../components/admin/Sidebar';
 
-const CustomerPage = () => {
+const CustomerPage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [customers, setCustomers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,6 +12,7 @@ const CustomerPage = () => {
   const [activeTab, setActiveTab] = useState('active');
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -51,44 +53,51 @@ const CustomerPage = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50 font-sans">
-      <div className="flex-1 flex flex-col w-full overflow-hidden">
-        {/* HEADER */}
-        <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200">
-            <i 
-              className="fa-solid fa-user text-gray-500"
-              onClick={() => navigate('/admin/dashboard')}
-            >
-              
-            </i>
+      
+      {/* Main Content */}
+      <div className="flex-1 w-full overflow-hidden">
+        <header className="fixed top-0 left-0 w-full h-16 flex items-center justify-between px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-30">
+          <button 
+            className="md:hidden p-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            onClick={toggleSidebar}
+          >
+            <i className="fa-solid fa-bars text-xl"></i>
+          </button>
+          <div className="flex-1"></div>
+
+          <div className="flex-none">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center border border-gray-200 cursor-pointer hover:bg-gray-50">
+              <i 
+                className="fa-solid fa-user text-gray-500 text-lg"
+                onClick={() => navigate('/admin/dashboard')}
+              ></i>
+            </div>
           </div>
         </header>
 
-        <main className="p-8 pt-24 w-full max-w-7xl mx-auto flex-grow">
+        <main className="p-4 md:p-8 pt-20 md:pt-20 w-full max-w-7xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">Customers List</h2>
 
           {/* CONTROLS */}
-          <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
-            <div className="flex items-center gap-4">
-              <input
-                type="text"
-                placeholder="Search customers..."
-                className="p-2.5 border border-gray-200 rounded-lg outline-none w-72 focus:ring-2 focus:ring-[#F25278]/20"
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-              />
-              <div className="flex bg-gray-100 rounded-lg p-1">
-                {['active', 'deleted'].map((tab) => (
-                  <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-2 rounded-md ${activeTab === tab ? 'bg-white text-[#F25278] shadow-sm' : 'text-gray-500'}`}>
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
-              </div>
+          <div className="flex flex-col md:flex-row justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100 gap-4">
+            <input
+              type="text"
+              placeholder="Search customers..."
+              className="p-2.5 border border-gray-200 rounded-lg outline-none w-full md:w-72 focus:ring-2 focus:ring-[#F25278]/20"
+              onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+            />
+            <div className="flex bg-gray-100 rounded-lg p-1 w-full md:w-auto">
+              {['active', 'deleted'].map((tab) => (
+                <button key={tab} onClick={() => setActiveTab(tab)} className={`flex-1 md:px-6 py-2 rounded-md ${activeTab === tab ? 'bg-white text-[#F25278] shadow-sm' : 'text-gray-500'}`}>
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* TABLE */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-            <table className="w-full text-left">
+          {/* TABLE - overflow-x-auto ထည့်ထားပေးတယ် */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+            <table className="w-full text-left min-w-[600px]">
               <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
                 <tr>
                   <th className="py-4 px-6">ID</th>
@@ -110,9 +119,7 @@ const CustomerPage = () => {
                       <td className="py-4 px-6">{c.address}</td>
                       <td className="py-4 px-6">
                         {c.del_flag === 0 ? (
-                          <div className="flex gap-4">
-                            <button onClick={() => { setCustomerToDelete({ id: c.customer_id, name: c.customer_name }); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
-                          </div>
+                          <button onClick={() => { setCustomerToDelete({ id: c.customer_id, name: c.customer_name }); setIsModalOpen(true); }} className="text-[#F25278] hover:text-red-700"><i className="fa-solid fa-trash"></i></button>
                         ) : <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>}
                       </td>
                     </tr>
@@ -128,26 +135,12 @@ const CustomerPage = () => {
 
           {/* PAGINATION */}
           {nPages > 1 && (
-            <div className="flex justify-center mt-8 gap-2">
+            <div className="flex flex-wrap justify-center mt-8 gap-2">
               <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50"><i className="fa-solid fa-chevron-left"></i></button>
               {[...Array(nPages)].map((_, i) => (
                 <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 border rounded-lg ${currentPage === i + 1 ? 'bg-[#F25278] text-white border-[#F25278]' : 'bg-white'}`}>{i + 1}</button>
               ))}
               <button disabled={currentPage === nPages} onClick={() => setCurrentPage(prev => prev + 1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50"><i className="fa-solid fa-chevron-right"></i></button>
-            </div>
-          )}
-
-          {/* DELETE MODAL */}
-          {isModalOpen && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-xl w-96">
-                <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
-                <p className="mb-6 text-gray-600">Delete customer <span className="font-bold text-gray-800">"{customerToDelete?.name}"</span>?</p>
-                <div className="flex justify-end gap-4">
-                  <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded-md">Cancel</button>
-                  <button onClick={handleDelete} className="px-4 py-2 bg-[#F25278] text-white rounded-md">Yes, Delete</button>
-                </div>
-              </div>
             </div>
           )}
         </main>
