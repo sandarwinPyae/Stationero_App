@@ -2,7 +2,7 @@ import React, { useState , useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const AddProductPage = () => {
+const AddProductPage = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [categories, setCategories] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -103,21 +103,20 @@ const AddProductPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-  
-        {/* Back Button (Left side) */}
+      <header className="h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
         <button 
           onClick={() => navigate('/products')}
-          className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
+          className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center gap-2"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-
-        {/* User Icon (Right side) */}
-        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
-          <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
+        <div className="ml-auto w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
+          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
-      </div>
+      </header>
 
       {/* Main Content */}
       <div className="p-8 pt-24">

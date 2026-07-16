@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const PurchaseReturnList = () => {
+const PurchaseReturnList = ({toggleSidebar}) => {
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -60,15 +60,20 @@ const PurchaseReturnList = () => {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+      <div className="fixed top-0 left-0 right-0 h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
         <button 
           onClick={() => navigate('/purchase')}
-          className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center gap-2"
+          className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center"
         >
-          <i className="fa-solid fa-arrow-left"></i> Back
+          
+          <i className="fa-solid fa-arrow-left"></i> <span className="hidden sm:inline">Back</span>
         </button>
+
         
-        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200">
+        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500 text-sm" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </div>
@@ -76,19 +81,19 @@ const PurchaseReturnList = () => {
         <h2 className="text-2xl font-bold mb-8 text-gray-800">Purchase Return List</h2>
 
         {/* Filter Bar */}
-        <div className="flex flex-wrap items-end gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-          <div className="flex-1 min-w-[200px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+          <div className="w-full">
             <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">Search</label>
             <input 
               type="text" 
               placeholder="PO ID or Supplier name" 
-              className="w-full px-4 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-[#F25278] transition" 
+              className="w-full px-4 py-2 text-sm border rounded-lg outline-none" 
               value={searchTerm} 
               onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1);}} 
             />
           </div>
           
-          <div className="min-w-[150px]">
+          <div className="w-full">
             <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">Start Date</label>
             <input 
               type="date" 
@@ -104,7 +109,7 @@ const PurchaseReturnList = () => {
             />
           </div>
           
-          <div className="min-w-[150px]">
+          <div className="w-full">
             <label className="text-xs text-gray-500 mb-1 block uppercase font-semibold">End Date</label>
             <input 
               type="date" 
@@ -123,16 +128,16 @@ const PurchaseReturnList = () => {
               setEndDate("");
               setCurrentPage(1);
             }}
-            className="bg-gray-200 text-gray-700 py-2 px-8 rounded-lg font-semibold hover:bg-gray-300 transition"
+            className="flex items-end"
           >
             Reset Filter
           </button>
         </div>
 
         {/* Table */}
-        <div className="">
-          <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
+        <div className="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-100">
+          <table className="w-full min-w-[600px] text-left border-collapse">
+            <thead className="bg-gray-50 text-gray-600 text-xs uppercase">
               <tr>
                 <th className="p-5 font-semibold text-gray-600">Returned ID</th>
                 <th className="p-5 font-semibold text-gray-600">PO ID</th>

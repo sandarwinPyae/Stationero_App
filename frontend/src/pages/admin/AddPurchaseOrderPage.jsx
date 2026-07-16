@@ -12,7 +12,7 @@ const ErrorMessage = ({ message }) => {
   );
 };
 
-const AddPurchaseOrderPage = () => {
+const AddPurchaseOrderPage = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [isFormVisible, setIsFormVisible] = useState(false);
   const [products, setProducts] = useState([]);
@@ -120,11 +120,17 @@ const AddPurchaseOrderPage = () => {
 
   return (
     <div className="pt-4 pb-4 bg-gray-50 min-h-screen">
-      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-        <button onClick={() => navigate('/purchase')} className="text-gray-600 hover:text-[#F25278] font-medium flex items-center">
+      <header className="fixed top-0 left-0 md:left-64 right-0 h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <button 
+          onClick={() => navigate('/purchase')} 
+          className="hidden sm:flex text-gray-600 hover:text-[#F25278] font-medium items-center transition-colors"
+        >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-      </div>
+      </header>
 
       <div className="max-w-7xl mx-auto bg-white p-6 rounded-3xl shadow-sm border border-gray-100 pt-20">
         <h2 className="text-xl font-bold mb-6">Create Purchase Order</h2>
@@ -132,7 +138,7 @@ const AddPurchaseOrderPage = () => {
         {/* Error Message Component */}
         <ErrorMessage message={errorMessage} />
 
-        <div className="grid grid-cols-2 gap-4 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Select Supplier</label>
             <select className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none" value={selectedSupplier} onChange={(e) => setSelectedSupplier(e.target.value)}>
@@ -158,8 +164,8 @@ const AddPurchaseOrderPage = () => {
             + Add Products
           </button>
         ) : (
-          <div className="border rounded-xl overflow-hidden mb-4">
-            <table className="w-full text-sm text-left">
+          <div className="bg-white border rounded-xl overflow-x-auto mb-6">
+            <table className="w-full min-w-[700px] text-sm text-left">
               <thead className="bg-gray-50">
                 <tr>
                   <th className="p-4">No</th>

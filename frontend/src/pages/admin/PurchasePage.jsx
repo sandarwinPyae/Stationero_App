@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const PurchasePage = () => {
+const PurchasePage = ({ toggleSidebar }) => {
   const [orders, setOrders] = useState([]);
   const [returnedPoIds, setReturnedPoIds] = useState([]);
   const navigate = useNavigate();
@@ -76,9 +76,12 @@ const PurchasePage = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Header - Full Width */}
-      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-        <div className="w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border border-gray-200">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
+      <header className="fixed top-0 left-0 md:left-64 right-0 h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <div className="ml-auto w-10 h-10 bg-gray-50 rounded-full flex items-center justify-center border border-gray-200">
+          <i className="fa-solid fa-user text-gray-500 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
@@ -158,8 +161,8 @@ const PurchasePage = () => {
         </div>
 
         {/* Table Section */}
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left border-collapse">
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full min-w-[700px] text-left border-collapse">
             <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="p-5 font-semibold text-gray-600">Purchase Order ID</th>

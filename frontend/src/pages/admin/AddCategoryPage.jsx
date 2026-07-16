@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const AddCategoryPage = () => {
+const AddCategoryPage = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [categoryName, setCategoryName] = useState("");
 
@@ -26,18 +26,20 @@ const AddCategoryPage = () => {
       {/* --- MAIN CONTENT --- */}
       <div className="flex-1">
         {/* --- NAVBAR --- */}
-        <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-  
+        <div className="fixed top-0 left-0 md:left-64 right-0 h-16 flex items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+          <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+            <i className="fa-solid fa-bars"></i>
+          </button>
           {/* Back Button (Left side) */}
           <button 
             onClick={() => navigate('/categories')}
-            className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
+            className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center gap-2"
           >
             <i className="fa-solid fa-arrow-left mr-2"></i> Back
           </button>
 
           {/* User Icon (Right side) */}
-          <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+          <div className="ml-auto w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
             <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
           </div>
         </div>
