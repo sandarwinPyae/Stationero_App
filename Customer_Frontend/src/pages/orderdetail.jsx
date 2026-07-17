@@ -11,6 +11,16 @@ const OrderDetailPage = () => {
   const params = useParams();
   const orderId = params["order-id"] || params.orderId || params.order_id;
   const navigate = useNavigate();
+const [isMobile, setIsMobile] = useState(false);
+
+useEffect(() => {
+  const handleResize = () => {
+    setIsMobile(window.innerWidth <= 768);
+  };
+  handleResize();
+  window.addEventListener('resize', handleResize);
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
 
   const [orderData, setOrderData] = useState(null);
   const [isBackHovered, setIsBackHovered] = useState(false);
@@ -123,45 +133,64 @@ const OrderDetailPage = () => {
           </div>
 
 <div style={styles.tableWrapper}>
-            <div style={styles.tableHeaderRow}>
-              <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-              
-              <span style={{ ...styles.thCell, width: discountAmount > 0 ? '40%' : '48%' }}>Product Name</span>
-              <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
-              <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-              
-              {discountAmount > 0 && (
-                <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>
-              )}
-              
-              <span style={{ ...styles.thCell, width: discountAmount > 0 ? '14%' : '19%' }}>Total Amount</span>
-            </div>
+  {/* 💻 Desktop Table Headers (Hidden on small mobile viewports) */}
+  <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
+    <span style={{ ...styles.thCell, width: '10%' }}>No</span>
+    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '40%' : '48%' }}>Product Name</span>
+    <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
+    <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
+    {discountAmount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
+    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '14%' : '19%' }}>Total Amount</span>
+  </div>
 
-            {details.map((item, idx) => {
-              const rowGrossAmount = parseInt(item.qty, 10) * parseFloat(item.selling_price || 0);
-              
-              const computedRowDiscount = discountAmount > 0 ? (rowGrossAmount * 0.10) : 0;
+  {details.map((item, idx) => {
+    const rowGrossAmount = parseInt(item.qty, 10) * parseFloat(item.selling_price || 0);
+    const computedRowDiscount = discountAmount > 0 ? (rowGrossAmount * 0.10) : 0;
 
-              return (
-                <div key={idx} style={styles.tableBodyRow}>
-                  {/* idx + 1 စနစ်ဖြင့် နံပါတ်စဉ် No အား ရှေ့ဆုံးတွင် လှလှပပ မပြောင်းလဲဘဲ ဖော်ပြပေးလိုက်ခြင်းဖြစ်ပါသည် */}
-                  <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                  <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '40%' : '48%' }}>{item.product_name}</span>
-                  <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
-                  <span style={{ ...styles.tdCell, width: '13%' }}>{Number(item.selling_price).toLocaleString()}</span>
-                  {discountAmount > 0 && (
-                    <span style={{ ...styles.tdCell, width: '13%', color: '#000000', fontWeight: 200 }}>
-                      {computedRowDiscount.toLocaleString()}
-                    </span>
-                  )}
-                  
-                  <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '14%' : '19%', fontWeight: 200 }}>
-                    {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
+    return (
+      <div key={idx} style={isMobile ? styles.tableBodyRowMobile : styles.tableBodyRow}>
+        {isMobile ? (
+          /* 📱 Mobile Layout View: Matches your beautiful Order Page format exactly */
+          <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <div style={{ fontSize: '14px', color: '#111', fontWeight: 500 }}>
+                {idx + 1}. {item.product_name}
+              </div>
+              <div style={{ fontSize: '13px', color: '#666' }}>
+                Qty: {item.qty} × {Number(item.selling_price).toLocaleString()}
+                {discountAmount > 0 && (
+                  <span style={{ color: '#dc2626', marginLeft: '8px' }}>
+                    (Disc: -{computedRowDiscount.toLocaleString()})
                   </span>
-                </div>
-              );
-            })}
+                )}
+              </div>
+            </div>
+            
+            <div style={{ color: '#000000', fontWeight: 'bold', fontSize: '14px', paddingBottom: '2px' }}>
+              {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
+            </div>
           </div>
+        ) : (
+          /* 💻 Desktop Layout View: Preserved exactly as your original code */
+          <>
+            <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
+            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '40%' : '48%' }}>{item.product_name}</span>
+            <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
+            <span style={{ ...styles.tdCell, width: '13%' }}>{Number(item.selling_price).toLocaleString()}</span>
+            {discountAmount > 0 && (
+              <span style={{ ...styles.tdCell, width: '13%', color: '#000000', fontWeight: 200 }}>
+                {computedRowDiscount.toLocaleString()}
+              </span>
+            )}
+            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '14%' : '19%', fontWeight: 200 }}>
+              {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
+            </span>
+          </>
+        )}
+      </div>
+    );
+  })}
+</div>
 
           <div style={styles.summaryContainer}>
             {discountAmount > 0 ? (
@@ -188,31 +217,31 @@ const OrderDetailPage = () => {
     </div>
   );
 };
-const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
-  mainContent: { maxWidth: '900px', width: '100%', height: '90%', margin: 'auto', padding: '0 20px', boxSizing: 'border-box',marginBottom:'20px' },
-  invoiceCard: {  borderRadius: '15px', padding: '40px', boxShadow: '0 4px 25px rgba(0, 0, 0, 0.04)',marginBottom: '20px' },
-  brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: 200, textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
-  metaRow: { fontSize: '15px', color: '#666666', marginBottom: '35px', display: 'flex', flexWrap: 'wrap', gap: '10px' },
-  sectionBlock: { marginBottom: '35px' },
-  sectionHeading: { fontSize: '16px', fontWeight: 400, color: '#111111', marginBottom: '15px', textTransform: 'uppercase', letterSpacing: '0.3px' },
-  infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '12px', paddingLeft: '5px', fontSize: '15px', color: '#333333' },
-  infoLabel: { fontWeight: '600', color: '#666666' },
-  infoValue: { color: '#111111' },
-  selectInput: { padding: '8px 15px', fontSize: '15px', borderRadius: '8px', border: '1px solid #dddddd', outline: 'none', width: '200px', fontFamily: "'Poppins', sans-serif", color: '#111111' },
-  tableWrapper: { marginTop: '40px', border: '1px solid #f0f0f0', borderRadius: '10px', overflow: 'hidden' },
-  tableHeaderRow: { display: 'flex', backgroundColor: '#f9fafb', padding: '14px 20px', borderBottom: '1px solid #f0f0f0' },
-  thCell: { fontSize: '14px', fontWeight: '700', color: '#555555', textAlign: 'left' },
-  tableBodyRow: { display: 'flex', padding: '16px 20px', borderBottom: '1px solid #f9fafb', alignItems: 'center', transition: 'background-color 0.15s ease' },
-  tdCell: { fontSize: '14px', color: '#333333', textAlign: 'left' },
-  summaryContainer: { marginTop: '35px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', paddingRight: '20px' },
-  summaryRow: { display: 'flex', width: '280px', justifyContent: 'space-between', alignItems: 'center' },
-  summaryLabel: { fontSize: '15px', fontWeight: 400, color: '#666666' },
-  summaryValue: { fontSize: '15px', color: '#111111' },
-  actionButtonsRow: { display: 'flex', justifyContent: 'flex-end', gap: '20px', marginTop: '35px', paddingRight: '5px' },
-  cancelBtn: { backgroundColor: '#ffffff', color: '#555555', border: '1px solid #dddddd', padding: '12px 35px', borderRadius: '25px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none', fontFamily: "'Poppins', sans-serif" },
-  cancelBtnHover: { backgroundColor: '#f3f4f6', borderColor: '#cccccc' }
-};
 
+const styles = {
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: '10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContentMobile: { padding: '10px 0px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  invoiceCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0' },
+  invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 10px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', width: '100%', boxSizing: 'border-box' },
+  brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: 200, textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
+  metaRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px', color: '#333', borderBottom: '1px solid #f9f9f9', paddingBottom: '15px', marginBottom: '20px' },
+  sectionBlock: { marginBottom: '25px', width: '100%', boxSizing: 'border-box' },
+  sectionHeading: { fontSize: '15px', fontWeight: 'bold', color: '#111', margin: '0 0 12px 0' },
+  infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '15px', color: '#444', paddingLeft: '5px' },
+  infoGridMobile: { display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '12px', rowGap: '8px', fontSize: '14px', color: '#444', paddingLeft: '5px', width: '100%' },
+  infoLabel: { fontWeight: 200, color: '#555' },
+  infoValue: { color: '#222', whiteSpace: 'nowrap' },
+  tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e0e0e0', paddingTop: '20px', width: '100%', boxSizing: 'border-box' },
+  tableHeaderRow: { display: 'flex', backgroundColor: '#f8f9fa', padding: '12px 15px', borderRadius: '5px', fontWeight: 200, color: '#444', fontSize: '15px' },
+  tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '15px', alignItems: 'center' },
+  tableBodyRowMobile: { display: 'flex', padding: '12px 5px', borderBottom: '1px dashed #eee', color: '#444', width: '100%', boxSizing: 'border-box' },
+  thCell: { textAlign: 'left' },
+  tdCell: { textAlign: 'left' },
+  summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px', width: '100%', boxSizing: 'border-box' },
+  summaryRow: { display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '14px', color: '#444' },
+  summaryLabel: { fontWeight: 'bold', color: '#555' },
+  summaryValue: { color: '#111' }
+};
 
 export default OrderDetailPage;

@@ -128,8 +128,6 @@ const ReturnsPage = () => {
     try {
       const res = await axios.get(`http://localhost:8000/api/order/return-items-check/${targetDbKey}`);
       
-      // ====== 🎯 🟢 FIXED: UNIVERSAL DATA MAPPING PARSER SECURED ======
-      // ❌ items သက်သက်သာယူပြီး စျေးနှုန်းကျန်ရစ်ခဲ့သော စနစ်ဟောင်းအား ဖြုတ်ချ၍ 🟢 Backend မှ ကျလာသမျှသော Object fields အကုန်လုံး (selling_price ပါမကျန်) အား ကွက်တိ သိမ်းဆည်းလိုက်ခြင်းဖြစ်သည်
       const cleanItemsArray = res.data.items || (Array.isArray(res.data) ? res.data : []);
       setAvailableProducts(cleanItemsArray);
       
@@ -164,7 +162,6 @@ const ReturnsPage = () => {
         <form onSubmit={handleReturnSubmit} style={styles.formContainerCard}>
           <div style={styles.formGrid}>
             
-            {/* Left Column Container Panel */}
             <div style={styles.formColumn}>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Customer Email</label>
@@ -181,7 +178,6 @@ const ReturnsPage = () => {
                 <input type="text" value={customerProfile.address} style={styles.inputFieldDisabled} readOnly />
               </div>
               
-              {/* FIXED: Invoice ID Dropdown positioned directly above the Product Name link track */}
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Invoice ID</label>
                 <select 
@@ -220,7 +216,6 @@ const ReturnsPage = () => {
               </div>
             </div>
 
-            {/* Right Column Container Panel */}
             <div style={styles.formColumn}>          
               
               <div style={styles.inputGroup}>
@@ -271,41 +266,36 @@ const ReturnsPage = () => {
                 </select>
               </div>
               {productName && (parseInt(quantity, 10) >= 0) && (
-  <div style={styles.inputGroup}>
-    <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
-    <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
-      {(() => {
-        // 1. Find the selected item node
-        const selectedItemNode = availableProducts.find(
-          p => (p.name === productName || p.product_name === productName)
-        );
-        
-        // 2. Find the selected invoice header to get global discounts
-        const currentInvoiceHeader = invoiceList.find(
-          inv => inv.invoice_number === selectedInvoice
-        );
-        
-        const rawUnitPrice = selectedItemNode ? parseFloat(selectedItemNode.selling_price || 0) : 0;
-        
-        // Grab the global coupon details if they exist in your invoice list payload
-        const globalDiscount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.discount || 0) : 0;
-        const grossTotalAmount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.total_amount || 0) : 0;
-        
-        // 3. Calculate proportional unit price after discount
-        let finalRefundUnitPrice = rawUnitPrice;
-        if (globalDiscount > 0 && grossTotalAmount > 0) {
-          const discountRatio = globalDiscount / grossTotalAmount;
-          finalRefundUnitPrice = rawUnitPrice * (1 - discountRatio);
-        }
-        
-        const returnQty = parseInt(quantity, 10) || 0;
-        const totalRefund = returnQty * finalRefundUnitPrice;
-        
-        return (Math.round(totalRefund).toLocaleString() + " MMK");
-      })()}
-    </div>
-  </div>
-)}
+                <div style={styles.inputGroup}>
+                  <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
+                  <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
+                    {(() => {
+                      const selectedItemNode = availableProducts.find(
+                        p => (p.name === productName || p.product_name === productName)
+                      );
+                      
+                      const currentInvoiceHeader = invoiceList.find(
+                        inv => inv.invoice_number === selectedInvoice
+                      );
+                      
+                      const rawUnitPrice = selectedItemNode ? parseFloat(selectedItemNode.selling_price || 0) : 0;
+                      const globalDiscount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.discount || 0) : 0;
+                      const grossTotalAmount = currentInvoiceHeader ? parseFloat(currentInvoiceHeader.total_amount || 0) : 0;
+                      
+                      let finalRefundUnitPrice = rawUnitPrice;
+                      if (globalDiscount > 0 && grossTotalAmount > 0) {
+                        const discountRatio = globalDiscount / grossTotalAmount;
+                        finalRefundUnitPrice = rawUnitPrice * (1 - discountRatio);
+                      }
+                      
+                      const returnQty = parseInt(quantity, 10) || 0;
+                      const totalRefund = returnQty * finalRefundUnitPrice;
+                      
+                      return (Math.round(totalRefund).toLocaleString() + " MMK");
+                    })()}
+                  </div>
+                </div>
+              )}
 
               <div style={styles.actionRow}>
             <button
@@ -330,28 +320,30 @@ const ReturnsPage = () => {
 
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
-  mainContent: { padding: '40px', maxWidth: '1100px', margin: '0 auto' },
+  mainContent: { padding: '20px 12px', maxWidth: '1100px', margin: '0 auto', boxSizing: 'border-box' },
   mainHeading: { fontSize: '25px', fontWeight: 300, color: '#111', marginBottom: '20px', paddingLeft: '2px' },
-  formContainerCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #eeeeee' },
-  formGrid: { display: 'flex', gap: '50px' },
-  formColumn: { flex: 1, display: 'flex', flexDirection: 'column', gap: '24px' }, // Gap ကို 24px သို့ တိုးမြှင့်လိုက်သဖြင့် စာသားချင်း လုံးဝမကပ်တော့ပါ
+  formContainerCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '24px 16px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #eeeeee', boxSizing: 'border-box' },
+  formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' },
+  formColumn: { display: 'flex', flexDirection: 'column', gap: '24px' }, 
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
   label: { fontSize: '15px', fontWeight: 200, color: '#111'},
   inputField: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
   dropdownSelect: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', width: '100%', boxSizing: 'border-box' },
   fileUploadWrapper: { display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '15px', padding: '6px 12px', backgroundColor: '#fff', boxSizing: 'border-box', width: '100%', height: '47px' },
   hiddenFileInput: { display: 'none' },
-  fileLabelBtn: { backgroundColor: '#e0e0e0', color: '#333', padding: '6px 15px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', marginRight: '10px', display: 'inline-block', border: '1px solid #adadad' },
-  fileNameText: { fontSize: '13px', color: '#666' },
-  actionRow: { marginTop: '16px', display: 'flex', justifyContent: 'flex-end', width: '100%' },
-  submitReturnBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none' },
+  fileLabelBtn: { backgroundColor: '#e0e0e0', color: '#333', padding: '6px 15px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', marginRight: '10px', display: 'inline-block', border: '1px solid #adadad', whiteSpace: 'nowrap' },
+  fileNameText: { fontSize: '13px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  actionRow: { marginTop: '16px', display: 'flex', justifyContent: 'center', width: '100%', boxSizing: 'border-box' },
+  submitReturnBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none', width: '100%', maxWidth: '340px' },
   submitReturnBtnHover: { backgroundColor: '#e04167', boxShadow: '0 4px 15px rgba(242,82,120,0.3)' },
-  textareaField: { padding: '12px 15px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#fff', outline: 'none', fontFamily: "'Poppins', sans-serif", resize: 'none' }, // မူရင်း borders အဝိုင်းပုံစံများအတိုင်း ညှိထားခြင်း
-  inputFieldDisabled: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#f1f5f9', color: '#64748b', outline: 'none', cursor: 'not-allowed' }
+  textareaField: { padding: '12px 15px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#fff', outline: 'none', fontFamily: "'Poppins', sans-serif", resize: 'none' }, 
+  inputFieldDisabled: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#f1f5f9', color: '#64748b', outline: 'none', cursor: 'not-allowed', width: '100%', boxSizing: 'border-box' }
 };
+
+
 export default ReturnsPage;

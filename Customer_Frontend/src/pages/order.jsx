@@ -7,6 +7,12 @@ import { StationeroNavbar } from './StationeroPage';
 
 const OrderPage = () => {
   const navigate = useNavigate();
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
   const location = useLocation();
   const { userProfile } = useContext(AuthContext); 
   const [isBackHovered, setIsBackHovered] = useState(null);
@@ -203,11 +209,10 @@ const OrderPage = () => {
     }
   };
 
-
   return (
     <div style={styles.container}>
         <StationeroNavbar showSearch={false} />
-        <main style={styles.mainContent}>
+        <main style={isMobile ? styles.mainContentMobile : styles.mainContent}>
           <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '-5px', paddingLeft: '5px' }}>
           <button 
             type="button"
@@ -227,13 +232,13 @@ const OrderPage = () => {
               gap: '6px',
               padding: '4px 8px',
               outline: 'none',
-              transition: 'color 0.2s ease, transform 0.2s ease' // 👈 စာသားအရောင် ပြောင်းလဲမှုကို အလွန်နူးညံ့ချောမွေ့သွားစေရန် ဖြစ်သည်
+              transition: 'color 0.2s ease, transform 0.2s ease'
             }}
           >
             <span>←</span> <span>Back</span>
           </button>
         </div>
-            <div style={styles.invoiceCard}>
+            <div style={isMobile ? styles.invoiceCardMobile : styles.invoiceCard}>
               <div style={styles.brandTitleHeader}>Stationero</div>
 
               <div style={styles.metaRow}>
@@ -242,7 +247,7 @@ const OrderPage = () => {
 
               <div style={styles.sectionBlock}>
                 <h3 style={styles.sectionHeading}>Customer Information :</h3>
-                <div style={styles.infoGrid}>
+                <div style={isMobile ? styles.infoGridMobile : styles.infoGrid}>
                   <div style={styles.infoLabel}>Customer Name :</div>
                   <div style={styles.infoValue}>{customerProfile.name}</div>
                   <div style={styles.infoLabel}>Phone :</div>
@@ -257,7 +262,7 @@ const OrderPage = () => {
               <div style={styles.sectionBlock}>
                 <h3 style={styles.sectionHeading}>Payment Information :</h3>
                 <div style={{ display: 'flex', alignItems: 'center', paddingLeft: '5px' }}>
-                  <div style={{ ...styles.infoLabel, width: '160px' }}>Payment Method :</div>
+                  <div style={isMobile ? { ...styles.infoLabel, width: '135px' } : { ...styles.infoLabel, width: '160px' }}>Payment Method :</div>
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
@@ -271,16 +276,13 @@ const OrderPage = () => {
               </div>
 
               <div style={styles.tableWrapper}>
-                <div style={styles.tableHeaderRow}>
+                {/* 👈 Hidden on mobile to avoid squishing the layout columns */}
+                <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
                   <span style={{ ...styles.thCell, width: '10%' }}>No</span>
                   <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>Product Name</span>
                   <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
                   <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-                  
-                  {pricingSummary.discount > 0 && (
-                    <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>
-                  )}
-                  
+                  {pricingSummary.discount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
                   <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '14%' : '19%' }}>Total Amount</span>
                 </div>
 
@@ -289,21 +291,28 @@ const OrderPage = () => {
                   const computedRowDiscount = rowGrossAmount * 0.10;
 
                   return (
-                    <div key={idx} style={styles.tableBodyRow}>
-                      <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                      <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
-                      <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
-                      <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
-                      
-                      {pricingSummary.discount > 0 && (
-                        <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>
-                          {computedRowDiscount.toLocaleString()}
-                        </span>
+                    <div key={idx} style={isMobile ? styles.tableBodyRowMobile : styles.tableBodyRow}>
+                      {isMobile ? (
+                        /* 📱 Mobile Layout: Fixes overlapping product information */
+                        <div style={{ display: 'flex', flexDirection: 'column', width: '100%', gap: '4px' }}>
+                          <div style={{ fontSize: '14px', color: '#111', fontWeight: 500 }}>{idx + 1}. {item.name}</div>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#666' }}>
+                            <span>Qty: {item.qty} × {(item.price || 0).toLocaleString()}</span>
+                            {pricingSummary.discount > 0 && <span style={{ color: '#dc2626' }}>Discount: {computedRowDiscount.toLocaleString()}</span>}
+                            <span style={{ color: '#000000', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
+                          </div>
+                        </div>
+                      ) : (
+                        /* 💻 Desktop Layout: Preserved exactly as your original code */
+                        <>
+                          <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
+                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
+                          <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
+                          <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
+                          {pricingSummary.discount > 0 && <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>{computedRowDiscount.toLocaleString()}</span>}
+                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
+                        </>
                       )}
-                      
-                      <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>
-                        {(item.amount || 0).toLocaleString()} MMK
-                      </span>
                     </div>
                   );
                 })}
@@ -328,7 +337,7 @@ const OrderPage = () => {
               </div>
             </div>
 
-            <div style={styles.actionButtonsRow}>
+            <div style={isMobile ? styles.actionButtonsRowMobile : styles.actionButtonsRow}>
               <button
                 type="button"
                 onClick={() => navigate('/cart')}
@@ -348,45 +357,49 @@ const OrderPage = () => {
                 Confirm Order
               </button>
             </div>
-      </main>
+        </main>
     </div>
   );
 };
 
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { fontFamily: "Azeret Mono, monospace", color: '#f25278', fontSize: '30px', fontWeight: '800', letterSpacing: '-1.5px', margin: 0, textTransform: 'none' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
-  mainContent: { padding: '30px 20px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '25px' },
+  mainContent: { padding: '10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContentMobile: { padding: '10px 5px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   invoiceCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0' },
+  invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 15px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', width: '100%', boxSizing: 'border-box' },
   brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: 200, textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
   metaRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px', color: '#333', borderBottom: '1px solid #f9f9f9', paddingBottom: '15px', marginBottom: '20px' },
-  sectionBlock: { marginBottom: '25px' },
+  sectionBlock: { marginBottom: '25px', width: '100%', boxSizing: 'border-box' },
   sectionHeading: { fontSize: '15px', fontWeight: 'bold', color: '#111', margin: '0 0 12px 0' },
   infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '15px', color: '#444', paddingLeft: '5px' },
+  infoGridMobile: { display: 'grid', gridTemplateColumns: '135px 1fr', rowGap: '8px', fontSize: '14px', color: '#444', paddingLeft: '5px' }, // 👈 🎯 FIXED: Tightened column width from 160px to 135px for mobile viewing proximity
   infoLabel: { fontWeight: 200, color: '#555' },
   infoValue: { color: '#222' },
-  tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e0e0e0', paddingTop: '20px' },
+  tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e0e0e0', paddingTop: '20px', width: '100%', boxSizing: 'border-box' },
   tableHeaderRow: { display: 'flex', backgroundColor: '#f8f9fa', padding: '12px 15px', borderRadius: '5px', fontWeight: 200, color: '#444', fontSize: '15px' },
   tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '15px', alignItems: 'center' },
+  tableBodyRowMobile: { display: 'flex', padding: '12px 5px', borderBottom: '1px dashed #eee', color: '#444', width: '100%', boxSizing: 'border-box' },
   thCell: { textAlign: 'left' },
   tdCell: { textAlign: 'left' },
-  activeLink: { color: '#f25278', fontWeight: 'bold' },
   backButtonWrapper: { display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: '8px 14px', borderRadius: '20px', backgroundColor: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.08)', zIndex: 10, transition: 'all 0.2s ease' },
-  backArrow: { color: '#f25278', fontWeight: 200},
+  backArrow: { color: '#f25278', fontWeight: 200 },
   backText: { color: '#f25278', fontWeight: 200, fontSize: '15px', fontFamily: "Poppins, sans-serif" },
-  summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px' },
+  summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px', width: '100%', boxSizing: 'border-box' },
   summaryRow: { display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '14px', color: '#444' },
   summaryLabel: { fontWeight: 'bold', color: '#555' },
   summaryValue: { color: '#111' },
   actionButtonsRow: { display: 'flex', justifyContent: 'center', gap: '30px', marginTop: '10px', marginBottom: '30px' },
-  cancelBtn: { backgroundColor: '#e0e0e0', color: '#444', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
+  actionButtonsRowMobile: { display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '15px', marginBottom: '20px', width: '100%', boxSizing: 'border-box' }, // 👈 Keeps confirmation buttons clean and original size on mobile
+  cancelBtn: { backgroundColor: '#e0e0e0', color: '#444', border: 'none', padding: '12px 35px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   cancelBtnHover: { backgroundColor: '#d5d5d5', color: '#111' },
-  confirmBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 45px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
+  confirmBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 35px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none' },
   confirmBtnHover: { backgroundColor: '#d93a5f', color: 'white' },
   emptyOrderContainer: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '60px 40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' },
   emptyOrderText: { color: '#111', fontSize: '20px', margin: 0, fontWeight: 'bold' },

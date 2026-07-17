@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
 import { StationeroNavbar } from './StationeroPage'; 
 import { AuthProvider } from '../context/AuthContext';
+import { AlignCenter } from 'lucide-react';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -115,17 +116,18 @@ const ProfilePage = () => {
 
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh' },
-  mainContent: { padding: '50px 20px', display: 'flex', justifyContent: 'center' },
-  profileCard: { backgroundColor: '#fff', padding: '40px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', width: '100%', maxWidth: '500px', border: '1px solid #f0f0f0' },
-  heading: { fontSize: '22px', fontWeight: 'bold', marginBottom: '25px', color: '#111', borderBottom: '2px solid #fdf2f4', paddingBottom: '10px' },
+  mainContent: { padding: '20px 12px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box' },
+  profileCard: { backgroundColor: '#fff', padding: '24px 16px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', width: '100%', maxWidth: '500px', border: '1px solid #f0f0f0', boxSizing: 'border-box' },
+  heading: { fontSize: '25px', fontWeight: '400', marginBottom: '25px', color: '#111', paddingBottom: '10px', textAlign: 'center' },
   form: { display: 'flex', flexDirection: 'column', gap: '20px' },
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
   label: { fontSize: '15px', fontWeight: 200, color: '#555' },
-  inputField: { padding: '12px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '15px', outline: 'none', backgroundColor: '#fff' },
-  btnRow: { display: 'flex', gap: '15px', marginTop: '10px', justifyContent: 'center' },
-  editBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' },
-  cancelBtn: { backgroundColor: '#e2e8f0', color: '#4a5568', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer' },
-  saveBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '15px', fontWeight: 200, cursor: 'pointer' }
+  inputField: { padding: '12px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '15px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
+  btnRow: { display: 'flex', gap: '15px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' },
+  editBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', width: '100%', maxWidth: '240px' },
+  cancelBtn: { backgroundColor: '#e2e8f0', color: '#4a5568', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', flex: '1 1 120px' },
+  saveBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', flex: '1 1 120px' }
 };
+
 
 export default ProfilePage;

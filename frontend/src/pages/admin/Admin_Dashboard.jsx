@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from '../../components/admin/Sidebar';
+
 import {
   ResponsiveContainer,
   BarChart,
@@ -20,6 +22,7 @@ const AdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetch("http://localhost:8000/admin/dashboard")
@@ -59,6 +62,15 @@ if (!dashboardData) return (
 
   return (
     <div className="bg-[#fafafa] min-h-screen">
+
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
+      
+      <div className="md:hidden p-4 flex items-center bg-white border-b">
+        <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <h1 className="ml-4 font-bold text-[#F25278]">Stationero</h1>
+      </div>
       
       {/* Header */}
       <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">

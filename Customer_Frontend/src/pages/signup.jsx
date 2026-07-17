@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios'; // 🌟 axios ကို import လုပ်ပါ
+import axios from 'axios'; 
 import { StationeroNavbar } from './StationeroPage'; 
 import { AuthProvider } from '../context/AuthContext';
+
 const SignUpPage = () => {
   const navigate = useNavigate();
   const [name, setName] = useState('');
@@ -20,8 +21,6 @@ const SignUpPage = () => {
     setErrorMessage('');
 
     try {
-      // 🌟 fetch အစား axios.post ကို အသုံးပြုထားသည်
-      // axios က Content-Type နဲ့ JSON ပြောင်းတာတွေကို အလိုအလျောက် လုပ်ပေးပါတယ်
       const response = await axios.post('http://localhost:8000/api/signup', {
         name: name.trim(),
         email: email.trim(),
@@ -30,12 +29,10 @@ const SignUpPage = () => {
         password: password
       });
 
-      // Axios မှာ 2xx status ဆိုရင် အောင်မြင်တယ်လို့ သတ်မှတ်ပြီး ဒီလိုင်းကို ရောက်လာပါတယ်
       if (response.status === 201 || response.status === 200) {
         navigate('/login');
       }
     } catch (error) {
-      // 🌟 Error handling ကို axios ပုံစံဖြင့် ပြင်ဆင်ထားသည်
       if (error.response && error.response.data && error.response.data.detail) {
         setErrorMessage(error.response.data.detail);
       } else {
@@ -47,7 +44,9 @@ const SignUpPage = () => {
   return (
     <div style={styles.container}>
       <AuthProvider>
+        <div style={{ width: '100%', boxSizing: 'border-box' }}>
           <StationeroNavbar showSearch={false} />
+        </div>
       </AuthProvider>
 
       <main style={styles.mainContent}>
@@ -85,7 +84,7 @@ const SignUpPage = () => {
                 type={showPassword ? "text" : "password"} 
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
-                style={{ ...styles.input, width: '100%', paddingRight: '45px', boxSizing: 'border-box' }} 
+                style={{ ...styles.input, paddingRight: '45px' }} 
                 required 
               />
               <span
@@ -135,24 +134,25 @@ const SignUpPage = () => {
   );
 };
 
+// ====== 🎯 🟢 TRUE PRODUCTION MOBILE-BIG RESPONSIVE SINGLE-LINE STYLES MATRIX ======
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px' },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px min(50px, 4%)', flexWrap: 'wrap', gap: '15px' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
-  navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },
+  navLinks: { display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' },
   link: { cursor: 'pointer', color: '#333' },
-  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '30px 20px' },
-  heading: { fontSize: '24px', marginBottom: '20px', color: '#111' },
-  formBox: { backgroundColor: '#f3f3f3', padding: '40px', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px' },
-  errorBanner: { backgroundColor: '#ffeef0', color: '#d9383a', padding: '10px 15px', borderRadius: '10px', fontSize: '14px', border: '1px solid #fccacf', fontWeight: 'bold', textAlign: 'center' },
-  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '20px min(20px, 4%)', boxSizing: 'border-box' },
+  heading: { fontSize: '24px', marginBottom: '20px', color: '#111', textAlign: 'center' },
+  formBox: { backgroundColor: '#f3f3f3', padding: '40px min(30px, 6%)', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px', boxSizing: 'border-box' },
+  errorBanner: { backgroundColor: '#ffeef0', color: '#d9383a', padding: '10px 15px', borderRadius: '10px', fontSize: '14px', border: '1px solid #fccacf', fontWeight: 'bold', textAlign: 'center', width: '100%', boxSizing: 'border-box' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', boxSizing: 'border-box' },
   label: { fontSize: '14px', color: '#333' },
-  input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#ffffff' },
-  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease', fontWeight: 'bold' },
+  input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '16px', outline: 'none', backgroundColor: '#ffffff', width: '100%', boxSizing: 'border-box' },
+  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease', fontWeight: 'bold', width: '100%', boxSizing: 'border-box' },
   submitBtnHover: { backgroundColor: '#d93a5f' },
   navBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '14px', cursor: 'pointer', transition: 'background-color 0.2s ease' },
   btnHover: { backgroundColor: '#d93a5f' },
-  divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0' },
+  divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0', width: '100%' },
   footerText: { textAlign: 'center', fontSize: '14px', color: '#555', marginBottom: '5px' },
   signUpLinkBtn: { color: '#f25278', cursor: 'pointer', textDecoration: 'underline', fontWeight: 'bold', transition: 'color 0.2s ease' }
 };

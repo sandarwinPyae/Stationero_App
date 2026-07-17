@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const PurchaseOrderDetail = () => {
+const PurchaseOrderDetail = ({toggleSidebar}) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [order, setOrder] = useState(null);
@@ -51,35 +51,39 @@ const PurchaseOrderDetail = () => {
     }
     };
 
-  if (!order) return <div className="p-10 text-center">Loading...</div>;
+  if (!order) return (
+  <div className="min-h-screen flex flex-col justify-center items-center">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#F25278]"></div>
+    <p className="mt-4 text-gray-500 font-medium">Loading Dashboard...</p>
+  </div>
+  );
   const isConfirmed = order.purchase_order_status === 'Confirmed';
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Section */}
-      <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-  
-        {/* Back Button (Left side) */}
+      <header className="fixed top-0 left-0 md:left-64 right-0 h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
         <button 
           onClick={() => navigate('/purchase')}
-          className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
+          className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center"
         >
           <i className="fa-solid fa-arrow-left mr-2"></i> Back
         </button>
-
-        {/* User Icon (Right side) */}
-        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300">
+        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center border border-gray-300 ml-auto">
           <i className="fa-solid fa-user text-gray-600 cursor-pointer" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
-      </div>
+      </header>
 
-      <div className="max-w-5xl mx-auto px-6 pt-24">
+      <div className="max-w-5xl mx-auto px-4 pt-24 pb-10">
 
-        <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
+        <div className="bg-white p-4 md:p-8 rounded-3xl shadow-sm border border-gray-100">
           <h2 className="text-xl font-bold mb-6">Purchase Order Details</h2>
           
           {/* Order Info Grid */}
-          <div className="grid grid-cols-2 gap-y-4 gap-x-8 mb-8 bg-gray-100 p-6 rounded-2xl">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-8 mb-8 bg-gray-100 p-6 rounded-2xl">
             <p><strong>Purchase Order ID:</strong> : {order.po_number}</p>
             <p>
               <strong>Order Date:</strong> : 
@@ -102,36 +106,58 @@ const PurchaseOrderDetail = () => {
             <p><strong>PO Status:</strong> : {order.purchase_order_status}</p>
           </div>
 
-          <table className="w-full text-left mb-8">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="p-3">Product ID</th>
-                <th className="p-3">Product Name</th>
-                <th className="p-3">Qty</th>
-                <th className="p-3">Unit Price</th>
-                <th className="p-3">Selling Price</th>
-                <th className="p-3">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {items.map((item, index) => (
-                <tr key={index} className="border-b border-gray-100">
-                  <td className="p-3">{item.product_id}</td>
-                  <td className="p-3">{item.product_name}</td>
-                  <td className="p-3">
-                    <input type="number" disabled={isConfirmed} className="w-16 border rounded p-1 disabled:bg-gray-100" value={item.quantity} onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} />
-                  </td>
-                  <td className="p-3">
-                    <input type="number" disabled={isConfirmed} className="w-24 border rounded p-1 disabled:bg-gray-100" value={item.unit_price} onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} />
-                  </td>
-                  <td className="p-3">
-                    <input type="number" disabled={isConfirmed} className="w-24 border rounded p-1 disabled:bg-gray-100" value={item.selling_price || 0} onChange={(e) => handleItemChange(index, 'selling_price', e.target.value)} />
-                  </td>
-                  <td className="p-3">{(item.quantity * item.unit_price).toFixed(2)}</td>
+          <div className="overflow-x-auto w-full mb-8 border rounded-lg">
+            <table className="w-full min-w-[600px] text-left">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Product ID</th>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Product Name</th>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Qty</th>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Unit Price</th>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Selling Price</th>
+                  <th className="p-3 text-sm font-semibold text-gray-700">Total</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {items.map((item, index) => (
+                  <tr key={index}>
+                    <td className="p-3 text-sm text-gray-600">{item.product_id}</td>
+                    <td className="p-3 text-sm text-gray-600">{item.product_name}</td>
+                    <td className="p-3">
+                      <input 
+                        type="number" 
+                        disabled={isConfirmed} 
+                        className="w-16 border rounded p-1 text-sm disabled:bg-gray-100" 
+                        value={item.quantity} 
+                        onChange={(e) => handleItemChange(index, 'quantity', e.target.value)} 
+                      />
+                    </td>
+                    <td className="p-3">
+                      <input 
+                        type="number" 
+                        disabled={isConfirmed} 
+                        className="w-20 border rounded p-1 text-sm disabled:bg-gray-100" 
+                        value={item.unit_price} 
+                        onChange={(e) => handleItemChange(index, 'unit_price', e.target.value)} 
+                      />
+                    </td>
+                    <td className="p-3">
+                      <input 
+                        type="number" 
+                        disabled={isConfirmed} 
+                        className="w-20 border rounded p-1 text-sm disabled:bg-gray-100" 
+                        value={item.selling_price || 0} 
+                        onChange={(e) => handleItemChange(index, 'selling_price', e.target.value)} 
+                      />
+                    </td>
+                    <td className="p-3 text-sm font-semibold text-gray-800">
+                      {(item.quantity * item.unit_price).toFixed(2)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
 
           <div className="text-right border-t pt-4">
             <p className="text-l font-bold mb-4">Total Amount: {calculateTotal().toFixed(2)}</p>

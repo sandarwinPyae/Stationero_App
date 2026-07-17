@@ -4,7 +4,7 @@ import { AuthContext } from '../context/AuthContext'; // 🌟 AuthContext ကိ
 import axios from 'axios';
 import { StationeroNavbar } from './StationeroPage'; 
 import { AuthProvider } from '../context/AuthContext';
-const Login = () => {
+const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
@@ -81,7 +81,9 @@ const Login = () => {
   return (
     <div style={styles.container}>
       <AuthProvider>
+        <div style={{ width: '100%', boxSizing: 'border-box' }}>
           <StationeroNavbar showSearch={false} />
+        </div>
       </AuthProvider>
 
       <main style={styles.mainContent}>
@@ -146,7 +148,7 @@ const Login = () => {
           <p style={styles.footerText}>
             Don't have an account?{' '}
             <span
-              onClick={() => navigate('/signup')} // 🌟 Route ကို App.jsx အတိုင်း ပြင်ထားသည်
+              onClick={() => navigate('/signup')} 
               onMouseEnter={() => setHoveredLink('signupLink')}
               onMouseLeave={() => setHoveredLink(null)}
               style={{ ...styles.signUpLinkBtn, ...(hoveredLink === 'signupLink' ? { color: '#c0395b' } : {}) }}
@@ -157,32 +159,30 @@ const Login = () => {
         </form>
       </main>
     </div>
-  );
-};
+  );}
 
-// Styles များ မူလအတိုင်း ထားပါသည်
-const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0 },
-  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 50px' },
+  const styles = {
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px min(50px, 4%)', flexWrap: 'wrap', gap: '15px' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
-  navLinks: { display: 'flex', alignItems: 'center', gap: '20px' },
+  navLinks: { display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' },
   link: { cursor: 'pointer', color: '#333' },
   toggleText: { position: 'absolute', right: '15px', fontSize: '15px', color: '#f25278', fontWeight: 200, cursor: 'pointer', userSelect: 'none' },
   passwordWrapper: { position: 'relative', display: 'flex', alignItems: 'center', width: '100%' },
-  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px' },
-  heading: { fontSize: '24px', marginBottom: '20px', color: '#111' },
-  formBox: { backgroundColor: '#f3f3f3', padding: '40px', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px' },
-  errorBanner: { backgroundColor: '#ffeef0', color: '#d9383a', padding: '10px 15px', borderRadius: '10px', fontSize: '15px', border: '1px solid #fccacf', fontWeight: 'bold', textAlign: 'center' },
-  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px' },
+  mainContent: { display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '20px min(20px, 4%)', boxSizing: 'border-box' },
+  heading: { fontSize: '24px', marginBottom: '20px', color: '#111', textAlign: 'center' },
+  formBox: { backgroundColor: '#f3f3f3', padding: '40px min(30px, 6%)', borderRadius: '15px', width: '100%', maxWidth: '500px', display: 'flex', flexDirection: 'column', gap: '15px', boxSizing: 'border-box' },
+  errorBanner: { backgroundColor: '#ffeef0', color: '#d9383a', padding: '10px 15px', borderRadius: '10px', fontSize: '15px', border: '1px solid #fccacf', fontWeight: 'bold', textAlign: 'center', width: '100%', boxSizing: 'border-box' },
+  inputGroup: { display: 'flex', flexDirection: 'column', gap: '5px', width: '100%', boxSizing: 'border-box' },
   label: { fontSize: '15px', color: '#333' },
-  input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '15px', outline: 'none' },
-  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease' },
+  input: { padding: '12px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '16px', outline: 'none', backgroundColor: '#ffffff', width: '100%', boxSizing: 'border-box' },
+  submitBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px', borderRadius: '20px', fontSize: '16px', cursor: 'pointer', marginTop: '10px', transition: 'background-color 0.2s ease', width: '100%', boxSizing: 'border-box' },
   submitBtnHover: { backgroundColor: '#d93a5f' },
   navBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '20px', fontSize: '15px', cursor: 'pointer', transition: 'background-color 0.2s ease' },
   btnHover: { backgroundColor: '#d93a5f' },
-  divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0' },
+  divider: { border: 'none', height: '1px', backgroundColor: '#ccc', margin: '15px 0', width: '100%' },
   footerText: { textAlign: 'center', fontSize: '15px', color: '#555', marginBottom: '5px' },
   signUpLinkBtn: { color: '#f25278', cursor: 'pointer', textDecoration: 'underline', fontWeight: 200, transition: 'color 0.2s ease' }
 };
 
-export default Login;
+export default LoginPage;

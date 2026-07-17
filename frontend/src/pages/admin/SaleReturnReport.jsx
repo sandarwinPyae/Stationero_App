@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const SaleReturnReport = () => {
+const SaleReturnReport = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -23,7 +23,6 @@ const SaleReturnReport = () => {
       .catch(err => { console.error(err); setLoading(false); });
   }, []);
 
-  // Helper Function: Date Format dd/mm/yyyy, hh:mm:ss
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const dd = String(date.getDate()).padStart(2, '0');
@@ -42,7 +41,6 @@ const SaleReturnReport = () => {
     setCurrentPage(1);
   };
 
-  // Export Excel Function
   const exportToExcel = async () => {
     const XLSX = await import('xlsx');
     const exportData = filteredData.map(s => ({
@@ -59,7 +57,6 @@ const SaleReturnReport = () => {
     setIsExportOpen(false);
   };
 
-  // Export PDF Function
   const exportToPDF = async () => {
     const { jsPDF } = await import('jspdf');
     const autoTable = (await import('jspdf-autotable')).default;
@@ -81,7 +78,6 @@ const SaleReturnReport = () => {
     setIsExportOpen(false);
   };
 
-  // Filter Logic
   const filteredData = returns.filter(s => {
     const matchesSearch = s.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           s.return_reason.toLowerCase().includes(searchTerm.toLowerCase());
@@ -104,16 +100,18 @@ const SaleReturnReport = () => {
   </div>
   );
 
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-        <div className="w-9 h-9 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
+      <header className="h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <div className="ml-auto w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="p-6 pt-24">
+      <div className="p-4 md:p-8 pt-24">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold text-gray-800">Sale Return Report</h2>
           <div className="relative">
@@ -129,39 +127,37 @@ const SaleReturnReport = () => {
           </div>
         </div>
         
-        {/* Filter Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
+        {/* Filter Bar - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Search</label>
-            <input type="text" placeholder="Invoice / Reason" className="p-2 border rounded-lg text-sm" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
+            <input type="text" placeholder="Invoice / Reason" className="p-2 border rounded-lg text-sm w-full" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" 
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm w-full" 
               onChange={(e) => {
                 setStartDate(e.target.value);
-                if (endDate && e.target.value > endDate) {
-                  setEndDate(""); 
-                }
-              }}   
+                if (endDate && e.target.value > endDate) { setEndDate(""); }
+              }}  
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate}/>
+            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm w-full" onChange={(e) => setEndDate(e.target.value)} value={endDate}/>
           </div>
-          <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
+          <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition w-full">Reset Filters</button>
         </div>
 
-        {/* Table Section */}
-        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-          <table className="w-full text-left text-sm">
+        {/* Table Section - Added horizontal scroll for small screens */}
+        <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
+          <table className="w-full text-left text-sm min-w-[700px]">
             <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="py-4 px-6 font-semibold">Invoice</th>
-                <th className="py-4 px-6 font-semibold">Return Amount (Ks)</th>
-                <th className="py-4 px-6 font-semibold">Payment Method</th>
-                <th className="p-4">Image</th>
+                <th className="py-4 px-6 font-semibold text-center">Return Amount</th>
+                <th className="py-4 px-6 font-semibold text-center">Payment</th>
+                <th className="p-4 text-center">Image</th>
                 <th className="py-4 px-6 font-semibold">Reason</th>
                 <th className="py-4 px-6 font-semibold">Date</th>
               </tr>
@@ -174,7 +170,7 @@ const SaleReturnReport = () => {
                       <td className="p-4 font-bold text-blue-600">{s.invoice_number}</td>
                       <td className="p-4 font-semibold text-center">{s.total_returned_amount.toLocaleString()}</td>
                       <td className="p-4 text-gray-600 text-center">{s.sale_return_payment_method}</td>
-                      <td className="p-4">
+                      <td className="p-4 flex justify-center">
                         {s.return_img_url ? (
                           <img 
                             src={`http://localhost:8000/return-images/${s.return_img_url}`} 
@@ -184,7 +180,7 @@ const SaleReturnReport = () => {
                           />
                         ) : <span className="text-gray-400 text-xs">No Image</span>}
                       </td>
-                      <td className="p-4 text-gray-600 text-left">{s.return_reason}</td>
+                      <td className="p-4 text-gray-600">{s.return_reason}</td>
                       <td className="p-4 text-gray-500">{formatDate(s.sale_return_date)}</td>
                     </tr>
                     {selectedId === s.sale_return_id && (
@@ -215,25 +211,24 @@ const SaleReturnReport = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="6" className="p-10 text-center text-gray-500">
-                    No matching records found.
-                  </td>
+                  <td colSpan="6" className="p-10 text-center text-gray-500">No matching records found.</td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
-        {/* Full Screen Image Modal */}
+
+        {/* Modal */}
         {selectedImage && (
           <div className="fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center z-50 p-4" onClick={() => setSelectedImage(null)}>
             <img src={`http://localhost:8000/return-images/${selectedImage}`} alt="Full View" className="max-w-full max-h-full rounded-lg shadow-2xl" />
-            <button className="absolute top-5 right-5 text-white text-3xl font-bold" onClick={() => setSelectedImage(null)}>&times;</button>
+            <button className="absolute top-5 right-5 text-white text-3xl font-bold">&times;</button>
           </div>
         )}
 
         {/* Pagination */}
         {nPages > 1 && (
-          <div className="flex justify-center mt-6 gap-2">
+          <div className="flex justify-center mt-6 gap-2 flex-wrap">
             <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="px-4 py-2 bg-white border rounded-lg disabled:opacity-50 hover:bg-gray-50"><i className="fa-solid fa-chevron-left"></i></button>
             {[...Array(nPages)].map((_, i) => (
               <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 border rounded-lg ${currentPage === i + 1 ? 'bg-[#F25278] text-white' : 'bg-white hover:bg-gray-50'}`}>{i + 1}</button>

@@ -115,6 +115,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                           <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
                                           <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
                                           <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
+                                          <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Shopping Cart</Link></li>
                                           <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
                                           <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
                                           <li><Link to="/profile" className={location.pathname === "/profile" ? "active" : ""}>Profile</Link></li>

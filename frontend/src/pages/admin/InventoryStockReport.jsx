@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const InventoryStockReport = () => {
+const InventoryStockReport = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -61,28 +61,31 @@ const InventoryStockReport = () => {
 
   return (
     <main className="w-full max-w-7xl mx-auto flex-grow">
-      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
-          <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
-        </div>
-      </header>
+      <header className="h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+          <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+            <i className="fa-solid fa-bars"></i>
+          </button>
+          <div className="ml-auto w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
+            <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
+          </div>
+        </header>
 
-      <div className="px-8 py-6 pt-24">
-        <h2 className="text-2xl font-bold text-gray-800 mb-6">Inventory Stock Report</h2>
+      <div className="p-4 md:p-8 pt-6">
+        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">Inventory Stock Report</h2>
 
         {/* CONTROLS */}
-        <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-4 rounded-xl shadow-sm mb-6 border border-gray-100">
           <input
             type="text"
             placeholder="Search by ID, name, or category..."
-            className="p-2.5 text-sm border border-gray-200 rounded-lg outline-none w-80 focus:ring-2 focus:ring-[#F25278]/20"
+            className="w-full sm:w-80 p-2.5 text-sm border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#F25278]/20"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
           />
           
-          <div className="flex items-center gap-6">
+          <div className="flex w-full sm:w-auto justify-between sm:justify-end items-center gap-4">
             {/* Total Monitored Items */}
-            <div className="text-sm font-semibold text-gray-500">
+            <div className="text-xs sm:text-sm font-semibold text-gray-500">
               Total Monitored Items: <span className="text-[#F25278]">{filteredProducts.length}</span>
             </div>
 
@@ -109,9 +112,9 @@ const InventoryStockReport = () => {
         </div>
 
         {/* DATA GRID TABLE */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <table className="w-full text-left">
-            <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
+          <table className="w-full text-left min-w-[600px]">
+            <thead className="bg-gray-200 text-gray-600 text-xs sm:text-sm uppercase">
               <tr>
                 <th className="py-4 px-6">Product ID</th>
                 <th className="py-4 px-6">Product Name</th>

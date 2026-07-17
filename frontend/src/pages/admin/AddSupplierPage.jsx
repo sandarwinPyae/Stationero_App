@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
-const AddSupplierPage = () => {
+const AddSupplierPage = ({ toggleSidebar }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -67,12 +67,16 @@ const AddSupplierPage = () => {
       {/* --- MAIN CONTENT --- */}
       <div className="flex-1">
         {/* --- NAVBAR --- */}
-        <div className="fixed top-0 left-64 right-0 h-16 flex justify-between items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-  
+        <div className="fixed top-0 left-0 md:left-64 right-0 h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm z-50">
+
+          <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+            <i className="fa-solid fa-bars"></i>
+          </button>
+
           {/* Back Button (Left side) */}
           <button 
             onClick={() => navigate('/suppliers')}
-            className="text-gray-600 hover:text-[#F25278] transition-colors font-medium flex items-center"
+            className="hidden sm:flex text-gray-600 hover:text-[#F25278] transition-colors font-medium items-center"
           >
             <i className="fa-solid fa-arrow-left mr-2"></i> Back
           </button>
@@ -84,43 +88,43 @@ const AddSupplierPage = () => {
         </div>
 
         {/* --- FORM CONTENT --- */}
-        <div className="p-8 pt-24">
-          <h2 className="text-2xl font-bold mb-6">Add Supplier</h2>
-          <div className="bg-white p-8 rounded-lg shadow-sm max-w-2xl">
+        <div className="p-4 md:p-8 pt-20 md:pt-20 w-full max-w-7xl mx-auto">
+          <h2 className="text-2xl font-bold mb-6 text-gray-800">Add Supplier</h2>
+          <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 max-w-2xl">
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full mt-1 p-2 border rounded" placeholder="Supplier Name" />
+                <input name="name" type="text" value={formData.name} onChange={handleChange} className="w-full mt-1 p-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#F25278]/20" placeholder="Supplier Name" />
               </div>
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700">Email</label>
                 <input 
-                  name="email" 
-                  type="email" 
-                  value={formData.email} 
-                  onChange={handleChangeEmail} 
-                  className={`w-full mt-1 p-2 border rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`} 
+                  name="email" type="email" value={formData.email} onChange={handleChangeEmail} 
+                  className={`w-full mt-1 p-2.5 border rounded-lg outline-none focus:ring-2 ${errors.email ? 'border-red-500' : 'border-gray-200 focus:ring-[#F25278]/20'}`} 
                   placeholder="email@gmail.com" 
                 />
                 {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-                <input name="phone" type="text" value={formData.phone} onChange={handleChange} className="w-full mt-1 p-2 border rounded" placeholder="09xxxxxxxxx" />
+                <input name="phone" type="text" value={formData.phone} onChange={handleChange} className="w-full mt-1 p-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#F25278]/20" placeholder="09xxxxxxxxx" />
               </div>
+
               <div>
                 <label className="block text-sm font-medium text-gray-700">Address</label>
-                <textarea name="address" value={formData.address} onChange={handleChange} className="w-full mt-1 p-2 border rounded" rows="3"></textarea>
+                <textarea name="address" value={formData.address} onChange={handleChange} className="w-full mt-1 p-2.5 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#F25278]/20" rows="3"></textarea>
               </div>
+
               <button 
                 onClick={handleSave} 
                 disabled={errors.email !== "" || !formData.name || !formData.email || !formData.phone || !formData.address}
-                className={`text-white px-8 py-2 rounded-md font-semibold mt-4 w-full sm:w-auto ${
+                className={`text-white px-8 py-2.5 rounded-lg font-semibold mt-4 w-full transition-all ${
                   (errors.email !== "" || !formData.name || !formData.email || !formData.phone || !formData.address) 
-                  ? 'opacity-50 cursor-not-allowed' 
-                  : 'opacity-100'
+                  ? 'bg-gray-300 cursor-not-allowed' 
+                  : 'bg-[#F25278] hover:bg-pink-600 shadow-md'
                 }`}
-                style={{ backgroundColor: '#F25278' }}
               >
                 Save Info
               </button>
