@@ -28,11 +28,17 @@ const SupplierPage = ({ toggleSidebar }) => {
     }
   };
 
-  const filteredSuppliers = suppliers.filter((s) =>
-    s.supplier_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.supplier_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.supplier_phone_no.includes(searchQuery)
-  );
+  const filteredSuppliers = suppliers.filter((s) => {
+    const formattedId = `s${s.supplier_id.toString().padStart(3, '0')}`;
+    const searchLower = searchQuery.toLowerCase();
+
+    return (
+      s.supplier_name.toLowerCase().includes(searchLower) ||
+      s.supplier_email?.toLowerCase().includes(searchLower) ||
+      s.supplier_phone_no.includes(searchQuery) ||
+      formattedId.includes(searchLower) 
+    );
+  });
 
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -139,7 +145,10 @@ const SupplierPage = ({ toggleSidebar }) => {
                 {currentRecords.length > 0 ? (
                   currentRecords.map((s) => (
                     <tr key={s.supplier_id} className="hover:bg-gray-50/50">
-                      <td className="py-4 px-6">{s.supplier_id}</td>
+                      <td className="py-4 px-6">
+                        {`S${s.supplier_id.toString().padStart(3, '0')}`}
+                        {/* {s.supplier_id} */}
+                      </td>
                       <td className="py-4 px-6 font-medium text-gray-800">{s.supplier_name}</td>
                       <td className="py-4 px-6">{s.supplier_phone_no}</td>
                       <td className="py-4 px-6">{s.supplier_email}</td>

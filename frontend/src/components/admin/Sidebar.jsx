@@ -11,7 +11,7 @@ const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
       ${isSubMenu ? 'ml-10 text-sm py-2' : ''} ${className}`}
   >
     {icon && <i className={`${icon} text-lg`}></i>}
-    <span className="font-medium">{label}</span>
+    <span className="font-semibold">{label}</span>
   </div>
 );
 

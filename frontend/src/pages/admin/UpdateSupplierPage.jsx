@@ -99,7 +99,7 @@ const UpdateSupplierPage = ({toggleSidebar}) => {
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button type="submit" className="bg-[#F25278] hover:bg-[#e04a6d] text-white px-8 py-3 rounded-lg font-semibold shadow-md w-full sm:w-auto">
+                <button type="submit" className="bg-[#F25278]  text-white px-8 py-3 rounded-lg font-semibold shadow-md w-full sm:w-auto">
                   Update Infos
                 </button>
                 <button 

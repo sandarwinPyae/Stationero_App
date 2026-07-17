@@ -11,6 +11,7 @@ const CategoryList = ({toggleSidebar}) => {
   const [categoryToDelete, setCategoryToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const recordsPerPage = 5;
+  
 
   useEffect(() => {
     fetchCategories();
@@ -43,7 +44,11 @@ const CategoryList = ({toggleSidebar}) => {
 
   // Filter & Search Logic
   const filteredCategories = categories.filter(c => {
-    const matchesSearch = c.category_name.toLowerCase().includes(searchTerm.toLowerCase());
+    const categoryIdWithPrefix = `CAT${c.category_id.toString().padStart(3, '0')}`.toLowerCase();
+    const categoryName = c.category_name.toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+
+    const matchesSearch = c.category_name.toLowerCase().includes(searchTerm.toLowerCase()) || categoryIdWithPrefix.includes(searchLower);
     const matchesFilter = filter === "active" ? c.del_flag === 0 : c.del_flag === 1;
     return matchesSearch && matchesFilter;
   });
@@ -116,10 +121,12 @@ const CategoryList = ({toggleSidebar}) => {
                 {currentRecords.length > 0 ? (
                   currentRecords.map((c) => (
                     <tr key={c.category_id} className="hover:bg-gray-50/50 transition">
-                      <td className="p-5 text-gray-700">{c.category_id}</td>
+                      <td className="p-5 text-gray-700">
+                        {`CAT${c.category_id.toString().padStart(3, '0')}`}
+                      </td>
                       <td className="p-5 font-medium text-gray-800">{c.category_name}</td>
                       <td className="p-5 text-gray-500 text-sm">
-                        {new Date(c.updated_date).toLocaleDateString('en-GB')}
+                        {new Date(c.updated_date).toLocaleString('en-GB')}
                       </td>
                       <td className="p-5 flex justify-center gap-4">
                         {c.del_flag === 0 ? (

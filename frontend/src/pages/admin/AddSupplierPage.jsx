@@ -123,7 +123,7 @@ const AddSupplierPage = ({ toggleSidebar }) => {
                 className={`text-white px-8 py-2.5 rounded-lg font-semibold mt-4 w-full transition-all ${
                   (errors.email !== "" || !formData.name || !formData.email || !formData.phone || !formData.address) 
                   ? 'bg-gray-300 cursor-not-allowed' 
-                  : 'bg-[#F25278] hover:bg-pink-600 shadow-md'
+                  : 'bg-[#F25278]'
                 }`}
               >
                 Save Info
