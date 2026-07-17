@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AuthContext } from "../../context/AuthContext";
+import { act } from 'react';
 
 const NavItem = ({ icon, label, active, onClick, className, isSubMenu }) => (
   <div 
@@ -65,7 +66,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       )}
 
       {/* Sidebar Container */}
-      <div div className={`w-64 bg-[#F8FAFC] h-screen border-r border-gray-200 shadow-sm flex flex-col fixed left-0 top-0 overflow-y-auto z-50 transition-transform duration-300 
+      <div className={`w-64 bg-[#F8FAFC] h-screen border-r border-gray-200 shadow-sm flex flex-col fixed left-0 top-0 overflow-y-auto z-50 transition-transform duration-300 
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
         
         <div className="py-4 px-6 flex justify-between items-center">
@@ -79,7 +80,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
           <NavItem icon="fa-solid fa-chart-line" label="Dashboard" onClick={() => { navigate('/admin/dashboard'); toggleSidebar(); }} active={isActive('/admin/dashboard')} />
           <NavItem icon="fa-solid fa-user" label="Customers" onClick={() => { navigate('/customers'); toggleSidebar(); }} active={isActive('customer')} />
           <NavItem icon="fa-solid fa-check-double" label="Confirm Order" onClick={() => { navigate('/confirm-orders'); toggleSidebar(); }} active={isActive('confirm-order')} />
-          <NavItem icon="fa-solid fa-users" label="Suppliers" onClick={() => { navigate('/suppliers'); toggleSidebar(); }} active={isActive('supplier')} />
+          <NavItem icon="fa-solid fa-users" label="Suppliers" onClick={() => { navigate('/suppliers'); toggleSidebar(); }} active={location.pathname === '/suppliers' || location.pathname === '/add-supplier' || isActive('edit-supplier')} />
           
           {/* Products */}
           <NavItem 
