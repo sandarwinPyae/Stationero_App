@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const SaleReport = () => {
+const SaleReport = ({toggleSidebar}) => {
   const navigate = useNavigate();
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -99,18 +99,20 @@ const SaleReport = () => {
   </div>
   );
 
-
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="fixed top-0 left-64 right-0 h-16 flex justify-end items-center px-8 bg-white border-b border-gray-100 shadow-sm z-50">
-        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
+      <header className="h-16 flex justify-between items-center px-4 md:px-8 bg-white border-b border-gray-100 shadow-sm sticky top-0 z-50">
+        <button onClick={toggleSidebar} className="md:hidden text-gray-600 text-xl">
+          <i className="fa-solid fa-bars"></i>
+        </button>
+        <div className="ml-auto w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center border border-gray-200 cursor-pointer">
           <i className="fa-solid fa-user text-gray-500" onClick={() => navigate('/admin/dashboard')}></i>
         </div>
       </header>
 
-      <div className="p-8 pt-24">
+      <div className="p-4 md:p-8 pt-24">
         <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl font-bold text-gray-800">Sale Report</h2>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-800">Sale Report</h2>
           <div className="relative">
             <button onClick={() => setIsExportOpen(!isExportOpen)} className="bg-[#F25278] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#e0456a] transition-all">
                <i className="fa-solid fa-file-export mr-2"></i> Export
@@ -125,14 +127,14 @@ const SaleReport = () => {
         </div>
         
         {/* Filter Bar */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100 items-end">
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Search</label>
-            <input type="text" placeholder="Invoice / Customer" className="p-2 border rounded-lg text-sm" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
+            <input type="text" placeholder="Invoice / Customer" className="p-2 border rounded-lg text-sm w-full" onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} value={searchTerm} />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Status</label>
-            <select className="p-2 border rounded-lg text-sm" onChange={(e) => {setStatusFilter(e.target.value); setCurrentPage(1)}} value={statusFilter}>
+            <select className="p-2 border rounded-lg text-sm w-full" onChange={(e) => {setStatusFilter(e.target.value); setCurrentPage(1)}} value={statusFilter}>
               <option value="">All</option>
               <option value="Confirmed">Confirmed</option>
               <option value="Pending">Pending</option>
@@ -140,32 +142,30 @@ const SaleReport = () => {
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">Start Date</label>
-            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm" 
+            <input type="date" value={startDate} className="p-2 border rounded-lg text-sm w-full" 
               onChange={(e) => {
                 setStartDate(e.target.value);
-                if (endDate && e.target.value > endDate) {
-                  setEndDate(""); 
-                }
+                if (endDate && e.target.value > endDate) { setEndDate(""); }
               }}  
             />
           </div>
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-500 uppercase">End Date</label>
-            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
+            <input type="date" min={startDate} className="p-2 border rounded-lg text-sm w-full" onChange={(e) => setEndDate(e.target.value)} value={endDate} />
           </div>
-          <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">Reset Filters</button>
+          <button onClick={resetFilters} className="bg-gray-200 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-300 transition w-full">Reset Filters</button>
         </div>
 
         {/* Table Section */}
-        <div className="bg-white rounded-3xl shadow-sm border overflow-hidden">
-          <table className="w-full text-left">
+        <div className="bg-white rounded-3xl shadow-sm border overflow-x-auto">
+          <table className="w-full text-left min-w-[800px]">
             <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
               <tr>
                 <th className="py-4 px-6 font-semibold">Invoice</th>
                 <th className="py-4 px-6 font-semibold">Customer</th>
-                <th className="py-4 px-6 font-semibold">Total Amount (Ks)</th>
-                <th className="py-4 px-6 font-semibold">Discount Amount (Ks)</th>
-                <th className="py-4 px-6 font-semibold">Net Amount (Ks)</th>
+                <th className="py-4 px-6 font-semibold text-center">Total (Ks)</th>
+                <th className="py-4 px-6 font-semibold text-center">Discount (Ks)</th>
+                <th className="py-4 px-6 font-semibold text-center">Net (Ks)</th>
                 <th className="py-4 px-6 font-semibold">Status</th>
                 <th className="py-4 px-6 font-semibold">Date</th>
               </tr>
@@ -184,7 +184,7 @@ const SaleReport = () => {
                         <span className={`px-3 py-1 rounded-full text-xs font-bold ${s.status === 'Confirmed' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{s.status}</span>
                       </td>
                       <td className="p-5">
-                        {new Date(s.order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                        {new Date(s.order_date).toLocaleString('en-GB', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' , second: '2-digit' })}
                       </td>
                     </tr>
                     {selectedId === s.sale_order_id && (
@@ -208,9 +208,7 @@ const SaleReport = () => {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="7" className="p-10 text-center text-gray-500">
-                    No matching records found.
-                  </td>
+                  <td colSpan="7" className="p-10 text-center text-gray-500">No matching records found.</td>
                 </tr>
               )}
             </tbody>
@@ -219,7 +217,7 @@ const SaleReport = () => {
 
         {/* Pagination */}
         {nPages > 1 && (
-          <div className="flex justify-center mt-8 gap-2">
+          <div className="flex justify-center mt-8 gap-2 flex-wrap">
             <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="px-4 py-2 bg-white border rounded-lg disabled:opacity-50"><i className="fa-solid fa-chevron-left"></i></button>
             {[...Array(nPages)].map((_, i) => (
               <button key={i} onClick={() => setCurrentPage(i + 1)} className={`px-4 py-2 border rounded-lg ${currentPage === i + 1 ? 'bg-[#F25278] text-white' : 'bg-white'}`}>{i + 1}</button>

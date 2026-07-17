@@ -61,11 +61,11 @@ function App() {
             
             <Route path="/confirm-orders" element={<ConfirmedOrderPage toggleSidebar={toggleSidebar}/>} />   
             <Route path="/confirm-orders/details/:id" element={<ConfirmedOrderDetailsPage toggleSidebar={toggleSidebar}/>} />
-            <Route path="/purchase-reports" element={<PurchaseSummary />} />
-            <Route path="/purchase-return-summary" element={<PurchaseReturnSummary />} />
-            <Route path="/supplier-wise" element={<SupplierWisePurchase />} />
-            <Route path='/sale-reports' element={<SaleReport />} />
-            <Route path='/sale-return-reports' element={<SaleReturnReport />} />
+            <Route path="/purchase-reports" element={<PurchaseSummary toggleSidebar={toggleSidebar}/>} />
+            <Route path="/purchase-return-summary" element={<PurchaseReturnSummary toggleSidebar={toggleSidebar}/>} />
+            <Route path="/supplier-wise" element={<SupplierWisePurchase toggleSidebar={toggleSidebar}/>} />
+            <Route path='/sale-reports' element={<SaleReport toggleSidebar={toggleSidebar}/>} />
+            <Route path='/sale-return-reports' element={<SaleReturnReport toggleSidebar={toggleSidebar}/>} />
             <Route path="/stock-report" element={<InventoryStockReport toggleSidebar={toggleSidebar}/>} /> 
             <Route path="/low-stock-report" element={<LowStockReport toggleSidebar={toggleSidebar}/>} />
             
