@@ -53,10 +53,16 @@
            END-EVALUATE
            GOBACK.
 
-       SIGNUP-PROCESS.
+              SIGNUP-PROCESS.
            IF LK-PARAM-3 = "N"
                DISPLAY "Password must be at least 8 characters long."
                MOVE 5 TO RETURN-CODE
+               GOBACK
+           END-IF.
+
+           IF LK-PARAM-4 = "N"
+               DISPLAY "Password must mix characters and numbers."
+               MOVE 6 TO RETURN-CODE
                GOBACK
            END-IF.
 
@@ -68,6 +74,7 @@
                DISPLAY "Registered successfully!"
                MOVE 0 TO RETURN-CODE
            END-IF.
+
 
        LOGIN-PROCESS.
            IF LK-PARAM-2 = "N"

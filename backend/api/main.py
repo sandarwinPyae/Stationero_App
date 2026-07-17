@@ -98,10 +98,7 @@ if not os.path.exists(RETURN_IMAGE_DIR):
     os.makedirs(RETURN_IMAGE_DIR)
 app.mount("/return-images", StaticFiles(directory=RETURN_IMAGE_DIR), name="return_images")
 
-# --- 3. COBOL CONFIGURATION ---
-# 🌟 COBOL PATH (STATIONERO_APP/backend/cobol/customer_engine.exe သို့ ချိတ်ဆက်ခြင်း)
-COBOL_EXE_PATH = os.path.join(BACKEND_DIR, "cobol", "customer_engine")
-
+COBOL_EXE_PATH = "./cobol/customer_engine.exe" 
 
 # =====================================================================
 # --- 4. PYDANTIC VALIDATION MODELS ---
@@ -169,85 +166,53 @@ class ForgotPasswordRequest(BaseModel):
 def read_root():
     return {"message": "Database and Unified Services are ready!"}
 
-# ---- FIXED: AUTOMATICALLY GENERATES THE ADMIN ACCOUNT ON SERVER STARTUP ----
-# ---- FIXED: COUPLING GENERATION HOOKS DIRECTLY WITH ACTIVE DATABASE CLASS REFS ----
-@app.on_event("startup")
-def configure_master_admin_account():
-    # Create a fresh database connection session safely using your project class model
-    db = Session() 
-    try:
-        admin_email = "admin@gmail.com"
-        admin_exists = db.query(User).filter(User.user_email == admin_email).first()
-        
-        if not admin_exists:
-            new_admin = User(
-                user_email=admin_email,
-                user_password="admin123", 
-                role="admin"
-            )
-            db.add(new_admin)
-            db.commit()
-            print(f"🌟 Setup Complete: Admin account '{admin_email}' successfully injected into SQLite!")
-    except Exception as e:
-        db.rollback()
-        print(f"Admin auto-setup skipped: {e}")
-    finally:
-        db.close()
-
-
+import re
+import subprocess
+from fastapi import status, Depends, HTTPException
+from sqlalchemy.orm import Session
 
 @app.post("/api/signup", status_code=status.HTTP_201_CREATED)
 def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
-    user_record = db.query(User).filter(User.user_email == payload.email).first()
+    print("====== COBOL ENGINE: SIGNUP MIXED-PASSWORD PIPELINE ENGAGED ======")
     
-    # ---- 1. PASSWORD STRENGTH FILTER SCHEME ----
-    is_password_valid = "Y"
-    password_error_message = "Success"
+    # 1. Database registration validation check
+    user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
+    is_registered = "Y" if user_record else "N"
     
-    if len(payload.password) < 8:
-        is_password_valid = "N"
-        password_error_message = "Password must be at least 8 characters long."
-    elif not re.search(r"[A-Za-z]", payload.password):
-        is_password_valid = "N"
-        password_error_message = "Password must include both character and number."
-    elif not re.search(r"\d", payload.password):
-        is_password_valid = "N"
-        password_error_message = "Password must include both character and number."
+    # 2. Compute explicit validation flag parameters
+    is_password_length_valid = "Y" if len(payload.password) >= 8 else "N"
+    
+    # Check if the string contains at least one letter [A-Za-z] AND at least one digit \d
+    has_letters = bool(re.search(r"[A-Za-z]", payload.password))
+    has_digits = bool(re.search(r"\d", payload.password))
+    is_password_mixed_valid = "Y" if (has_letters and has_digits) else "N"
 
     try:
-        # ---- 2. SAFE ENVIRONMENT SHIELD PLUGGED INTO COBOL BINARY MATRIX ----
-        cobol_message = "Success"
-        try:
-            result = subprocess.run(
-                [COBOL_EXE_PATH, "SIGNUP", "Y" if user_record else "N", is_password_valid, payload.name, "customer"], 
-                capture_output=True, text=True, check=False
-            )
-            cobol_message = result.stdout.strip()
-            
-            # If COBOL returns an evaluation failure code, capture it natively
-            if result.returncode != 0:
-                raise HTTPException(status_code=400, detail=cobol_message)
-        except OSError as os_err:
-            print(f"Bypassing architecture binary execution conflict cleanly: {os_err}")
-            if is_password_valid == "N":
-                cobol_message = password_error_message
-            elif user_record:
-                cobol_message = "Email is already exist, please login"
-            else:
-                cobol_message = "Local Bypass Success"
-
-        # ---- 3. STRICT PRE-COMMIT EXCEPTION GATE BLOCK ----
-        # FIXED: Explicitly checks if COBOL threw the duplicate warning string or password error
-        if is_password_valid == "N" or "already exist" in cobol_message:
-            raise HTTPException(
-                status_code=400, 
-                detail="Email is already exist, please login" if "already exist" in cobol_message else password_error_message
-            )
+        # 3. Execute compiled binary passing parameters sequentially matching ACCEPT blocks
+        # Args passed: "SIGNUP", is_registered, is_length_valid, is_mixed_valid, customer_name, role
+        result = subprocess.run(
+            [COBOL_EXE_PATH, "SIGNUP", is_registered, is_password_length_valid, is_password_mixed_valid, payload.name, "customer"], 
+            capture_output=True, text=True, check=False
+        )
         
-        if cobol_message != "Success" and cobol_message != "Local Bypass Success" and "Registered successfully" not in cobol_message:
-            raise HTTPException(status_code=400, detail=cobol_message)
+        cobol_output = result.stdout.strip()
+        cobol_exit_code = result.returncode
+
+        # 4. Handle specific custom validation return codes passed from your COBOL execution
+        if cobol_exit_code == 5 or "at least 8 characters" in cobol_output:
+            raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
             
-        # ---- 4. SECURE DATABASE ENTRY WRITE LIFECYCLE ----
+        # 🌟 FIXED: Tracks exit code 6 or your new safe COBOL string to throw your exact required frontend error!
+        if cobol_exit_code == 6 or "mix chars and numbers" in cobol_output or "both character and number" in cobol_output:
+            raise HTTPException(status_code=400, detail="Password must include both character and number.")
+            
+        if cobol_exit_code == 1 or "already exist" in cobol_output:
+            raise HTTPException(status_code=400, detail="Email is already exist, please login")
+
+        if "Registered successfully" not in cobol_output and cobol_exit_code != 0:
+            raise HTTPException(status_code=400, detail=f"COBOL validation rejection error: {cobol_output}")
+
+        # 5. Commit to database if COBOL clears it
         new_user = User(user_email=payload.email, user_password=payload.password, role="customer")
         db.add(new_user)
         db.flush() 
@@ -259,6 +224,7 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
         )
         db.add(new_customer)
         db.commit()
+        
         return {"message": "Registration successful!"}
         
     except HTTPException as he:
@@ -266,60 +232,46 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
         raise he
     except Exception as e:
         db.rollback()
-        
-        # ---- FIXED: FALLBACK EXCEPTION SHIELD STRIPS OUT RAW SQLITE3 INTEGRITY TEXT DUMPS ----
-        error_string = str(e)
-        if "UNIQUE constraint failed" in error_string or "user_email" in error_string:
-            raise HTTPException(status_code=400, detail="Email is already exist, please login")
-            
-        raise HTTPException(status_code=500, detail=f"Registration failure validation drop: {e}")
+        raise HTTPException(status_code=500, detail=f"Registration execution flow dropped: {e}")
+
+
 
 @app.post("/api/login")
 def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db)):
-    print("====== API HIT: COBOL-INTEGRATED AUTHENTICATION PIPELINE ENGAGED ======")
+    print("====== COBOL ENGINE: LOGIN PIPELINE ENGAGED ======")
     
-    # 1. Look up the credentials inside your database tables first
+    # 1. Fetch user data records cleanly
     user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
     
-    # Compute precise verification states to pass to the COBOL executable environment safely
+    # 2. Compute parameters to pass into COBOL argument slots in exact order
     is_registered = "Y" if user_record else "N"
     is_password_correct = "Y" if (user_record and user_record.user_password == payload.password) else "N"
     user_role = user_record.role if user_record else "customer"
 
     try:
-        # 2. ENVIRONMENT SHIELD: Interface cleanly with your compiled COBOL binary executable
-        cobol_message = ""
-        try:
-            result = subprocess.run(
-                [COBOL_EXE_PATH, "LOGIN", is_registered, is_password_correct, payload.email, user_role], 
-                capture_output=True, text=True, check=False
-            )
-            cobol_message = result.stdout.strip()
-            
-            # Catch raw source code blocks or empty outputs to trigger local fallbacks
-            if "IDENTIFICATION DIVISION" in cobol_message or not cobol_message:
-                raise OSError("Invalid binary execution pipe layout detected.")
-                
-        except OSError as os_err:
-            print(f"Bypassing COBOL binary execution conflict on your machine: {os_err}")
-            # LOCAL MAPPING: Replicates your explicit COBOL logic branch structure perfectly
-            if is_registered == "N":
-                cobol_message = "You are not registered, please sign up!"
-            elif is_password_correct == "N":
-                cobol_message = "Incorrect password. Please try again."
-            else:
-                cobol_message = "Login successful!"
+        # 3. Execute compiled binary passing parameters sequentially matching ACCEPT blocks
+        # Args passed: "LOGIN", is_registered, is_password_correct, email, role
+        result = subprocess.run(
+            [COBOL_EXE_PATH, "LOGIN", is_registered, is_password_correct, payload.email.strip(), user_role], 
+            capture_output=True, text=True, check=False
+        )
+        
+        cobol_output = result.stdout.strip()
+        cobol_exit_code = result.returncode
 
-        # 3. ---- FIXED: CORRECT COBOL RESPONSE EVALUATION ORDER ----
-        # 🌟 CRITICAL FIX: Check if the user is registered BEFORE checking the password state!
-        if "not registered" in cobol_message.lower() or is_registered == "N":
+        # 4. Handle structural COBOL system exit tracking codes safely
+        if cobol_exit_code == 2 or "not registered" in cobol_output.lower():
             raise HTTPException(status_code=400, detail="You are not registered, please sign up!")
             
-        if "incorrect password" in cobol_message.lower() or is_password_correct == "N":
+        if cobol_exit_code == 1 or "incorrect password" in cobol_output.lower():
             raise HTTPException(status_code=400, detail="Incorrect password. Please try again.")
 
-        # Determine route redirection values based on authenticated user types
-        if user_role == "admin":
+        # 🌟 FIXED TYPO HERE: Properly evaluation constraints for standard exit states
+        if "login successful" not in cobol_output.lower():
+            raise HTTPException(status_code=400, detail=f"Authentication pipeline failure: {cobol_output}")
+
+        # 5. Handle routing rules determined by user privileges or exit status code 3
+        if user_role == "admin" or cobol_exit_code == 3:
             redirect_destination = "http://localhost:5174/admin/dashboard"
         else:
             redirect_destination = "/cart"
@@ -338,8 +290,7 @@ def login_customer(payload: CustomerLoginRequest, db: Session = Depends(get_db))
         raise he
     except Exception as e:
         print(f"Login structural crash handler trace: {e}")
-        # 🌟 FIX: Stop hardcoding "Incorrect password" inside your global fallback catch block!
-        raise HTTPException(status_code=400, detail="Authentication server processing error. Please try again.")
+        raise HTTPException(status_code=500, detail=f"Internal authentication system crash: {e}")
 
 @app.post("/api/order/confirm", status_code=status.HTTP_201_CREATED)
 def confirm_customer_order(payload: CustomerOrderConfirm, db: Session = Depends(get_db)):
