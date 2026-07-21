@@ -12,7 +12,7 @@ const ConfirmModal = ({ isOpen, title, message, onConfirm, onCancel }) => {
         <p className="text-gray-600 mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button onClick={onCancel} className="px-4 py-2 text-gray-600 font-medium hover:bg-gray-100 rounded-lg transition">Cancel</button>
-          <button onClick={onConfirm} className="px-4 py-2 bg-[#F25278] text-white font-semibold rounded-lg hover:bg-pink-600 transition">Confirm</button>
+          <button onClick={onConfirm} className="px-4 py-2 bg-[#F25278] text-white font-semibold rounded-lg">Confirm</button>
         </div>
       </div>
     </div>
@@ -167,15 +167,21 @@ const ConfirmedOrderDetailsPage = ({ toggleSidebar }) => {
           {/* Totals */}
           <div className="flex justify-end">
             <div className="w-full sm:w-64 space-y-2 text-sm">
-              <div className="flex justify-between"><span>Total :</span> <span className="font-bold">{order.header.calculated_total_amount}</span></div>
-              <div className="flex justify-between border-t pt-2 mt-2 text-lg"><span>Net :</span> <span className="font-bold">{order.header.total_amount - order.header.discount}</span></div>
+              <div className="flex justify-between"><span>Total Amount:</span> <span className="font-bold">{order.header.calculated_total_amount}</span></div>
+              {order.header.discount > 0 && (
+                <div className="flex justify-between">
+                  <span>Discount Amount:</span> 
+                  <span className="font-bold">{order.header.discount}</span>
+                </div>
+              )}
+              <div className="flex justify-between border-t pt-2 mt-2 text-lg"><span>Net Amount:</span> <span className="font-bold">{order.header.total_amount - order.header.discount}</span></div>
             </div>
           </div>
 
           {/* Button */}
           <div className="flex justify-center mt-8">
             {order.header.status !== 'Confirmed' && (
-              <button onClick={() => setShowModal(true)} className="w-full sm:w-auto px-8 py-2 bg-[#F25278] text-white rounded-lg hover:bg-pink-600 transition">
+              <button onClick={() => setShowModal(true)} className="w-full sm:w-auto px-8 py-2 bg-[#F25278] text-white rounded-lg">
                 Confirm Sale
               </button>
             )}

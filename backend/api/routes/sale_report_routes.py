@@ -53,11 +53,16 @@ def get_sale_return_reports(db: Session = Depends(get_db)):
         models.SaleReturnHeader.total_returned_amount,
         models.SaleReturnHeader.return_reason,
         models.SaleReturnHeader.sale_return_payment_method,
-        models.SaleReturnHeader.return_img_url, # 
+        models.SaleReturnHeader.return_img_url,
         cast(models.SaleReturnHeader.sale_return_date, String).label("sale_return_date"),
         models.SaleOrdersHeader.invoice_number
-    ).join(models.SaleOrdersHeader, models.SaleReturnHeader.sale_order_id == models.SaleOrdersHeader.sale_order_id)\
-     .all()
+    ).join(
+        models.SaleOrdersHeader, 
+        models.SaleReturnHeader.sale_order_id == models.SaleOrdersHeader.sale_order_id
+    ).order_by(
+        models.SaleReturnHeader.sale_return_id.desc()
+    ).all()
+    
 
     output = []
     for ret in returns:

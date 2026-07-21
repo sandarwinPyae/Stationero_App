@@ -29,11 +29,15 @@ const CustomerPage = ({ toggleSidebar }) => {
     }
   };
 
-  const filteredCustomers = customers.filter((c) =>
-    c.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.customer_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.phone_number.includes(searchQuery)
-  );
+  const filteredCustomers = customers.filter((c) => {
+    const customerIdStr = `CUS${c.customer_id.toString().padStart(3, '0')}`;
+    return (
+      c.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.customer_email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.phone_number.includes(searchQuery) ||
+      customerIdStr.toLowerCase().includes(searchQuery.toLowerCase()) 
+    );
+  });
 
   const indexOfLastRecord = currentPage * recordsPerPage;
   const indexOfFirstRecord = indexOfLastRecord - recordsPerPage;
@@ -95,7 +99,6 @@ const CustomerPage = ({ toggleSidebar }) => {
             </div>
           </div>
 
-          {/* TABLE - overflow-x-auto ထည့်ထားပေးတယ် */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-x-auto">
             <table className="w-full text-left min-w-[600px]">
               <thead className="bg-gray-200 text-gray-600 text-sm uppercase">
@@ -112,7 +115,10 @@ const CustomerPage = ({ toggleSidebar }) => {
                 {currentRecords.length > 0 ? (
                   currentRecords.map((c) => (
                     <tr key={c.customer_id} className="hover:bg-gray-50/50">
-                      <td className="py-4 px-6">{c.customer_id}</td>
+                      <td className="py-4 px-6">
+                        {/* {`CUS${c.customer_id.toString().padStart(2, '0')}`} */}
+                        {`CUS${c.customer_id.toString().padStart(3, '0')}`}
+                      </td>
                       <td className="py-4 px-6 font-medium text-gray-800">{c.customer_name}</td>
                       <td className="py-4 px-6">{c.phone_number}</td>
                       <td className="py-4 px-6">{c.customer_email}</td>

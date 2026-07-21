@@ -18,9 +18,15 @@ const ProductList = ({toggleSidebar}) => {
 
   // Filter Logic
   const filteredProducts = products.filter(p => {
-    const matchesSearch = p.product_name.toLowerCase().includes(search.toLowerCase());
+    const formattedId = `p${p.product_id.toString().padStart(3, '0')}`;
+    const searchLower = search.toLowerCase();
+    const matchesSearch = 
+      p.product_name.toLowerCase().includes(searchLower) || 
+      formattedId.includes(searchLower);
+      
     const matchesCategory = selectedCategory === "" || p.category_id.toString() === selectedCategory;
     const matchesTab = activeTab === 'active' ? p.del_flag === 0 : p.del_flag === 1;
+    
     return matchesSearch && matchesCategory && matchesTab;
   });
 
@@ -129,25 +135,39 @@ const ProductList = ({toggleSidebar}) => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {currentItems.map((p) => (
-                  <tr key={p.product_id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">{p.product_id}</td>
-                    <td className="px-6 py-4">{p.product_name}</td>
-                    <td className="px-6 py-4">{categoryMap[p.category_id]}</td>
-                    <td className="px-6 py-4">{p.current_qty}</td>
-                    <td className="px-6 py-4 text-right">{p.unit_price}</td>
-                    <td className="px-6 py-4 text-right">{p.selling_price}</td>
-                    <td className="px-6 py-4 flex justify-center gap-3">
-                      {p.del_flag === 0 ? (
-                        <>
-                          <button onClick={() => navigate(`/view-product/${p.product_id}`)} className="text-[#405169]"><i className="fa-solid fa-eye"></i></button>
-                          <button onClick={() => navigate(`/edit-product/${p.product_id}`)} className="text-blue-600"><i className="fa-solid fa-pen-to-square"></i></button>
-                          <button onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }} className="text-red-600"><i className="fa-solid fa-trash"></i></button>
-                        </>
-                      ) : <span className="text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>}
+                {currentItems.length > 0 ? (
+                  currentItems.map((p) => (
+                    <tr key={p.product_id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 align-top">
+                        {`P${p.product_id.toString().padStart(3, '0')}`}
+                      </td>
+                      <td className="px-6 py-4 align-top">{p.product_name}</td>
+                      <td className="px-6 py-4 align-top">{categoryMap[p.category_id]}</td>
+                      <td className="px-6 py-4 align-top">{p.current_qty}</td>
+                      <td className="px-6 py-4 align-top text-right">{p.unit_price}</td>
+                      <td className="px-6 py-4 align-top text-right">{p.selling_price}</td>
+                      <td className="px-6 py-4 align-top">
+                        <div className="flex justify-center gap-3">
+                          {p.del_flag === 0 ? (
+                            <>
+                              <button onClick={() => navigate(`/view-product/${p.product_id}`)} className="text-[#405169]"><i className="fa-solid fa-eye"></i></button>
+                              <button onClick={() => navigate(`/edit-product/${p.product_id}`)} className="text-blue-600"><i className="fa-solid fa-pen-to-square"></i></button>
+                              <button onClick={() => { setProductIdToDelete(p.product_id); setProductNameToDelete(p.product_name); setIsModalOpen(true); }} className="text-red-600"><i className="fa-solid fa-trash"></i></button>
+                            </>
+                          ) : (
+                            <span className="text-gray-400 text-xs bg-gray-100 px-2 py-1 rounded">Removed</span>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="7" className="px-6 py-10 text-center text-gray-500">
+                      No products found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
