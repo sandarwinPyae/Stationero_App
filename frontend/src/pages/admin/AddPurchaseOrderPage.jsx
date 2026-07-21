@@ -26,8 +26,16 @@ const AddPurchaseOrderPage = ({toggleSidebar}) => {
     try {
       const res = await axios.get('http://localhost:8000/products');
       const suppRes = await axios.get('http://localhost:8000/suppliers');
-      setAvailableProducts(res.data);
-      setSuppliers(suppRes.data);
+
+      const sortedSuppliers = suppRes.data.sort((a, b) => 
+        a.supplier_name.localeCompare(b.supplier_name)
+      );
+
+      const sortedProducts = res.data.sort((a, b) => 
+        a.product_name.localeCompare(b.product_name)
+      );
+      setAvailableProducts(sortedProducts);
+      setSuppliers(sortedSuppliers);
     } catch (err) {
       setErrorMessage("Failed to load initial data. Please check your server connection.");
     }
@@ -151,10 +159,11 @@ const AddPurchaseOrderPage = ({toggleSidebar}) => {
             <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
             <select className="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none bg-white" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
               <option value="">Select Payment Method</option>
-              <option value="Cash">Cash</option>
-              <option value="Kpay">KBZ pay</option>
               <option value="AYA Pay">AYA Pay</option>
               <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cash">Cash</option>
+              <option value="Kpay">KBZ pay</option>
+              
             </select>
           </div>
         </div>

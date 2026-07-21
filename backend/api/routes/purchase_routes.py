@@ -331,7 +331,9 @@ def get_purchase_returns(db: Session = Depends(get_db)):
                     joinedload(models.PurchaseReturnHeader.purchase_order),
                     joinedload(models.PurchaseReturnHeader.details)
                     .joinedload(models.PurchaseReturnDetails.product)
-                ).all()
+                )\
+                .order_by(models.PurchaseReturnHeader.purchase_return_date.desc())\
+                .all()
     return returns
 
 @router.get("/supplier-wise")

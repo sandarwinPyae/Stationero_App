@@ -31,8 +31,12 @@ const AddProductPage = ({toggleSidebar}) => {
   useEffect(() => {
     const fetchCategories = async () => {
         try {
-        const response = await axios.get('http://localhost:8000/categories'); // သင့် backend route အတိုင်း
-        setCategories(response.data);
+        const response = await axios.get('http://localhost:8000/categories'); 
+
+        const sortedCategoroes = response.data.sort((a, b) => 
+        a.category_name.localeCompare(b.category_name)
+      );
+        setCategories(sortedCategoroes);
         } catch (error) {
         console.error('Error fetching categories:', error);
         }
@@ -176,16 +180,21 @@ const AddProductPage = ({toggleSidebar}) => {
                 <div>
                 <label className="block text-sm font-semibold text-gray-600 mb-2">Quantity</label>
                 <input 
-                    type="number" name="current_qty" value={formData.current_qty} onChange={handleChange}
+                    type="number" 
+                    name="current_qty" 
+                    value={formData.current_qty} 
+                    onChange={handleChange}
                     min="0"
+                    onWheel={(e) => e.target.blur()} 
                     onKeyDown={(e) => {
                       const invalidChars = ["-", "+", "e", "E"];
                       if (invalidChars.includes(e.key)) {
                         e.preventDefault();
                       }
                     }}
-                    className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-100 outline-none transition" 
-                    placeholder="0" required
+                    className="w-full p-3.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-100 outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    placeholder="0" 
+                    required
                 />
                 </div>
 

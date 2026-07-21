@@ -111,7 +111,7 @@ const ConfirmedOrderPage = ({toggleSidebar}) => {
             
             <div>
               <label className="text-xs font-semibold text-gray-500 mb-1 block uppercase">End Date</label>
-              <input type="date" value={endDate} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-600" onChange={(e) => setEndDate(e.target.value)} />
+              <input type="date" value={endDate} min={startDate} className="w-full px-4 py-2 border border-gray-200 rounded-lg text-gray-600" onChange={(e) => setEndDate(e.target.value)} />
             </div>
 
             <button onClick={() => { setSearchTerm(""); setStatusFilter(""); setStartDate(""); setEndDate(""); }} className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-lg">

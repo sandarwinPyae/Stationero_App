@@ -901,9 +901,10 @@ def get_products(
 @app.get("/api/categories")
 def get_categories(db: Session = Depends(get_db)):
 
+    # order_by(Category.category_name.asc()) ကို ပေါင်းထည့်ထားပါသည်
     categories = db.query(Category).filter(
         Category.del_flag == 0
-    ).all()
+    ).order_by(Category.category_name.asc()).all()
 
     return [
         {
@@ -912,6 +913,7 @@ def get_categories(db: Session = Depends(get_db)):
         }
         for c in categories
     ]
+
 @app.get("/api/products/best-selling", response_model=List[schemas.ProductResponse])
 def get_best_selling(db: Session = Depends(get_db)):
     best_selling_records = db.query(

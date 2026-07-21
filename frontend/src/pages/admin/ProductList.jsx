@@ -52,7 +52,10 @@ const ProductList = ({toggleSidebar}) => {
   const fetchCategories = async () => {
     try {
       const response = await axios.get('http://localhost:8000/categories');
-      setCategories(response.data);
+       const sortedCategories = response.data.sort((a, b) => 
+        a.category_name.localeCompare(b.category_name)
+      );
+      setCategories(sortedCategories);
     } catch (error) { console.error(error); }
   };
 

@@ -106,11 +106,27 @@ const UpdateProductPage = ({toggleSidebar}) => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Unit Price (Ks)</label>
-                    <input type="number" min="0" value={product.unit_price} onKeyDown={handleKeyDown} onChange={e => setProduct({...product, unit_price: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none" />
+                    <input 
+                      type="number" 
+                      min="0" 
+                      value={product.unit_price} 
+                      onWheel={(e) => e.target.blur()}
+                      onKeyDown={handleKeyDown} 
+                      onChange={e => setProduct({...product, unit_price: e.target.value})} 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-2">Selling Price (Ks)</label>
-                    <input type="number" min="0" value={product.selling_price} onKeyDown={handleKeyDown} onChange={e => setProduct({...product, selling_price: e.target.value})} className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none" />
+                    <input 
+                      type="number" 
+                      min="0" 
+                      value={product.selling_price} 
+                      onWheel={(e) => e.target.blur()}
+                      onKeyDown={handleKeyDown} 
+                      onChange={e => setProduct({...product, selling_price: e.target.value})} 
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-4 focus:ring-pink-500/10 focus:border-pink-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
                   </div>
                 </div>
               </div>
@@ -130,7 +146,15 @@ const UpdateProductPage = ({toggleSidebar}) => {
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-emerald-600 mb-2">Add New Stock</label>
-                    <input type="number" min="0" value={addedQty} onKeyDown={handleKeyDown} onChange={e => setAddedQty(e.target.value)} className="w-full px-4 py-3 rounded-xl border-2 border-emerald-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none" />
+                    <input 
+                      type="number" 
+                      min="0" 
+                      value={addedQty} 
+                      onWheel={(e) => e.target.blur()}
+                      onKeyDown={handleKeyDown} 
+                      onChange={e => setAddedQty(e.target.value)} 
+                      className="w-full px-4 py-3 rounded-xl border-2 border-emerald-200 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                    />
                 </div>
               </div>
               <div className="md:col-span-2">
