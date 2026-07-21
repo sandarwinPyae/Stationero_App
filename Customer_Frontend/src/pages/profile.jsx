@@ -79,6 +79,11 @@ const ProfilePage = () => {
       <main style={styles.mainContent}>
         <div style={styles.profileCard}>
           <h2 style={styles.heading}>Account Profile</h2>
+          <div style={styles.avatarRow}>
+            <div style={styles.avatarCircleLarge}>
+              {name ? name.trim().charAt(0).toUpperCase() : 'K'}
+            </div>
+          </div>
           <form onSubmit={handleUpdateProfile} style={styles.form}>
             <div style={styles.inputGroup}>
               <label style={styles.label}>Full Name</label>
@@ -115,19 +120,25 @@ const ProfilePage = () => {
 
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh' },
-  mainContent: { padding: '20px 12px', display: 'flex', justifyContent: 'center', boxSizing: 'border-box' },
-  profileCard: { backgroundColor: '#fff', padding: '24px 16px', borderRadius: '15px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', width: '100%', maxWidth: '500px', border: '1px solid #f0f0f0', boxSizing: 'border-box' },
-  heading: { fontSize: '25px', fontWeight: '400', marginBottom: '25px', color: '#111', paddingBottom: '10px', textAlign: 'center' },
-  form: { display: 'flex', flexDirection: 'column', gap: '20px' },
-  inputGroup: { display: 'flex', flexDirection: 'column', gap: '6px' },
-  label: { fontSize: '15px', fontWeight: 200, color: '#555' },
-  inputField: { padding: '12px 15px', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '15px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
-  btnRow: { display: 'flex', gap: '15px', marginTop: '10px', justifyContent: 'center', flexWrap: 'wrap' },
-  editBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', width: '100%', maxWidth: '240px' },
-  cancelBtn: { backgroundColor: '#e2e8f0', color: '#4a5568', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', flex: '1 1 120px' },
-  saveBtn: { backgroundColor: '#f25278', color: '#fff', border: 'none', padding: '12px 25px', borderRadius: '25px', fontSize: '15px', fontWeight: 'bold', cursor: 'pointer', flex: '1 1 120px' }
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: window.innerWidth <= 768 ? '10px 8px' : '16px 12px', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, width: '100%', boxSizing: 'border-box' },
+  profileCard: { backgroundColor: '#ffffff', padding: window.innerWidth <= 768 ? '16px 16px' : '32px 40px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', width: '100%', maxWidth: '560px', border: '1px solid #f3f4f6', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: window.innerWidth <= 768 ? '12px' : '24px' },
+  heading: { fontFamily: "'Poppins', sans-serif", fontSize: window.innerWidth <= 768 ? '18px' : '24px', fontWeight: '600', color: '#111827', margin: window.innerWidth <= 768 ? '0 0 4px 0' : '0 0 8px 0', textAlign: 'center' },
+  avatarRow: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '0px', width: '100%' },
+  avatarCircleLarge: { width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#fdf2f4', color: '#f25278', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '32px', fontWeight: '600', border: '3px solid #fff', boxShadow: '0 4px 10px rgba(242,82,120,0.15)' },
+  profileGreetingRow: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' },
+  inlineLabelText: { fontFamily: "'Poppins', sans-serif", fontSize: '16px', fontWeight: '500', color: '#4b5563', margin: 0 },
+  inlineValueText: { fontFamily: "'Poppins', sans-serif", fontSize: '16px', fontWeight: '600', color: '#f25278', margin: 0, textTransform: 'capitalize' },
+  form: { display: 'flex', flexDirection: 'column', gap: window.innerWidth <= 768 ? '10px' : '20px', width: '100%' },
+  inputGroup: { display: 'flex', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center', gap: window.innerWidth <= 768 ? '4px' : '16px', width: '100%', boxSizing: 'border-box' },
+  label: { fontFamily: "'Poppins', sans-serif", fontSize: '13px', fontWeight: '500', color: '#4b5563', width: window.innerWidth <= 768 ? 'auto' : '140px', minWidth: window.innerWidth <= 768 ? 'auto' : '140px', textAlign: 'left', margin: 0 },
+  inputField: { fontFamily: "'Poppins', sans-serif", padding: window.innerWidth <= 768 ? '8px 12px' : '10px 14px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '15px', fontWeight: '500', outline: 'none', backgroundColor: '#ffffff', color: '#1f2937', flex: 1, boxSizing: 'border-box', width: '100%' },
+  btnRow: { display: 'flex', gap: '12px', marginTop: '6px', justifyContent: window.innerWidth <= 768 ? 'stretch' : 'flex-end', width: '100%' },
+  editBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f25278', color: '#ffffff', border: 'none', padding: '12px 32px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', width: '100%', outline: 'none' },
+  cancelBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f3f4f6', color: '#4b5563', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', flex: window.innerWidth <= 768 ? 1 : 'none', outline: 'none' },
+  saveBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f25278', color: '#ffffff', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', flex: window.innerWidth <= 768 ? 1 : 'none', outline: 'none' }
 };
+
 
 
 export default ProfilePage;

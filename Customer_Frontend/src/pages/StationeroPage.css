@@ -109,9 +109,9 @@ body {
 }
 
 .logo {
-  font-family: 'Azeret Mono', monospace, sans-serif;
-  font-size: 30px;
-  font-weight: 800;
+  font-family: 'poppins', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
   color: #F25278;
   margin: 0;
 }
@@ -620,3 +620,258 @@ body {
   transform: scale(0.95);
   /* နှိပ်လိုက်ရင် သေးသွားမယ် */
 }
+
+.menu-toggle {
+  display: none;
+}
+
+/* ==========================================================================
+   FINAL ALL-IN-ONE HOME PAGE MOBILE RESPONSIVENESS OVERRIDES
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  
+  /* 1. GUEST MODE HEADER ROW LAYOUT (Kept exactly as you had it) */
+  .navbar .container {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    position: relative !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 10px 15px !important;
+  }
+
+  .logo {
+    font-size: 24px !important; 
+    font-weight: bold !important;
+    margin: 0 !important;
+    flex: 1 !important;        
+    text-align: left !important;
+    white-space: nowrap !important;
+  }
+
+  .menu-toggle {
+    display: block !important;
+    background: none !important;
+    border: none !important;
+    color: #F25278 !important;
+    font-size: 26px !important;
+    cursor: pointer !important;
+    margin: 0 !important;
+    flex: 0 0 auto !important;
+    order: 3 !important;        
+  }
+
+  /* Removes unwanted background lines from past errors */
+  .nav-links::before, .nav-links::after,
+  .user-nav-links::before, .user-nav-links::after {
+    display: none !important;
+    content: "" !important;
+    opacity: 0 !important;
+  }
+
+  /* Guest buttons container: Placed perfectly in the top row between logo and icon */
+  .auth-btns {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 20px !important;       
+    margin: 0 !important;
+    padding: 0 10px !important;
+    position: static !important;
+    width: auto !important;
+    flex: 2 !important;          
+    order: 2 !important;
+  }
+
+  .auth-btns .btn-auth {
+    display: inline-block !important;
+    background: none !important; 
+    border: none !important;
+    box-shadow: none !important;
+    color: #333333 !important;   
+    font-size: 14px !important;  
+    font-weight: 500 !important; 
+    padding: 4px 5px !important; 
+    margin: 0 5px !important;    
+    border-radius: 0 !important;
+    text-decoration: none !important;
+    width: auto !important;
+    white-space: nowrap !important;
+  }
+
+
+  /* 2. LOGGED-IN USER LIST OVERRIDES (FIXED DROPDOWN SYSTEM) */
+  
+  /* Closed State: Hidden completely when the menu is shut */
+  .nav-links {
+    display: none !important;
+  }
+
+  /* Opened Dropdown State: Drops cleanly from the navbar container */
+  .nav-links.mobile-open {
+    display: flex !important;
+    flex-direction: column !important; 
+    position: absolute !important;
+    top: 100% !important; 
+    left: 0 !important;
+    width: 100% !important;
+    background-color: #fff !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08) !important;
+    padding: 20px 15px !important;
+    box-sizing: border-box !important;
+    gap: 12px !important;
+    z-index: 99999 !important;
+  }
+
+  /* Centers all 8 links smoothly inside the active mobile column view */
+  .nav-links.mobile-open li {
+    display: block !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding: 0 !important;
+  }
+
+  .nav-links.mobile-open li a {
+    font-size: 1.1em !important;
+    display: block !important;
+    padding: 6px 0 !important;
+    text-align: center !important;
+    color: #333333 !important;
+    text-decoration: none !important;
+  }
+
+  /* Completely hides the search bar from showing inside this mobile dropdown list */
+  .search-bar {
+    display: none !important;
+  }
+
+
+  /* 3. GENERAL LAYOUT CONTAINER SETUP */
+  .container, .hero-container {
+    flex-direction: column !important;
+    gap: 15px !important;
+    padding: 0 15px !important;
+  }
+
+  /* 4. HERO SECTION ADJUSTMENTS */
+  .hero {
+    height: auto !important;
+    padding: 40px 0 !important;
+  }
+
+  .hero-content {
+    max-width: 100% !important; 
+    text-align: center !important;
+  }
+
+  .hero-title {
+    font-size: 2.2em !important; 
+  }
+
+  /* 5. CATEGORY OFFERS ARRANGEMENT */
+  .category-offers {
+    padding: 30px 0 !important;
+  }
+
+  .category-grid {
+    grid-template-columns: 1fr !important; 
+    grid-gap: 20px !important;
+  }
+
+  .offer-card {
+    height: 180px !important; 
+  }
+
+  /* 6. BEST SELLING PRODUCT GRID ADJUSTMENTS */
+  .best-selling {
+    padding: 30px 0 !important;
+  }
+
+  .section-title {
+    font-size: 1.6em !important;
+  }
+
+  .product-grid {
+    display: grid !important; 
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 15px !important;
+    margin-top: 25px !important;
+  }
+
+  .product-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-img-box {
+    height: 200px !important; 
+    margin-bottom: 10px !important;
+  }
+
+  /* 7. PROMO BANNER ALIGNMENT */
+  .promo-wrapper {
+    flex-direction: column !important;
+  }
+
+  .promo-text-side {
+    padding: 30px 20px !important;
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .promo-title {
+    font-size: 1.6em !important;
+  }
+
+  /* 8. EXPERIENCE LAYOUT SETTINGS */
+  .experience-wrapper {
+    height: auto !important;
+    padding: 40px 20px !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    background-position: center !important; 
+  }
+
+  .exp-content {
+    padding-right: 0 !important; 
+    text-align: center !important;
+  }
+
+  .exp-title {
+    font-size: 1.6em !important;
+  }
+
+  /* 9. FIRST ORDER PROMOTION BLOCK SETTINGS */
+  .first-order-section {
+    padding: 30px 20px !important;
+    height: auto !important;
+    justify-content: center !important;
+    text-align: center !important;
+  }
+
+  .first-order-content h2 {
+    font-size: 1.6em !important;
+  }
+
+  /* 10. CRITICAL ABSOLUTE LAYOUT CONTROLS */
+  .product-hero-title-box, [class*="hero-title-box"], [class*="hero-content"] {
+    position: relative !important; 
+    left: auto !important;
+    bottom: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    margin: 20px 0 !important;   
+    padding: 20px 15px !important;
+    box-sizing: border-box !important;
+    text-align: center !important; 
+  }
+}
+
+
+
+

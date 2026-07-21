@@ -99,3 +99,47 @@
 custom-navbar .search-bar{
       display: none !important;
 }
+
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES (SAFE FOR TEAM CODE)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  /* Reduce outer container margins so text doesn't hit the screen edge */
+  .about-container {
+    margin: 20px auto;
+    padding: 15px;
+  }
+
+  /* Shrink padding inside the grey layout boxes */
+  .about-box {
+    padding: 25px 20px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+  }
+
+  /* Stack Mission & Commitment vertically instead of side-by-side */
+  .mission-commitment-row {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  /* Force the team avatars to wrap into 2 rows of 2 instead of squishing in 1 row */
+  .team-grid {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 25px 15px; /* Vertical and horizontal gap spacing */
+  }
+
+  /* Ensure team card layout blocks scale smoothly on smaller screen shapes */
+  .team-member {
+    width: calc(50% - 10px); /* Perfectly fits 2 members side-by-side */
+    min-width: 130px;
+  }
+
+  /* Optimize layout size for team photos on compact screen displays */
+  .team-img {
+    width: 130px;
+    height: 155px;
+  }
+}

@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = true }) => {
       const location = useLocation();
       const navigate = useNavigate();
+      const [isMenuOpen, setIsMenuOpen] = useState(false);
       const [showLogoutModal, setShowLogoutModal] = useState(false);
       const { isLoggedIn, setIsLoggedIn } = useContext(AuthContext);
       const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
@@ -108,6 +109,9 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
             <nav className="navbar">
                   <div className="container">
                         <h1 className="logo">Stationero</h1>
+                        <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                              ☰
+                        </button>
                         {isUserAuthenticated ? (
                               <>
                                     {renderSearchBar()}

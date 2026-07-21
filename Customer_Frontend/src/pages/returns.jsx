@@ -268,7 +268,7 @@ const ReturnsPage = () => {
               {productName && (parseInt(quantity, 10) >= 0) && (
                 <div style={styles.inputGroup}>
                   <label style={{ ...styles.label, color: '#555555' }}>Receive Amount</label>
-                  <div style={{ ...styles.label, color: '#d9383a', fontWeight: '805', fontSize: '18px', paddingTop: '6px' }}>
+                  <div style={{ ...styles.label, color: '#f25278', fontWeight: '600', fontSize: '25px', paddingTop: '6px', fontFamily: "'Poppins', sans-serif" }}>
                     {(() => {
                       const selectedItemNode = availableProducts.find(
                         p => (p.name === productName || p.product_name === productName)
@@ -319,31 +319,30 @@ const ReturnsPage = () => {
 };
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0 },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', margin: 0 },
   navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', backgroundColor: '#fff', borderBottom: '1px solid #f0f0f0' },
   logo: { color: '#f25278', fontSize: '24px', fontWeight: 'bold' },
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
-  mainContent: { padding: '20px 12px', maxWidth: '1100px', margin: '0 auto', boxSizing: 'border-box' },
-  mainHeading: { fontSize: '25px', fontWeight: 300, color: '#111', marginBottom: '20px', paddingLeft: '2px' },
-  formContainerCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '24px 16px', boxShadow: '0 4px 15px rgba(0,0,0,0.02)', border: '1px solid #eeeeee', boxSizing: 'border-box' },
+  mainContent: { padding: '30px 12px', maxWidth: '1100px', margin: '0 auto', boxSizing: 'border-box' },
+  mainHeading: { fontFamily: "'Poppins', sans-serif", fontSize: '24px', fontWeight: '600', color: '#1f2937', marginTop: '4px', marginBottom: '16px', paddingLeft: '2px' },
+  formContainerCard: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '24px 16px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', boxSizing: 'border-box' },
   formGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' },
   formColumn: { display: 'flex', flexDirection: 'column', gap: '24px' }, 
   inputGroup: { display: 'flex', flexDirection: 'column', gap: '8px' },
-  label: { fontSize: '15px', fontWeight: 200, color: '#111'},
-  inputField: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
-  dropdownSelect: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', width: '100%', boxSizing: 'border-box' },
-  fileUploadWrapper: { display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '15px', padding: '6px 12px', backgroundColor: '#fff', boxSizing: 'border-box', width: '100%', height: '47px' },
+  label: { fontFamily: "'Poppins', sans-serif", fontSize: '15px', fontWeight: '500', color: '#4b5563', textTransform: 'uppercase' },
+  inputField: { fontFamily: "'Poppins', sans-serif", padding: '12px 15px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '16px', outline: 'none', backgroundColor: '#fff', width: '100%', boxSizing: 'border-box' },
+  dropdownSelect: { fontFamily: "'Poppins', sans-serif", padding: '12px 15px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '16px', outline: 'none', backgroundColor: '#fff', cursor: 'pointer', width: '100%', boxSizing: 'border-box' },
+  fileUploadWrapper: { display: 'flex', alignItems: 'center', border: '1px solid #e5e7eb', borderRadius: '8px', padding: '6px 12px', backgroundColor: '#fff', boxSizing: 'border-box', width: '100%', height: '47px' },
   hiddenFileInput: { display: 'none' },
-  fileLabelBtn: { backgroundColor: '#e0e0e0', color: '#333', padding: '6px 15px', borderRadius: '10px', fontSize: '12px', fontWeight: 'bold', cursor: 'pointer', marginRight: '10px', display: 'inline-block', border: '1px solid #adadad', whiteSpace: 'nowrap' },
-  fileNameText: { fontSize: '13px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  actionRow: { marginTop: '16px', display: 'flex', justifyContent: 'center', width: '100%', boxSizing: 'border-box' },
-  submitReturnBtn: { backgroundColor: '#f25278', color: 'white', border: 'none', padding: '14px 40px', borderRadius: '25px', fontSize: '14px', fontWeight: 'bold', cursor: 'pointer', transition: 'all 0.2s ease', boxShadow: '0 4px 12px rgba(242,82,120,0.2)', outline: 'none', width: '100%', maxWidth: '340px' },
-  submitReturnBtnHover: { backgroundColor: '#e04167', boxShadow: '0 4px 15px rgba(242,82,120,0.3)' },
-  textareaField: { padding: '12px 15px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#fff', outline: 'none', fontFamily: "'Poppins', sans-serif", resize: 'none' }, 
-  inputFieldDisabled: { padding: '12px 18px', borderRadius: '15px', border: '1px solid #ccc', fontSize: '14px', backgroundColor: '#f1f5f9', color: '#64748b', outline: 'none', cursor: 'not-allowed', width: '100%', boxSizing: 'border-box' }
+  fileLabelBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f3f4f6', color: '#4b5563', padding: '6px 15px', borderRadius: '6px', fontSize: '13px', fontWeight: '500', cursor: 'pointer', marginRight: '10px', display: 'inline-block', border: '1px solid #e5e7eb', whiteSpace: 'nowrap' },
+  fileNameText: { fontFamily: "'Poppins', sans-serif", fontSize: '13px', color: '#6b7280', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  actionRow: { marginTop: '16px', display: 'flex', justifyContent: 'flex-end', width: '100%', boxSizing: 'border-box' },
+  submitReturnBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f25278', color: 'white', border: 'none', padding: '12px 32px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s ease', outline: 'none', width: 'auto', maxWidth: '100%' },
+  submitReturnBtnHover: { backgroundColor: '#e04167' },
+  textareaField: { fontFamily: "'Poppins', sans-serif", padding: '12px 15px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '15px', backgroundColor: '#fff', outline: 'none', resize: 'none' }, 
+  inputFieldDisabled: { fontFamily: "'Poppins', sans-serif", padding: '12px 15px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '15px', backgroundColor: '#f3f4f6', color: '#6b7280', outline: 'none', cursor: 'not-allowed', width: '100%', boxSizing: 'border-box' }
 };
-
 
 export default ReturnsPage;

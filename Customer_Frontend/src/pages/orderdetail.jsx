@@ -68,7 +68,6 @@ useEffect(() => {
   const grossAmount = header.total_amount ? Number(header.total_amount) : 0;
   const discountAmount = header.discount ? Number(header.discount) : 0;
   
-  // 🟢 🎯 FIXED (၃): မိတ်ဆွေအောက်ခြေတွင် သုံးစွဲထားသော customerPaidNetAmount အား ဒိုင်နမစ် တန်ဖိုး ကွက်တိတွက်ချက်ပေးလိုက်ခြင်းဖြစ်သည်
   const customerPaidNetAmount = amountPaidFromDb > 0 ? amountPaidFromDb : (grossAmount - discountAmount);
 
   return (
@@ -88,13 +87,14 @@ useEffect(() => {
               cursor: 'pointer',
               color: isBackHovered ? '#f25278' : '#555555', 
               fontSize: '16px',
-              fontWeight: 200,
+              fontWeight: 600,
               fontFamily: "'Poppins', sans-serif",
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
               padding: '4px 8px',
               outline: 'none',
+              textTransform: 'capitalize',
               transition: 'color 0.2s ease, transform 0.2s ease' // 👈 စာသားအရောင် ပြောင်းလဲမှုကို အလွန်နူးညံ့ချောမွေ့သွားစေရန် ဖြစ်သည်
             }}
           >
@@ -105,7 +105,7 @@ useEffect(() => {
         <div style={styles.invoiceCard}>
           <div style={styles.brandTitleHeader}>Stationero</div>
           <div style={styles.metaRow}>
-            <span><strong>Sale Date :</strong> {saleDateString}</span>
+            <span>Sale Date : {saleDateString}</span>
           </div>
 
           <div style={styles.sectionBlock}>
@@ -150,7 +150,6 @@ useEffect(() => {
     return (
       <div key={idx} style={isMobile ? styles.tableBodyRowMobile : styles.tableBodyRow}>
         {isMobile ? (
-          /* 📱 Mobile Layout View: Matches your beautiful Order Page format exactly */
           <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-end', width: '100%' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
               <div style={{ fontSize: '14px', color: '#111', fontWeight: 500 }}>
@@ -171,18 +170,17 @@ useEffect(() => {
             </div>
           </div>
         ) : (
-          /* 💻 Desktop Layout View: Preserved exactly as your original code */
           <>
             <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
             <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '40%' : '48%' }}>{item.product_name}</span>
             <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
             <span style={{ ...styles.tdCell, width: '13%' }}>{Number(item.selling_price).toLocaleString()}</span>
             {discountAmount > 0 && (
-              <span style={{ ...styles.tdCell, width: '13%', color: '#000000', fontWeight: 200 }}>
+              <span style={{ ...styles.tdCell, width: '13%', color: '#000000', fontWeight: 600 }}>
                 {computedRowDiscount.toLocaleString()}
               </span>
             )}
-            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '14%' : '19%', fontWeight: 200 }}>
+            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '14%' : '19%', fontWeight: 600 }}>
               {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
             </span>
           </>
@@ -193,23 +191,10 @@ useEffect(() => {
 </div>
 
           <div style={styles.summaryContainer}>
-            {discountAmount > 0 ? (
-              <>
-                <div style={styles.summaryRow}>
-                  <span style={styles.summaryLabel}>Discount:</span>
-                  <span style={{ ...styles.summaryValue, color: '#000000', fontWeight: 200 }}>{discountAmount.toLocaleString()} MMK</span>
-                </div>
-                <div style={{ ...styles.summaryRow, paddingTop: '8px', marginTop: '5px' }}>
-                  <span style={{ ...styles.summaryLabel, color: '#000000', fontSize: '16px' }}>Net Amount :</span>
-                  <span style={{ ...styles.summaryValue, color: '#000000', fontSize: '16px', fontWeight: 200 }}>{customerPaidNetAmount.toLocaleString()} MMK</span>
-                </div>
-              </>
-            ) : (
               <div style={styles.summaryRow}>
                 <span style={styles.summaryLabel}>Net Amount :</span>
                 <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '16px', fontWeight: 'bold' }}>{grossAmount.toLocaleString()} MMK</span>
               </div>
-            )}
           </div>
 
         </div>
@@ -219,29 +204,29 @@ useEffect(() => {
 };
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fafafa', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
-  mainContent: { padding: '10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
-  mainContentMobile: { padding: '10px 0px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
-  invoiceCard: { backgroundColor: '#ffffff', borderRadius: '15px', padding: '40px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0' },
-  invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 10px', boxShadow: '0 4px 12px rgba(0,0,0,0.03)', border: '1px solid #f0f0f0', width: '100%', boxSizing: 'border-box' },
-  brandTitleHeader: { backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: 200, textAlign: 'center', padding: '12px', borderRadius: '25px', marginBottom: '30px' },
-  metaRow: { display: 'flex', justifyContent: 'space-between', fontSize: '15px', color: '#333', borderBottom: '1px solid #f9f9f9', paddingBottom: '15px', marginBottom: '20px' },
+  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: '30px 10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContentMobile: { padding: '12px 0px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  invoiceCard: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 15px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6' },
+  invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 10px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', width: '100%', boxSizing: 'border-box' },
+  brandTitleHeader: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#fdf2f4', color: '#f25278', fontSize: '25px', fontWeight: '600', textAlign: 'center', padding: '12px', borderRadius: '8px', marginBottom: '24px' },
+  metaRow: { fontFamily: "'Poppins', sans-serif", display: 'flex', justifyContent: 'space-between', fontSize: '16px', color: '#1f2937', borderBottom: '1px solid #f3f4f6', paddingBottom: '15px', marginBottom: '20px', fontWeight: '600' },
   sectionBlock: { marginBottom: '25px', width: '100%', boxSizing: 'border-box' },
-  sectionHeading: { fontSize: '15px', fontWeight: 'bold', color: '#111', margin: '0 0 12px 0' },
-  infoGrid: { display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '15px', color: '#444', paddingLeft: '5px' },
-  infoGridMobile: { display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '12px', rowGap: '8px', fontSize: '14px', color: '#444', paddingLeft: '5px', width: '100%' },
-  infoLabel: { fontWeight: 200, color: '#555' },
-  infoValue: { color: '#222', whiteSpace: 'nowrap' },
-  tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e0e0e0', paddingTop: '20px', width: '100%', boxSizing: 'border-box' },
-  tableHeaderRow: { display: 'flex', backgroundColor: '#f8f9fa', padding: '12px 15px', borderRadius: '5px', fontWeight: 200, color: '#444', fontSize: '15px' },
-  tableBodyRow: { display: 'flex', padding: '15px', borderBottom: '1px solid #f6f6f6', color: '#444', fontSize: '15px', alignItems: 'center' },
-  tableBodyRowMobile: { display: 'flex', padding: '12px 5px', borderBottom: '1px dashed #eee', color: '#444', width: '100%', boxSizing: 'border-box' },
-  thCell: { textAlign: 'left' },
-  tdCell: { textAlign: 'left' },
+  sectionHeading: { fontFamily: "'Poppins', sans-serif", fontSize: '16px', fontWeight: '600', color: '#111827', margin: '0 0 12px 0' },
+  infoGrid: { fontFamily: "'Poppins', sans-serif", display: 'grid', gridTemplateColumns: '160px 1fr', rowGap: '8px', fontSize: '16px', color: '#4b5563', paddingLeft: '5px' },
+  infoGridMobile: { fontFamily: "'Poppins', sans-serif", display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '12px', rowGap: '8px', fontSize: '15px', color: '#4b5563', paddingLeft: '5px', width: '100%' },
+  infoLabel: { fontFamily: "'Poppins', sans-serif", fontWeight: '600', color: '#6b7280', fontSize: '15px' },
+  infoValue: { fontFamily: "'Poppins', sans-serif", fontWeight: '600', color: '#1f2937', fontSize: '15px', whiteSpace: 'nowrap' },
+  tableWrapper: { marginTop: '20px', borderTop: '1px dashed #e5e7eb', paddingTop: '20px', width: '100%', boxSizing: 'border-box' },
+  tableHeaderRow: { fontFamily: "'Poppins', sans-serif", display: 'flex', backgroundColor: '#e5e7eb', padding: '12px 15px', borderRadius: '8px', fontWeight: '600', color: '#4b5563', fontSize: '16px', textTransform: 'uppercase', alignItems: 'center' },
+  tableBodyRow: { fontFamily: "'Poppins', sans-serif", display: 'flex', padding: '15px', borderBottom: '1px solid #f3f4f6', color: '#1f2937', fontSize: '16px', fontWeight: '600', alignItems: 'center', textTransform: 'capitalize' },
+  tableBodyRowMobile: { display: 'flex', padding: '12px 5px', borderBottom: '1px dashed #e5e7eb', color: '#1f2937', width: '100%', boxSizing: 'border-box' },
+  thCell: { textAlign: 'left',fontsize: '16px', fontWeight: '600' },
+  tdCell: { textAlign: 'left',fontsize: '16px', fontWeight: '600' },
   summaryContainer: { display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', marginTop: '25px', paddingRight: '15px', width: '100%', boxSizing: 'border-box' },
-  summaryRow: { display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '14px', color: '#444' },
-  summaryLabel: { fontWeight: 'bold', color: '#555' },
-  summaryValue: { color: '#111' }
+  summaryRow: { fontFamily: "'Poppins', sans-serif", display: 'grid', gridTemplateColumns: '120px 100px', textAlign: 'right', fontSize: '16px', color: '#4b5563' },
+  summaryLabel: { fontFamily: "'Poppins', sans-serif", fontWeight: '600', color: '#6b7280', fontSize: '16px' },
+  summaryValue: { fontFamily: "'Poppins', sans-serif", fontWeight: '600', color: '#1f2937', fontSize: '16px' }
 };
 
 export default OrderDetailPage;

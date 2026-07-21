@@ -227,3 +227,174 @@
       font-weight: 700;
       /* Price ဆိုတဲ့ စာသားကို အထူ ပြောင်းလိုက်တယ် */
 }
+
+
+/* ==========================================================================
+   MOBILE RESPONSIVENESS OVERRIDES FOR PRODUCT PAGE (100% SAFE)
+   ========================================================================== */
+@media screen and (max-width: 768px) {
+  /* ၁။ Hero Banner ပိုင်းကို ဖုန်းမျက်နှာပြင်နဲ့ ကိုက်ညီအောင် ညှိခြင်း */
+  .product-hero {
+    padding: 20px 10px;
+  }
+
+  .product-hero-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ညာဘက်ကပ်နေတဲ့ Background ပုံကို ဖုန်းမှာ အပြည့်ပေါ်အောင် လုပ်ခြင်း */
+  .hero-image-bg {
+    width: 100%;
+    height: 300px; /* ဖုန်းမျက်နှာပြင်အတွက် အမြင့်ကို လျှော့ချပေးခြင်း */
+    border-radius: 10px;
+  }
+
+  /* Title Box ကို ပုံရဲ့အောက်မှာ စာသားမပျောက်ဘဲ သေသပ်စွာ စီပေးခြင်း */
+  .product-hero-title-box {
+    position: relative; /* Absolute ကနေ ပုံမှန် Flow အတိုင်း ပြောင်းလဲပေးခြင်း */
+    left: auto;
+    bottom: auto;
+    width: 90%;
+    margin: -40px auto 20px auto; /* ပုံပေါ်ကို အနည်းငယ် ထပ်နေအောင် လုပ်ခြင်း */
+    padding: 15px 25px;
+    text-align: center;
+  }
+
+  .product-hero-title {
+    font-size: 1.3em;
+  }
+
+  /* ၂။ Toolbar (Search, Category & Sort) ကို ဒေါင်လိုက်ပုံစံ ပြောင်းခြင်း */
+  .product-list-section {
+    margin: 20px auto;
+    padding: 0 15px;
+  }
+
+  .product-toolbar {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch; /* ခလုတ်တွေကို ညီညာအောင် ညှိခြင်း */
+    margin-bottom: 25px;
+  }
+
+  /* Search Bar ကို ဖုန်းမျက်နှာပြင်အပြည့် ချဲ့ပေးခြင်း */
+  .product-search-bar {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Filter နှင့် Sort Dropdown များကို ဖုန်းထဲတွင် ယှဉ်တွဲလျက် စနစ်တကျ ပြသခြင်း */
+  .category-bar, .sort-bar {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .category-select, .sort-select {
+    flex: 1; /* Dropdown ခလုတ်တွေကို နေရာအပြည့် ယူစေခြင်း */
+    max-width: 70%;
+  }
+
+  /* ၃။ Product Items ၃ ကော်လံမှ ဖုန်းအတွက် ၂ ကော်လံသို့ ပြောင်းလဲခြင်း */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr); /* ဓာတ်ပုံများ ညှပ်မသွားစေရန် ၂ ကော်လံပဲ ထားခြင်း */
+    gap: 15px; /* ကပ်မနေအောင် ကြားအကွာအဝေး ညှိခြင်း */
+  }
+
+  /* Product ကတ်ပြားအတွင်းရှိ ပုံများ၏ အမြင့်ကို ချိန်ညှိခြင်း */
+  .product-img-box {
+    height: 180px; /* ဖုန်း screen နှင့် သင့်တော်သော အမြင့် */
+    margin-bottom: 10px;
+  }
+
+  .product-name {
+    font-size: 1em;
+  }
+
+  .product-price-tag {
+    font-size: 0.95em;
+  }
+
+   /* ၃။ Product Items ၃ ကော်လံမှ ဖုန်းအတွက် ၂ ကော်လံသို့ ပြောင်းလဲခြင်း */
+  .product-grid {
+    display: grid !important; /* Grid ပုံစံကို မဖြစ်မနေ အတင်းပြန်သုံးခိုင်းခြင်း */
+    grid-template-columns: repeat(2, 1fr) !important; 
+    gap: 15px !important; 
+  }
+
+    /* Paste this directly inside your @media screen and (max-width: 768px) block */
+  .product-card {
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-img-box {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    height: 180px !important; 
+    width: 100% !important;
+    margin-bottom: 10px !important;
+    overflow: hidden !important;
+  }
+
+  .product-img-box img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important; /* Forces images to fit beautifully without stretching */
+  }
+
+  /* အောက်ပါကုဒ်ကို အခုနက Footer မိုဘိုင်းကုဒ်ဟောင်းနေရာမှာ အစားထိုး ကူးထည့်လိုက်ပါ */
+
+  .footer-section {
+    padding: 20px 10px !important; /* အပေါ်အောက် အကွာအဝေးကို ချုံ့လိုက်ခြင်း */
+    height: auto !important;        /* Desktop က အမြင့်အသေ သတ်မှတ်ချက်ကို ဖြတ်ချခြင်း */
+    min-height: auto !important;
+  }
+
+  .footer-container {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 15px !important;          /* ခေါင်းစဉ်တစ်ခုနဲ့တစ်ခု ကြားက Gap ကို အနည်းဆုံးဖြစ်အောင် ချုံ့ခြင်း */
+    height: auto !important;
+  }
+
+  .footer-col {
+    width: 90% !important;         /* စာသားတွေ ဘေးတိုက် အပြည့် ဖြန့်ထွက်သွားစေခြင်း */
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+
+  /* ခေါင်းစဉ် (ABOUT US, OUR STORES) များ၏ Margin ကို လျှော့ချခြင်း */
+  .footer-heading, .footer-col h4 {
+    margin-top: 10px !important;
+    margin-bottom: 5px !important;
+    font-size: 1.1em !important;
+  }
+
+  /* စာသားများနှင့် လင့်ခ်များကြားထဲက Margin အလွတ်များကို ချုံ့ပစ်ခြင်း */
+  .footer-col p, .footer-col a {
+    text-align: center !important;
+    margin: 3px 0 !important;      /* အပေါ်အောက် ကပ်သွားအောင် 3px ပဲ ထားခြင်း */
+    line-height: 1.4 !important;
+    font-size: 0.95em !important;
+  }
+
+
+  footer a, .footer-section a {
+    text-align: center !important;
+    display: inline-block !important; /* လင့်ခ်စာသားများကို စနစ်တကျ ပြသခြင်း */
+    margin: 4px 10px !important;      /* လင့်ခ်တစ်ခုနှင့်တစ်ခု ဘေးတိုက် ခွာပေးခြင်း */
+  }
+
+
+}
+
+ 
