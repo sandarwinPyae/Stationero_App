@@ -280,11 +280,11 @@ const OrderPage = () => {
                 {/* 👈 Hidden on mobile to avoid squishing the layout columns */}
                 <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
                   <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>Product Name</span>
+                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '35%' : '43%' }}>Product Name</span>
                   <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
                   <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
                   {pricingSummary.discount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
-                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '14%' : '19%' }}>Total Amount</span>
+                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '19%' : '24%' }}>Total Amount</span>
                 </div>
 
                 {checkoutItems.map((item, idx) => {
@@ -307,11 +307,11 @@ const OrderPage = () => {
                         /* 💻 Desktop Layout: Preserved exactly as your original code */
                         <>
                           <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '40%' : '48%' }}>{item.name}</span>
+                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '35%' : '43%' }}>{item.name}</span>
                           <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
                           <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
                           {pricingSummary.discount > 0 && <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>{computedRowDiscount.toLocaleString()}</span>}
-                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '14%' : '19%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
+                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '19%' : '24%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
                         </>
                       )}
                     </div>

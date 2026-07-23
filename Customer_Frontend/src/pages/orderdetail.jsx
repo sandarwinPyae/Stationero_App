@@ -136,11 +136,11 @@ useEffect(() => {
   {/* 💻 Desktop Table Headers (Hidden on small mobile viewports) */}
   <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
     <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '40%' : '48%' }}>Product Name</span>
+    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '35%' : '43%' }}>Product Name</span>
     <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
     <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
     {discountAmount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
-    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '14%' : '19%' }}>Total Amount</span>
+    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '19%' : '24%' }}>Total Amount</span>
   </div>
 
   {details.map((item, idx) => {
@@ -172,7 +172,7 @@ useEffect(() => {
         ) : (
           <>
             <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '40%' : '48%' }}>{item.product_name}</span>
+            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '35%' : '43%' }}>{item.product_name}</span>
             <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
             <span style={{ ...styles.tdCell, width: '13%' }}>{Number(item.selling_price).toLocaleString()}</span>
             {discountAmount > 0 && (
@@ -180,7 +180,7 @@ useEffect(() => {
                 {computedRowDiscount.toLocaleString()}
               </span>
             )}
-            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '14%' : '19%', fontWeight: 600 }}>
+            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '19%' : '24%', fontWeight: 600 }}>
               {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
             </span>
           </>
@@ -205,7 +205,7 @@ useEffect(() => {
 
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
-  mainContent: { padding: '30px 10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: '30px 10px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   mainContentMobile: { padding: '12px 0px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   invoiceCard: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 15px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6' },
   invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 10px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', width: '100%', boxSizing: 'border-box' },
