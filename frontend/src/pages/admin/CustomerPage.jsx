@@ -149,6 +149,32 @@ const CustomerPage = ({ toggleSidebar }) => {
               <button disabled={currentPage === nPages} onClick={() => setCurrentPage(prev => prev + 1)} className="px-4 py-2 bg-white border border-gray-200 rounded-lg disabled:opacity-50"><i className="fa-solid fa-chevron-right"></i></button>
             </div>
           )}
+
+          {isModalOpen && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white p-6 rounded-lg shadow-xl w-96">
+                <h3 className="text-lg font-bold mb-4">Are you sure?</h3>
+                <p className="mb-6 text-gray-600">
+                  This action will delete the customer 
+                  <span className="font-bold text-gray-800">"{customerToDelete?.name}"</span> ?
+                </p>
+                <div className="flex justify-end gap-4">
+                  <button 
+                    onClick={() => setIsModalOpen(false)} 
+                    className="px-4 py-2 bg-gray-200 rounded-md"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleDelete} 
+                    className="px-4 py-2 bg-[#F25278] text-white rounded-md"
+                  >
+                    Yes, Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>

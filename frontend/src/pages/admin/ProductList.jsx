@@ -17,7 +17,7 @@ const ProductList = ({toggleSidebar}) => {
   const [productNameToDelete, setProductNameToDelete] = useState("");
 
   // Filter Logic
-  const filteredProducts = products.filter(p => {
+ const filteredProducts = products.filter(p => {
     const formattedId = `p${p.product_id.toString().padStart(3, '0')}`;
     const searchLower = search.toLowerCase();
     const matchesSearch = 
@@ -25,9 +25,8 @@ const ProductList = ({toggleSidebar}) => {
       formattedId.includes(searchLower);
       
     const matchesCategory = selectedCategory === "" || p.category_id.toString() === selectedCategory;
-    const matchesTab = activeTab === 'active' ? p.del_flag === 0 : p.del_flag === 1;
     
-    return matchesSearch && matchesCategory && matchesTab;
+    return matchesSearch && matchesCategory;
   });
 
   const currentItems = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
