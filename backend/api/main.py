@@ -829,11 +829,10 @@ def get_order_details(order_id: int, db: Session = Depends(get_db)):
             },
             "details": order_details,
             
-            # 🟢 🎯 Payments Table ထဲမှလာသော ဝယ်ယူသူ အမှန်တကယ် ပေးချေခဲ့ရသည့် ငွေပေးချေမှုမှတ်တမ်းများ
             "payments": [
                 {
                     "payment_id": payment.payment_id,
-                    "payment_method": payment.sale_payment_method,
+                    "sale_payment_method": payment.sale_payment_method, 
                     "amount_paid": float(payment.amount_paid) if payment.amount_paid else 0.0,
                     "pay_date": payment.pay_date
                 }

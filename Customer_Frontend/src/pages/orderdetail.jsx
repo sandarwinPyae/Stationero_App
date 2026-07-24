@@ -61,8 +61,14 @@ useEffect(() => {
     address: header.customer?.customer_address || header.customer?.address || "-"
   };
   
-  const activePaymentMethod = payments && payments.length > 0 ? payments.payment_method : "Cash Down";
-  const amountPaidFromDb = payments && payments.length > 0 ? parseFloat(payments.amount_paid || 0) : 0;
+const activePaymentMethod = payments && payments.length > 0 && payments[0]
+  ? (payments[0].sale_payment_method || "Cash Down") 
+  : "Cash Down";
+
+const amountPaidFromDb = payments && payments.length > 0 && payments[0]
+  ? parseFloat(payments[0].amount_paid || 0) 
+  : 0;
+
   const saleDateString = header.order_date ? new Date(header.order_date).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' }) : "N/A";
 
   const grossAmount = header.total_amount ? Number(header.total_amount) : 0;
@@ -189,7 +195,6 @@ useEffect(() => {
     );
   })}
 </div>
-
           <div style={styles.summaryContainer}>
               <div style={styles.summaryRow}>
                 <span style={styles.summaryLabel}>Net Amount :</span>
