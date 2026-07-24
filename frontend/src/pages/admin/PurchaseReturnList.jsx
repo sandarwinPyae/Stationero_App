@@ -30,20 +30,32 @@ const PurchaseReturnList = ({toggleSidebar}) => {
 
   // Filter Logic
   const filteredReturns = returns.filter((ret) => {
-  // Search Logic (null/undefined safety)
+    // Search Logic (null/undefined safety)
     const poNumber = ret.purchase_order?.po_number?.toString().toLowerCase() || "";
     const supplierName = ret.purchase_order?.supplier?.supplier_name?.toLowerCase() || "";
     const matchesSearch = 
         poNumber.includes(searchTerm.toLowerCase()) || 
         supplierName.includes(searchTerm.toLowerCase());
 
-    // Date Logic
-    const returnDate = new Date(ret.purchase_return_date);
-    const matchesStartDate = !startDate || returnDate >= new Date(startDate);
-    const matchesEndDate = !endDate || returnDate <= new Date(endDate);
+    // Date Logic (Year, Month, Day သက်သက် နှိုင်းယှဉ်ရန် ယူခြင်း)
+    if (!ret.purchase_return_date) return matchesSearch && !startDate && !endDate;
+
+    const returnDateObj = new Date(ret.purchase_return_date);
+    
+    // Time များကို 00:00:00 သို့ ညှိရန် ရက်စွဲ string အဖြစ် ပြောင်းပြီးမှ နှိုင်းယှဉ်ခြင်း
+    const returnDateOnly = new Date(returnDateObj.getFullYear(), returnDateObj.getMonth(), returnDateObj.getDate());
+    
+    const startDateOnly = startDate ? new Date(startDate) : null;
+    if (startDateOnly) startDateOnly.setHours(0, 0, 0, 0);
+
+    const endDateOnly = endDate ? new Date(endDate) : null;
+    if (endDateOnly) endDateOnly.setHours(0, 0, 0, 0);
+
+    const matchesStartDate = !startDateOnly || returnDateOnly >= startDateOnly;
+    const matchesEndDate = !endDateOnly || returnDateOnly <= endDateOnly;
     
     return matchesSearch && matchesStartDate && matchesEndDate;
-    });
+  });
 
   // Pagination Logic
   const indexOfLastRecord = currentPage * recordsPerPage;
@@ -128,7 +140,7 @@ const PurchaseReturnList = ({toggleSidebar}) => {
               setEndDate("");
               setCurrentPage(1);
             }}
-            className="flex items-end"
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-200 text-gray-700 text-sm font-semibold rounded-lg transition self-end h-[38px]"
           >
             Reset Filter
           </button>

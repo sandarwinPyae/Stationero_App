@@ -274,7 +274,7 @@ def get_admin_full_stock_report(db: Session = Depends(get_db)):
 def get_admin_low_stock_report(db: Session = Depends(get_db)):
     try:
         # FIX: Changed Product to models.Product
-        products = db.query(models.Product).filter(models.Product.current_qty <= 10).all()
+        products = db.query(models.Product).filter(models.Product.current_qty <= 10).filter(models.Product.del_flag == 0).all()
         report_list = []
         for p in products:
             p_id = f"P{p.product_id:03d}" if p.product_id else "P001"
