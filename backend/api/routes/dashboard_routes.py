@@ -104,7 +104,10 @@ def get_dashboard_data(db: Session = Depends(get_db)):
             )
             .join(models.SaleOrdersDetails, models.Product.product_id == models.SaleOrdersDetails.product_id)
             .join(models.SaleOrdersHeader, models.SaleOrdersDetails.sale_order_id == models.SaleOrdersHeader.sale_order_id)
-            .filter(models.SaleOrdersHeader.status == "Confirmed")
+            .filter(
+                models.SaleOrdersHeader.status == "Confirmed",
+                models.Product.del_flag == 0  
+            )
             .group_by(models.Product.product_name)
             .order_by(desc(func.sum(models.SaleOrdersDetails.qty)))
             .limit(5)

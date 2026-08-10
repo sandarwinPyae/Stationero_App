@@ -1,5 +1,6 @@
 import os
 import re
+import random
 import math
 import subprocess
 from fastapi import FastAPI, APIRouter, Depends, HTTPException, status, Query
@@ -106,10 +107,13 @@ COBOL_EXE_PATH = "./cobol/customer_engine.exe"
 class CustomerSignUpRequest(BaseModel):
     name: str
     email: EmailStr
+    password: str
     phone_number: str
     address: str
-    password: str
-    
+
+class VerifyOTPRequest(BaseModel):
+    email: EmailStr
+    otp: str
 
 class CustomerLoginRequest(BaseModel):
     email: EmailStr
@@ -170,9 +174,137 @@ import re
 import subprocess
 from fastapi import status, Depends, HTTPException
 from sqlalchemy.orm import Session
+from pydantic import EmailStr, BaseModel
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
-@app.post("/api/signup", status_code=status.HTTP_201_CREATED)
-def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
+conf = ConnectionConfig(
+    MAIL_USERNAME = "sandarwpyae275@gmail.com",  # သင့် App Email
+    MAIL_PASSWORD = "zjce dhin auag xeur",    # Gmail App Password
+    MAIL_FROM = "sandarwpyae275@gmail.com",
+    MAIL_PORT = 587,
+    MAIL_SERVER = "smtp.gmail.com",
+    MAIL_STARTTLS = True,
+    MAIL_SSL_TLS = False,
+    USE_CREDENTIALS = True
+)
+
+otp_storage = {}
+
+# @app.post("/api/signup", status_code=status.HTTP_201_CREATED)
+# def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
+#     print("====== COBOL ENGINE: SIGNUP MIXED-PASSWORD PIPELINE ENGAGED ======")
+    
+#     # 1. Database registration validation check
+#     user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
+#     is_registered = "Y" if user_record else "N"
+    
+#     # 2. Compute explicit validation flag parameters
+#     is_password_length_valid = "Y" if len(payload.password) >= 8 else "N"
+    
+#     # Check if the string contains at least one letter [A-Za-z] AND at least one digit \d
+#     has_letters = bool(re.search(r"[A-Za-z]", payload.password))
+#     has_digits = bool(re.search(r"\d", payload.password))
+#     is_password_mixed_valid = "Y" if (has_letters and has_digits) else "N"
+
+#     try:
+#         # 3. Execute compiled binary passing parameters sequentially matching ACCEPT blocks
+#         # Args passed: "SIGNUP", is_registered, is_length_valid, is_mixed_valid, customer_name, role
+#         result = subprocess.run(
+#             [COBOL_EXE_PATH, "SIGNUP", is_registered, is_password_length_valid, is_password_mixed_valid, payload.name, "customer"], 
+#             capture_output=True, text=True, check=False
+#         )
+        
+#         cobol_output = result.stdout.strip()
+#         cobol_exit_code = result.returncode
+
+#         # 4. Handle specific custom validation return codes passed from your COBOL execution
+#         if cobol_exit_code == 5 or "at least 8 characters" in cobol_output:
+#             raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
+            
+#         # 🌟 FIXED: Tracks exit code 6 or your new safe COBOL string to throw your exact required frontend error!
+#         if cobol_exit_code == 6 or "mix chars and numbers" in cobol_output or "both character and number" in cobol_output:
+#             raise HTTPException(status_code=400, detail="Password must include both character and number.")
+            
+#         if cobol_exit_code == 1 or "already exist" in cobol_output:
+#             raise HTTPException(status_code=400, detail="Email is already exist, please login")
+
+#         if "Registered successfully" not in cobol_output and cobol_exit_code != 0:
+#             raise HTTPException(status_code=400, detail=f"COBOL validation rejection error: {cobol_output}")
+
+#         # 5. Commit to database if COBOL clears it
+#         new_user = User(user_email=payload.email, user_password=payload.password, role="customer")
+#         db.add(new_user)
+#         db.flush() 
+
+#         new_customer = Customer(
+#             customer_name=payload.name, customer_email=payload.email,
+#             phone_number=payload.phone_number, address=payload.address,
+#             customer_password=payload.password, del_flag=0
+#         )
+#         db.add(new_customer)
+#         db.commit()
+        
+#         return {"message": "Registration successful!"}
+        
+#     except HTTPException as he:
+#         db.rollback()
+#         raise he
+#     except Exception as e:
+#         db.rollback()
+#         raise HTTPException(status_code=500, detail=f"Registration execution flow dropped: {e}")
+
+@app.post("/api/signup", status_code=status.HTTP_200_OK)
+async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
+    
+    # Email အဟောင်း DB ထဲမှာ ရှိပြီးသားလား အရင်စစ်ပါ
+    user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
+    if user_record:
+        raise HTTPException(status_code=400, detail="Email is already exist, please login")
+
+    # 6-digit OTP ထုတ်ယူခြင်း
+    otp_code = str(random.randint(100000, 999999))
+    
+    # payload နှင့် OTP ကို ယာယီ memory ထဲသိမ်းထားမည်
+    otp_storage[payload.email] = {
+        "otp": otp_code,
+        "payload": payload
+    }
+
+    # Email စာပို့ရန် Message ပြင်ဆင်ခြင်း
+    message = MessageSchema(
+        subject="Stationero Account Activation",
+        recipients=[payload.email],
+        body=f"Hello {payload.name},\n\nYour OTP verification code is: {otp_code}\n\nPlease use this code to complete your signup.",
+        subtype=MessageType.plain
+    )
+
+    try:
+        fm = FastMail(conf)
+        await fm.send_message(message)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to send OTP email: {str(e)}")
+
+    return {"message": "OTP verification code has been sent to your email."}
+
+
+# ==========================================
+# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း
+# ==========================================
+@app.post("/api/verify-otp", status_code=status.HTTP_201_CREATED)
+def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends(get_db)):
+    
+    # ယာယီ Memory ထဲတွင် Email ရှိမရှိနှင့် OTP မှန်မမှန် စစ်ဆေးခြင်း
+    stored_data = otp_storage.get(otp_payload.email)
+
+    if not stored_data:
+        raise HTTPException(status_code=400, detail="OTP requested record not found or expired.")
+
+    if stored_data["otp"] != otp_payload.otp.strip():
+        raise HTTPException(status_code=400, detail="Invalid OTP code. Please try again.")
+
+    # OTP မှန်ကန်ပါက မူလ SignUp Payload ကို ပြန်ထုတ်ယူမည်
+    payload: CustomerSignUpRequest = stored_data["payload"]
+
     print("====== COBOL ENGINE: SIGNUP MIXED-PASSWORD PIPELINE ENGAGED ======")
     
     # 1. Database registration validation check
@@ -182,14 +314,12 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
     # 2. Compute explicit validation flag parameters
     is_password_length_valid = "Y" if len(payload.password) >= 8 else "N"
     
-    # Check if the string contains at least one letter [A-Za-z] AND at least one digit \d
     has_letters = bool(re.search(r"[A-Za-z]", payload.password))
     has_digits = bool(re.search(r"\d", payload.password))
     is_password_mixed_valid = "Y" if (has_letters and has_digits) else "N"
 
     try:
-        # 3. Execute compiled binary passing parameters sequentially matching ACCEPT blocks
-        # Args passed: "SIGNUP", is_registered, is_length_valid, is_mixed_valid, customer_name, role
+        # 3. Execute COBOL validation
         result = subprocess.run(
             [COBOL_EXE_PATH, "SIGNUP", is_registered, is_password_length_valid, is_password_mixed_valid, payload.name, "customer"], 
             capture_output=True, text=True, check=False
@@ -198,11 +328,10 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
         cobol_output = result.stdout.strip()
         cobol_exit_code = result.returncode
 
-        # 4. Handle specific custom validation return codes passed from your COBOL execution
+        # 4. Handle custom validation return codes
         if cobol_exit_code == 5 or "at least 8 characters" in cobol_output:
             raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
             
-        # 🌟 FIXED: Tracks exit code 6 or your new safe COBOL string to throw your exact required frontend error!
         if cobol_exit_code == 6 or "mix chars and numbers" in cobol_output or "both character and number" in cobol_output:
             raise HTTPException(status_code=400, detail="Password must include both character and number.")
             
@@ -212,7 +341,7 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
         if "Registered successfully" not in cobol_output and cobol_exit_code != 0:
             raise HTTPException(status_code=400, detail=f"COBOL validation rejection error: {cobol_output}")
 
-        # 5. Commit to database if COBOL clears it
+        # 5. Commit to database after COBOL approval
         new_user = User(user_email=payload.email, user_password=payload.password, role="customer")
         db.add(new_user)
         db.flush() 
@@ -225,6 +354,9 @@ def signup_customer(payload: CustomerSignUpRequest, db: Session = Depends(get_db
         db.add(new_customer)
         db.commit()
         
+        # အောင်မြင်ပါက temporary storage မှ ဖျက်ထုတ်ပါ
+        del otp_storage[payload.email]
+
         return {"message": "Registration successful!"}
         
     except HTTPException as he:
