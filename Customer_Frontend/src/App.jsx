@@ -8,6 +8,7 @@ import ProductDetail from './pages/ProductDetail';
 import ShoppingCart from './pages/ShoppingCart';
 import LoginPage from './pages/login';
 import SignupPage from './pages/signup';
+import OTPVerifyPage from './pages/OTPVerifyPage';
 import ForgotPasswordPage from './pages/forgotpassword';
 import OrderPage from './pages/order';
 import OrderHistoryPage from './pages/history';
@@ -34,6 +35,7 @@ function App() {
           <Route path="/product" element={<ProductPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/verify-otp" element={<OTPVerifyPage />} />
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/product/:id" element={<ProtectedRoute><ProductDetail /></ProtectedRoute>} />
           <Route path="/cart" element={<ProtectedRoute><ShoppingCart /></ProtectedRoute>} />
