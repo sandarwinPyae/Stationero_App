@@ -14,6 +14,8 @@ from typing import List, Optional
 from fastapi import UploadFile, File, Form
 from datetime import datetime
 from sqlalchemy import func, desc, or_
+import dns.resolver
+import httpx
 
 
 # Route imports
@@ -177,6 +179,8 @@ from sqlalchemy.orm import Session
 from pydantic import EmailStr, BaseModel
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
+ZEROBOUNCE_API_KEY = "21dda22cc4cd4b29921fd264e86750b1"
+
 conf = ConnectionConfig(
     MAIL_USERNAME = "sandarwpyae275@gmail.com",  # သင့် App Email
     MAIL_PASSWORD = "zjce dhin auag xeur",    # Gmail App Password
@@ -258,59 +262,80 @@ otp_storage = {}
 import re
 import random
 import smtplib
+import dns.resolver
 from fastapi import HTTPException, status, Depends
+
+def check_email_domain_has_mx(email: str) -> bool:
+    try:
+        domain = email.split('@')[1]
+        records = dns.resolver.resolve(domain, 'MX')
+        return len(records) > 0
+    except Exception:
+        return False
+
+async def verify_email_with_zerobounce(email: str) -> bool:
+    """
+    ZeroBounce API ကို ခေါ်ယူပြီး aww@gmail.com ကဲ့သို့ အကောင့်မရှိသည့် Mailbox များကို စစ်ဆေးခြင်း
+    """
+    url = f"https://api.zerobounce.net/v2/validate?api_key={ZEROBOUNCE_API_KEY}&email={email}"
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            response = await client.get(url)
+            if response.status_code == 200:
+                data = response.json()
+                status_result = data.get("status", "").lower()
+                
+                # ZeroBounce status အရ 'valid' ဖြစ်မှသာ အကောင့်အစစ် ရှိသည်ဟု သတ်မှတ်မည်
+                # (invalid, abuse, spamtrap စသည်တို့ဆိုပါက False ပြန်ပေးမည်)
+                return status_result == "valid"
+            
+            # API Limit ကုန်သွားခြင်း သို့မဟုတ် အခြား Error များအတွက်
+            return True
+            
+    except Exception as e:
+        print(f"ZeroBounce Verification Error: {e}")
+        # Network Error သို့မဟုတ် Timeout ဖြစ်ပါက Signup Flow မပျက်စေရန် True ပေးမည်
+        return True
+
 
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
-    print("====== SIGNUP PIPELINE: RE-ORDERED BULLETPROOF VERIFICATION ENGAGED ======")
+    print("====== SIGNUP PIPELINE: ZEROBOUNCE ENGAGED ======")
     
     target_email = payload.email.strip()
 
-    # ၁။ ကနဦး အီးမေးလ် Format Pattern စစ်ဆေးခြင်း
-    strict_email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|io|co)$"
+    # 1. Regex Email Format Validation
+    strict_email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
     if not re.match(strict_email_pattern, target_email):
         raise HTTPException(
             status_code=400, 
             detail="Email is invalid. Please enter a valid email."
         )
 
-    # 🌟 🌟 🌟 ၂။ CRITICAL RE-ORDERED STEP (နံပါတ် ၂ အဆင့်အဖြစ် ပြောင်းလဲထားပါသည်) 🌟 🌟 🌟
-    # အီးမေးလ်အဟောင်း DB ထဲမှာ ရှိပြီးသားလားဆိုတာကို အရင်ဆုံး အပြတ်အသတ် စစ်ထုတ်ခြင်း ဖြစ်ပါတယ်
+    # 2. Domain MX Record Validation (Domain အတုများကို ငြင်းထုတ်ရန်)
+    if not check_email_domain_has_mx(target_email):
+        raise HTTPException(
+            status_code=400, 
+            detail="Email address does not exist or is invalid. Please enter a valid email."
+        )
+
+    # 🌟 3. ZEROBOUNCE MAILBOX EXISTENCE CHECK (aww@gmail.com လို အကောင့်မရှိသည့် မေးလ်များကို ဤနေရာတွင် ငြင်းထုတ်မည်)
+    is_real_email = await verify_email_with_zerobounce(target_email)
+    if not is_real_email:
+        raise HTTPException(
+            status_code=400, 
+            detail="Email address does not exist or is invalid. Please enter a valid email."
+        )
+
+    # 4. DB Duplicate Check
     user_record = db.query(User).filter(User.user_email == target_email).first()
-    
-    # 🌟 အကယ်၍ ဒေတာဘေ့စ်ထဲမှာ ရှိပြီးသား အီးမေးလ်အစစ် ဖြစ်နေပါက
     if user_record:
-        # သင့်တောင်းဆိုချက်အတိုင်း အခြားအရာများကို မစစ်တော့ဘဲ ဤအမှားစာသားကို ချက်ချင်း အပြတ်အသတ် လွှတ်ထုတ်ပေးပါမည်
         raise HTTPException(
             status_code=400, 
             detail="Email is already exist, please login"
         )
 
-    # 🌟 ၃။ REAL-WORLD INBOX EXISTENCE VERIFICATION GATEWAY
-    # DB ထဲမှာမရှိသေးတဲ့ အီးမေးလ်အသစ်ဖြစ်မှသာ ကမ္ဘာပေါ်မှာ တကယ်ရှိမရှိ Google SMTP Server ဆီ သွားမေးခိုင်းခြင်း ဖြစ်ပါတယ်
-    try:
-        smtp = smtplib.SMTP('://google.com', 25, timeout=4.0)
-        smtp.helo()
-        smtp.mail('sandarwpyae275@gmail.com') 
-        
-        code, message = smtp.rcpt(target_email)
-        smtp.quit()
-        
-        # Google က ဤအသုံးပြုသူအကောင့် ကမ္ဘာပေါ်မှာ လုံးဝမရှိပါ (code 550) ဟု တုံ့ပြန်လာလျှင်
-        if code >= 500:
-            raise HTTPException(
-                status_code=400, 
-                detail="Email is invalid. Please enter a valid email."
-            )
-            
-    except Exception:
-        # SMTP Timeout ဖြစ်ခြင်း သို့မဟုတ် အကောင့်အတုဖြစ်ခြင်း ကြုံရပါက
-        raise HTTPException(
-            status_code=400, 
-            detail="Email is invalid. Please enter a valid email."
-        )
-
-    # ၄။ Password Rules စစ်ဆေးမှု (မူရင်းအတိုင်း တင်းကြပ်စွာ ဆက်ထားပါသည်)
+    # 5. Password Rules Check
     is_length_valid = len(payload.password) >= 8
     has_uppercase = bool(re.search(r"[A-Z]", payload.password))
     has_lowercase = bool(re.search(r"[a-z]", payload.password))
@@ -323,16 +348,9 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
         )
 
-    # ၅။ 6-digit OTP ထုတ်ယူခြင်း (အချက်အလက်အားလုံး သန့်ရှင်းမှသာ ဤအဆင့်သို့ ရောက်ရှိလာပါမည်)
+    # 6. Generate OTP Code
     otp_code = str(random.randint(100000, 999999))
-    
-    # payload နှင့် OTP ကို ယာယီ memory ထဲသိမ်းထားမည်
-    otp_storage[target_email] = {
-        "otp": otp_code,
-        "payload": payload
-    }
 
-    # Email စာပို့ရန် Message ပြင်ဆင်ခြင်း
     message = MessageSchema(
         subject="Stationero Account Activation",
         recipients=[target_email],
@@ -340,25 +358,35 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         subtype=MessageType.plain
     )
 
+    # 7. FastMail ဖြင့် OTP ပို့ဆောင်ပေးခြင်း
     try:
         fm = FastMail(conf)
         await fm.send_message(message)
+
+        otp_storage[target_email] = {
+            "otp": otp_code,
+            "payload": payload
+        }
+
     except Exception as e:
-        print(f"SMTP Server Handshake Failed: {str(e)}")
+        print(f"SMTP Mail Sending Exception: {str(e)}")
+        if target_email in otp_storage:
+            del otp_storage[target_email]
+
         raise HTTPException(
             status_code=400, 
-            detail="Email is invalid. Please enter a valid email."
+            detail="Email address does not exist or is invalid. Please enter a valid email."
         )
 
     return {"message": "OTP verification code has been sent to your email."}
 
+
 # ==========================================================================
-# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း (မူရင်းအတိုင်း သန့်ရှင်းစွာ ထားရှိပါသည်)
+# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း
 # ==========================================================================
 @app.post("/api/verify-otp", status_code=status.HTTP_201_CREATED)
 def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     
-    # ယာယီ Memory ထဲတွင် Email ရှိမရှိနှင့် OTP မှန်မမှန် စစ်ဆေးခြင်း
     stored_data = otp_storage.get(otp_payload.email)
 
     if not stored_data:
@@ -367,25 +395,20 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
     if stored_data["otp"] != otp_payload.otp.strip():
         raise HTTPException(status_code=400, detail="Invalid OTP code. Please try again.")
 
-    # OTP မှန်ကန်ပါက မူလ SignUp Payload ကို ပြ成ထုတ်ယူမည်
     payload: CustomerSignUpRequest = stored_data["payload"]
 
     print("====== COBOL ENGINE: SIGNUP MIXED-PASSWORD PIPELINE ENGAGED ======")
     
-    # 1. Database registration validation check
     user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
     is_registered = "Y" if user_record else "N"
     
-    # 2. Compute explicit validation flag parameters for COBOL Engine
     is_password_length_valid = "Y" if len(payload.password) >= 8 else "N"
     
-    # 🌟 COBOL အဟောင်းနှင့် ကိုက်ညီစေရန် စာလုံးကြီး/သေး နှင့် ဂဏန်းများ ပါဝင်မှုကို စစ်ဆေးခြင်း
     has_letters = bool(re.search(r"[A-Za-z]", payload.password))
     has_digits = bool(re.search(r"\d", payload.password))
     is_password_mixed_valid = "Y" if (has_letters and has_digits) else "N"
 
     try:
-        # 3. Execute COBOL validation binary rules sequentially
         result = subprocess.run(
             [COBOL_EXE_PATH, "SIGNUP", is_registered, is_password_length_valid, is_password_mixed_valid, payload.name, "customer"], 
             capture_output=True, text=True, check=False
@@ -394,7 +417,6 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         cobol_output = result.stdout.strip()
         cobol_exit_code = result.returncode
 
-        # 4. Handle custom validation return codes passed from your COBOL execution
         if cobol_exit_code == 5 or "at least 8 characters" in cobol_output:
             raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
             
@@ -407,7 +429,6 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         if "Registered successfully" not in cobol_output and cobol_exit_code != 0:
             raise HTTPException(status_code=400, detail=f"COBOL validation rejection error: {cobol_output}")
 
-        # 5. Commit to database after COBOL approval checks are passed successfully
         new_user = User(user_email=payload.email, user_password=payload.password, role="customer")
         db.add(new_user)
         db.flush() 
@@ -420,7 +441,6 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         db.add(new_customer)
         db.commit()
         
-        # အောင်မြင်ပါက temporary storage မှ သန့်ရှင်းစွာ ဖျက်ထုတ်ပါ
         del otp_storage[payload.email]
 
         return {"message": "Registration successful!"}
