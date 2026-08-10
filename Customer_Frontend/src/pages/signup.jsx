@@ -17,8 +17,24 @@ const SignUpPage = () => {
   const [hoveredBtn, setHoveredBtn] = useState(null);
   const [hoveredLink, setHoveredLink] = useState(null);
 
+  // 🌟 Real-time Dynamic Validation Criteria Rules
+  const hasEightChars = password.length >= 8;
+  const hasUpperLower = /[a-z]/.test(password) && /[A-Z]/.test(password);
+  const hasNumber = /[0-9]/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>_]/.test(password);
+
+  // 🌟 စည်းကမ်းချက် ၄ ခုစလုံး ပြည့်စုံမှသာ Form တင်ခွင့်ပေးမည့် ဥပဒေသ
+  const isPasswordValid = hasEightChars && hasUpperLower && hasNumber && hasSpecialChar;
+
   const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    
+    // 🌟 ဇွတ်အတင်း ခလုတ်နှိပ်ခြင်းမှ ကာကွယ်ရန် Safe validation gate
+    if (!isPasswordValid) {
+      setErrorMessage('Please ensure your password meets all validation checklist items first.');
+      return;
+    }
+
     setErrorMessage('');
     setLoading(true);
 
@@ -32,7 +48,6 @@ const SignUpPage = () => {
       });
 
       if (response.status === 201 || response.status === 200) {
-        // OTP Page သို့ Email အချက်အလက်ပါ သယ်ဆောင်ပြီး Navigate လုပ်မည်
         navigate('/verify-otp', { state: { email: email.trim() } });
       }
     } catch (error) {
@@ -109,16 +124,37 @@ const SignUpPage = () => {
                 )}
               </span>
             </div>
+
+            {password.length > 0 && (
+              <div style={{ marginTop: '12px', fontSize: '13px', textAlign: 'left', width: '100%' }}>
+                <p style={{ color: hasEightChars ? '#2ecc71' : '#e74c3c', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{hasEightChars ? '✅' : '❌'}</span> Password must be 8 characters long
+                </p>
+                <p style={{ color: hasUpperLower ? '#2ecc71' : '#e74c3c', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{hasUpperLower ? '✅' : '❌'}</span> Must include both uppercase and lowercase
+                </p>
+                <p style={{ color: hasNumber ? '#2ecc71' : '#e74c3c', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{hasNumber ? '✅' : '❌'}</span> Must include both character and number
+                </p>
+                <p style={{ color: hasSpecialChar ? '#2ecc71' : '#e74c3c', margin: '4px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>{hasSpecialChar ? '✅' : '❌'}</span> Must include at least one special character
+                </p>
+              </div>
+            )}
+
           </div>
 
+          {/* 🌟 CRITICAL GATE BUTTON CONTROLLER */}
           <button
             type="submit"
-            disabled={loading}
-            onMouseEnter={() => setHoveredBtn('submitSignup')}
+            disabled={loading || !isPasswordValid}
+            onMouseEnter={() => isPasswordValid && setHoveredBtn('submitSignup')}
             onMouseLeave={() => setHoveredBtn(null)}
             style={{ 
               ...styles.submitBtn, 
-              ...(hoveredBtn === 'submitSignup' ? styles.submitBtnHover : {}),
+              ...(hoveredBtn === 'submitSignup' && isPasswordValid ? styles.submitBtnHover : {}),
+              backgroundColor: isPasswordValid ? '#f25278' : '#cccccc',
+              cursor: isPasswordValid ? 'pointer' : 'not-allowed',
               opacity: loading ? 0.7 : 1
             }}
           >
@@ -143,6 +179,7 @@ const SignUpPage = () => {
     </div>
   );
 };
+
 
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#ffffff', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },

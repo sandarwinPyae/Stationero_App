@@ -253,15 +253,39 @@ otp_storage = {}
 #         db.rollback()
 #         raise HTTPException(status_code=500, detail=f"Registration execution flow dropped: {e}")
 
+import re
+import random
+from fastapi import HTTPException, status, Depends
+from pydantic import BaseModel
+# သင့်ရဲ့ မူရင်း imports များ (User, Customer, Session, get_db, MessageSchema, FastMail, conf, otp_storage, COBOL_EXE_PATH) ကို ဆက်ထားပေးပါ
+
+# ==========================================================================
+# 1. Signup Request - OTP မထုတ်ပေးမီ Password ကြံ့ခိုင်မှုအား တင်းကြပ်စွာ စစ်ဆေးခြင်း
+# ==========================================================================
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
+    print("====== SIGNUP PIPELINE: PASSWORDS COMPLEXITY CHECK ENGAGED ======")
     
-    # Email အဟောင်း DB ထဲမှာ ရှိပြီးသားလား အရင်စစ်ပါ
+    # 🔴 ကနဦးအဆင့် - Email အဟောင်း DB ထဲမှာ ရှိပြီးသားလား အရင်စစ်ပါ
     user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
     if user_record:
         raise HTTPException(status_code=400, detail="Email is already exist, please login")
 
-    # 6-digit OTP ထုတ်ယူခြင်း
+    # 🌟 ဥပဒေအသစ် - ခေတ်မီ Website စည်းကမ်းချက် ၄ ခုစလုံးအား Regex ဖြင့် တင်းကြပ်စွာ စစ်ဆေးခြင်း
+    is_length_valid = len(payload.password) >= 8
+    has_uppercase = bool(re.search(r"[A-Z]", payload.password))
+    has_lowercase = bool(re.search(r"[a-z]", payload.password))
+    has_digits = bool(re.search(r"\d", payload.password))
+    has_special_char = bool(re.search(r"[!@#$%^&*(),.?\":{}|<>_]", payload.password))
+
+    # စည်းကမ်းချက်တစ်ခုခု ပျက်ကွက်ပါက OTP လုံးဝ မထုတ်ပေးဘဲ ချက်ချင်း ငြင်းပယ်ရန် Gate
+    if not (is_length_valid and has_uppercase and has_lowercase and has_digits and has_special_char):
+        raise HTTPException(
+            status_code=400, 
+            detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
+        )
+
+    # စည်းကမ်းချက်အားလုံး အောင်မြင်မှသာ 6-digit OTP ထုတ်ယူခြင်း
     otp_code = str(random.randint(100000, 999999))
     
     # payload နှင့် OTP ကို ယာယီ memory ထဲသိမ်းထားမည်
@@ -287,9 +311,9 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
     return {"message": "OTP verification code has been sent to your email."}
 
 
-# ==========================================
-# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း
-# ==========================================
+# ==========================================================================
+# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း (မူရင်းအတိုင်း သန့်ရှင်းစွာ ထားရှိပါသည်)
+# ==========================================================================
 @app.post("/api/verify-otp", status_code=status.HTTP_201_CREATED)
 def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     
@@ -302,7 +326,7 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
     if stored_data["otp"] != otp_payload.otp.strip():
         raise HTTPException(status_code=400, detail="Invalid OTP code. Please try again.")
 
-    # OTP မှန်ကန်ပါက မူလ SignUp Payload ကို ပြန်ထုတ်ယူမည်
+    # OTP မှန်ကန်ပါက မူလ SignUp Payload ကို ပြ成ထုတ်ယူမည်
     payload: CustomerSignUpRequest = stored_data["payload"]
 
     print("====== COBOL ENGINE: SIGNUP MIXED-PASSWORD PIPELINE ENGAGED ======")
@@ -311,15 +335,16 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
     user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
     is_registered = "Y" if user_record else "N"
     
-    # 2. Compute explicit validation flag parameters
+    # 2. Compute explicit validation flag parameters for COBOL Engine
     is_password_length_valid = "Y" if len(payload.password) >= 8 else "N"
     
+    # 🌟 COBOL အဟောင်းနှင့် ကိုက်ညီစေရန် စာလုံးကြီး/သေး နှင့် ဂဏန်းများ ပါဝင်မှုကို စစ်ဆေးခြင်း
     has_letters = bool(re.search(r"[A-Za-z]", payload.password))
     has_digits = bool(re.search(r"\d", payload.password))
     is_password_mixed_valid = "Y" if (has_letters and has_digits) else "N"
 
     try:
-        # 3. Execute COBOL validation
+        # 3. Execute COBOL validation binary rules sequentially
         result = subprocess.run(
             [COBOL_EXE_PATH, "SIGNUP", is_registered, is_password_length_valid, is_password_mixed_valid, payload.name, "customer"], 
             capture_output=True, text=True, check=False
@@ -328,7 +353,7 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         cobol_output = result.stdout.strip()
         cobol_exit_code = result.returncode
 
-        # 4. Handle custom validation return codes
+        # 4. Handle custom validation return codes passed from your COBOL execution
         if cobol_exit_code == 5 or "at least 8 characters" in cobol_output:
             raise HTTPException(status_code=400, detail="Password must be at least 8 characters long.")
             
@@ -341,7 +366,7 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         if "Registered successfully" not in cobol_output and cobol_exit_code != 0:
             raise HTTPException(status_code=400, detail=f"COBOL validation rejection error: {cobol_output}")
 
-        # 5. Commit to database after COBOL approval
+        # 5. Commit to database after COBOL approval checks are passed successfully
         new_user = User(user_email=payload.email, user_password=payload.password, role="customer")
         db.add(new_user)
         db.flush() 
@@ -354,7 +379,7 @@ def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends
         db.add(new_customer)
         db.commit()
         
-        # အောင်မြင်ပါက temporary storage မှ ဖျက်ထုတ်ပါ
+        # အောင်မြင်ပါက temporary storage မှ သန့်ရှင်းစွာ ဖျက်ထုတ်ပါ
         del otp_storage[payload.email]
 
         return {"message": "Registration successful!"}
