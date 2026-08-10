@@ -39,7 +39,7 @@ const ProfilePage = () => {
       .then(res => {
         const data = res.data; 
         setName(data.name || data.customer_name || 'New Customer');
-        setEmail(data.email || data.customer_email || activeEmail);
+        setEmail(data.email || data.customer_email || 'customer@gmail.com');
         setPhone(data.phone || data.phone_number || '-');
         setAddress(data.address || '-');
       })
