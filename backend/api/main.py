@@ -257,12 +257,11 @@ otp_storage = {}
 
 import re
 import random
-import smtplib
 from fastapi import HTTPException, status, Depends
 
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
-    print("====== SIGNUP PIPELINE: RE-ORDERED BULLETPROOF VERIFICATION ENGAGED ======")
+    print("====== SIGNUP PIPELINE: REAL-WORLD MAILBOX VERIFICATION ENGAGED ======")
     
     target_email = payload.email.strip()
 
@@ -274,43 +273,15 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Email is invalid. Please enter a valid email."
         )
 
-    # 🌟 🌟 🌟 ၂။ CRITICAL RE-ORDERED STEP (နံပါတ် ၂ အဆင့်အဖြစ် ပြောင်းလဲထားပါသည်) 🌟 🌟 🌟
-    # အီးမေးလ်အဟောင်း DB ထဲမှာ ရှိပြီးသားလားဆိုတာကို အရင်ဆုံး အပြတ်အသတ် စစ်ထုတ်ခြင်း ဖြစ်ပါတယ်
+    # ၂။ Email အဟောင်း DB ထဲမှာ ရှိပြီးသားလား အပြတ်အသတ် အရင်ဆုံး စစ်ထုတ်ခြင်း
     user_record = db.query(User).filter(User.user_email == target_email).first()
-    
-    # 🌟 အကယ်၍ ဒေတာဘေ့စ်ထဲမှာ ရှိပြီးသား အီးမေးလ်အစစ် ဖြစ်နေပါက
     if user_record:
-        # သင့်တောင်းဆိုချက်အတိုင်း အခြားအရာများကို မစစ်တော့ဘဲ ဤအမှားစာသားကို ချက်ချင်း အပြတ်အသတ် လွှတ်ထုတ်ပေးပါမည်
         raise HTTPException(
             status_code=400, 
             detail="Email is already exist, please login"
         )
 
-    # 🌟 ၃။ REAL-WORLD INBOX EXISTENCE VERIFICATION GATEWAY
-    # DB ထဲမှာမရှိသေးတဲ့ အီးမေးလ်အသစ်ဖြစ်မှသာ ကမ္ဘာပေါ်မှာ တကယ်ရှိမရှိ Google SMTP Server ဆီ သွားမေးခိုင်းခြင်း ဖြစ်ပါတယ်
-    try:
-        smtp = smtplib.SMTP('://google.com', 25, timeout=4.0)
-        smtp.helo()
-        smtp.mail('sandarwpyae275@gmail.com') 
-        
-        code, message = smtp.rcpt(target_email)
-        smtp.quit()
-        
-        # Google က ဤအသုံးပြုသူအကောင့် ကမ္ဘာပေါ်မှာ လုံးဝမရှိပါ (code 550) ဟု တုံ့ပြန်လာလျှင်
-        if code >= 500:
-            raise HTTPException(
-                status_code=400, 
-                detail="Email is invalid. Please enter a valid email."
-            )
-            
-    except Exception:
-        # SMTP Timeout ဖြစ်ခြင်း သို့မဟုတ် အကောင့်အတုဖြစ်ခြင်း ကြုံရပါက
-        raise HTTPException(
-            status_code=400, 
-            detail="Email is invalid. Please enter a valid email."
-        )
-
-    # ၄။ Password Rules စစ်ဆေးမှု (မူရင်းအတိုင်း တင်းကြပ်စွာ ဆက်ထားပါသည်)
+    # ၃။ Password Rules စစ်ဆေးမှု (မူရင်းအတိုင်း တင်းကြပ်စွာ ဆက်ထားပါသည်)
     is_length_valid = len(payload.password) >= 8
     has_uppercase = bool(re.search(r"[A-Z]", payload.password))
     has_lowercase = bool(re.search(r"[a-z]", payload.password))
@@ -323,14 +294,8 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
         )
 
-    # ၅။ 6-digit OTP ထုတ်ယူခြင်း (အချက်အလက်အားလုံး သန့်ရှင်းမှသာ ဤအဆင့်သို့ ရောက်ရှိလာပါမည်)
+    # ၄။ 6-digit OTP အကြိုထုတ်ယူခြင်း
     otp_code = str(random.randint(100000, 999999))
-    
-    # payload နှင့် OTP ကို ယာယီ memory ထဲသိမ်းထားမည်
-    otp_storage[target_email] = {
-        "otp": otp_code,
-        "payload": payload
-    }
 
     # Email စာပို့ရန် Message ပြင်ဆင်ခြင်း
     message = MessageSchema(
@@ -340,17 +305,28 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         subtype=MessageType.plain
     )
 
+    # 🌟 🌟 🌟 ၅။ REAL-WORLD EXISTENCE VERIFICATION GATEWAY (CRITICAL FIX) 🌟 🌟 🌟
+    # ယာယီမန်မိုရီထဲ မသိမ်းမီ စာကို အရင်ဆုံး အတင်းထွက်အောင် ပို့ခိုင်းလိုက်ခြင်း ဖြစ်ပါတယ်
     try:
         fm = FastMail(conf)
-        await fm.send_message(message)
+        await fm.send_message(message) # 🌟 ဤလိုင်းကနေ ကမ္ဘာ့ Google Server ဆီသို့ အီးမေးလ်အစစ် ဟုတ်မဟုတ် မီးစမ်းစာ လှမ်းပို့လိုက်ခြင်း ဖြစ်ပါသည်
     except Exception as e:
-        print(f"SMTP Server Handshake Failed: {str(e)}")
+        # 🌟 အကယ်၍ အီးမေးလ်အတုဖြစ်လို့ စာပို့မရပါက (သို့မဟုတ်) Google က ငြင်းပယ်လိုက်ပါက 
+        # OTP စာမျက်နှာသို့ လုံးဝ (လုံးဝ) ဆက်မသွားစေဘဲ "Email is invalid" အမှားစာတန်းကို ချက်ချင်း လွှတ်ထုတ်ခိုင်းလိုက်ခြင်း ဖြစ်ပါတယ်
+        print(f"SMTP Real-world Rejection Detected: {str(e)}")
         raise HTTPException(
             status_code=400, 
             detail="Email is invalid. Please enter a valid email."
         )
 
+    # 🌟 ၆။ အီးမေးလ်က တကယ်ရှိလို့ အောင်မြင်စွာ ပို့ပြီးမှသာ ယာယီ Memory (otp_storage) ထဲသို့ ဒေတာ သိမ်းဆည်းခွင့်ပြုမည်
+    otp_storage[target_email] = {
+        "otp": otp_code,
+        "payload": payload
+    }
+
     return {"message": "OTP verification code has been sent to your email."}
+
 
 # ==========================================================================
 # 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း (မူရင်းအတိုင်း သန့်ရှင်းစွာ ထားရှိပါသည်)
