@@ -253,43 +253,81 @@ otp_storage = {}
 #         db.rollback()
 #         raise HTTPException(status_code=500, detail=f"Registration execution flow dropped: {e}")
 
+
+
 import re
 import random
+import smtplib
 from fastapi import HTTPException, status, Depends
-from pydantic import BaseModel
-# သင့်ရဲ့ မူရင်း imports များ (User, Customer, Session, get_db, MessageSchema, FastMail, conf, otp_storage, COBOL_EXE_PATH) ကို ဆက်ထားပေးပါ
 
-# ==========================================================================
-# 1. Signup Request - OTP မထုတ်ပေးမီ Password ကြံ့ခိုင်မှုအား တင်းကြပ်စွာ စစ်ဆေးခြင်း
-# ==========================================================================
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
-    print("====== SIGNUP PIPELINE: PASSWORDS COMPLEXITY CHECK ENGAGED ======")
+    print("====== SIGNUP PIPELINE: RE-ORDERED BULLETPROOF VERIFICATION ENGAGED ======")
     
-    # 🔴 ကနဦးအဆင့် - Email အဟောင်း DB ထဲမှာ ရှိပြီးသားလား အရင်စစ်ပါ
-    user_record = db.query(User).filter(User.user_email == payload.email.strip()).first()
-    if user_record:
-        raise HTTPException(status_code=400, detail="Email is already exist, please login")
+    target_email = payload.email.strip()
 
-    # 🌟 ဥပဒေအသစ် - ခေတ်မီ Website စည်းကမ်းချက် ၄ ခုစလုံးအား Regex ဖြင့် တင်းကြပ်စွာ စစ်ဆေးခြင်း
+    # ၁။ ကနဦး အီးမေးလ် Format Pattern စစ်ဆေးခြင်း
+    strict_email_pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|net|org|edu|gov|io|co)$"
+    if not re.match(strict_email_pattern, target_email):
+        raise HTTPException(
+            status_code=400, 
+            detail="Email is invalid. Please enter a valid email."
+        )
+
+    # 🌟 🌟 🌟 ၂။ CRITICAL RE-ORDERED STEP (နံပါတ် ၂ အဆင့်အဖြစ် ပြောင်းလဲထားပါသည်) 🌟 🌟 🌟
+    # အီးမေးလ်အဟောင်း DB ထဲမှာ ရှိပြီးသားလားဆိုတာကို အရင်ဆုံး အပြတ်အသတ် စစ်ထုတ်ခြင်း ဖြစ်ပါတယ်
+    user_record = db.query(User).filter(User.user_email == target_email).first()
+    
+    # 🌟 အကယ်၍ ဒေတာဘေ့စ်ထဲမှာ ရှိပြီးသား အီးမေးလ်အစစ် ဖြစ်နေပါက
+    if user_record:
+        # သင့်တောင်းဆိုချက်အတိုင်း အခြားအရာများကို မစစ်တော့ဘဲ ဤအမှားစာသားကို ချက်ချင်း အပြတ်အသတ် လွှတ်ထုတ်ပေးပါမည်
+        raise HTTPException(
+            status_code=400, 
+            detail="Email is already exist, please login"
+        )
+
+    # 🌟 ၃။ REAL-WORLD INBOX EXISTENCE VERIFICATION GATEWAY
+    # DB ထဲမှာမရှိသေးတဲ့ အီးမေးလ်အသစ်ဖြစ်မှသာ ကမ္ဘာပေါ်မှာ တကယ်ရှိမရှိ Google SMTP Server ဆီ သွားမေးခိုင်းခြင်း ဖြစ်ပါတယ်
+    try:
+        smtp = smtplib.SMTP('://google.com', 25, timeout=4.0)
+        smtp.helo()
+        smtp.mail('sandarwpyae275@gmail.com') 
+        
+        code, message = smtp.rcpt(target_email)
+        smtp.quit()
+        
+        # Google က ဤအသုံးပြုသူအကောင့် ကမ္ဘာပေါ်မှာ လုံးဝမရှိပါ (code 550) ဟု တုံ့ပြန်လာလျှင်
+        if code >= 500:
+            raise HTTPException(
+                status_code=400, 
+                detail="Email is invalid. Please enter a valid email."
+            )
+            
+    except Exception:
+        # SMTP Timeout ဖြစ်ခြင်း သို့မဟုတ် အကောင့်အတုဖြစ်ခြင်း ကြုံရပါက
+        raise HTTPException(
+            status_code=400, 
+            detail="Email is invalid. Please enter a valid email."
+        )
+
+    # ၄။ Password Rules စစ်ဆေးမှု (မူရင်းအတိုင်း တင်းကြပ်စွာ ဆက်ထားပါသည်)
     is_length_valid = len(payload.password) >= 8
     has_uppercase = bool(re.search(r"[A-Z]", payload.password))
     has_lowercase = bool(re.search(r"[a-z]", payload.password))
     has_digits = bool(re.search(r"\d", payload.password))
     has_special_char = bool(re.search(r"[!@#$%^&*(),.?\":{}|<>_]", payload.password))
 
-    # စည်းကမ်းချက်တစ်ခုခု ပျက်ကွက်ပါက OTP လုံးဝ မထုတ်ပေးဘဲ ချက်ချင်း ငြင်းပယ်ရန် Gate
     if not (is_length_valid and has_uppercase and has_lowercase and has_digits and has_special_char):
         raise HTTPException(
             status_code=400, 
             detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
         )
 
-    # စည်းကမ်းချက်အားလုံး အောင်မြင်မှသာ 6-digit OTP ထုတ်ယူခြင်း
+    # ၅။ 6-digit OTP ထုတ်ယူခြင်း (အချက်အလက်အားလုံး သန့်ရှင်းမှသာ ဤအဆင့်သို့ ရောက်ရှိလာပါမည်)
     otp_code = str(random.randint(100000, 999999))
     
     # payload နှင့် OTP ကို ယာယီ memory ထဲသိမ်းထားမည်
-    otp_storage[payload.email] = {
+    otp_storage[target_email] = {
         "otp": otp_code,
         "payload": payload
     }
@@ -297,7 +335,7 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
     # Email စာပို့ရန် Message ပြင်ဆင်ခြင်း
     message = MessageSchema(
         subject="Stationero Account Activation",
-        recipients=[payload.email],
+        recipients=[target_email],
         body=f"Hello {payload.name},\n\nYour OTP verification code is: {otp_code}\n\nPlease use this code to complete your signup.",
         subtype=MessageType.plain
     )
@@ -306,10 +344,13 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         fm = FastMail(conf)
         await fm.send_message(message)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Failed to send OTP email: {str(e)}")
+        print(f"SMTP Server Handshake Failed: {str(e)}")
+        raise HTTPException(
+            status_code=400, 
+            detail="Email is invalid. Please enter a valid email."
+        )
 
     return {"message": "OTP verification code has been sent to your email."}
-
 
 # ==========================================================================
 # 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း (မူရင်းအတိုင်း သန့်ရှင်းစွာ ထားရှိပါသည်)

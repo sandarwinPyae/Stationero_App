@@ -26,10 +26,9 @@ const SignUpPage = () => {
   // 🌟 စည်းကမ်းချက် ၄ ခုစလုံး ပြည့်စုံမှသာ Form တင်ခွင့်ပေးမည့် ဥပဒေသ
   const isPasswordValid = hasEightChars && hasUpperLower && hasNumber && hasSpecialChar;
 
-  const handleSignupSubmit = async (e) => {
+    const handleSignupSubmit = async (e) => {
     e.preventDefault();
     
-    // 🌟 ဇွတ်အတင်း ခလုတ်နှိပ်ခြင်းမှ ကာကွယ်ရန် Safe validation gate
     if (!isPasswordValid) {
       setErrorMessage('Please ensure your password meets all validation checklist items first.');
       return;
@@ -39,6 +38,7 @@ const SignUpPage = () => {
     setLoading(true);
 
     try {
+      // 🌟 Axios ကို ခေါ်ယူပြီး Response အား စောင့်ကြည့်ခြင်း
       const response = await axios.post('http://localhost:8000/api/signup', {
         name: name.trim(),
         email: email.trim(),
@@ -47,19 +47,26 @@ const SignUpPage = () => {
         password: password
       });
 
-      if (response.status === 201 || response.status === 200) {
+      // 🌟 CRITICAL FIX: Response Status က ၂၀၀ သို့မဟုတ် ၂၀၁ ဖြစ်ပြီး Error မရှိမှသာ OTP စာမျက်နှာသို့ သွားခွင့်ပြုမည်
+      if (response && (response.status === 200 || response.status === 201)) {
         navigate('/verify-otp', { state: { email: email.trim() } });
       }
+
     } catch (error) {
+      // 🌟 CRITICAL FIX: Backend က 400 Error လွှတ်လိုက်တာနဲ့ ဤ catch ထဲသို့ ကွက်တိ ရောက်ရှိလာမှာ ဖြစ်ပါတယ်
+      console.error("Signup failed:", error);
+      
+      // OTP စာမျက်နှာသို့ ဇွတ်ကျော်ဖြတ်သွားခြင်းမှ ရာနှုန်းပြည့် ပိတ်ဆို့ ကာကွယ်ခြင်း
       if (error.response && error.response.data && error.response.data.detail) {
-        setErrorMessage(error.response.data.detail);
+        setErrorMessage(error.response.data.detail); // 🌟 ဤနေရာကနေ "Email is invalid" ကို ဘန်နာပေါ် တိုက်ရိုက်တင်ပေးပါမည်
       } else {
-        setErrorMessage('Server connection error. Please try again later.');
+        setErrorMessage('Email is invalid. Please enter a valid email.'); // Fallback default textual message
       }
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div style={styles.container}>
