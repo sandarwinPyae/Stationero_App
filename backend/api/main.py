@@ -179,7 +179,7 @@ from sqlalchemy.orm import Session
 from pydantic import EmailStr, BaseModel
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
-ZEROBOUNCE_API_KEY = "21dda22cc4cd4b29921fd264e86750b1"
+ZEROBOUNCE_API_KEY = "17cf5214e2ba48b4b23b3d99434a999e"
 
 conf = ConnectionConfig(
     MAIL_USERNAME = "sandarwpyae275@gmail.com",  # သင့် App Email
