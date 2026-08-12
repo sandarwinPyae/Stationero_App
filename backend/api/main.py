@@ -275,9 +275,6 @@ def check_email_domain_has_mx(email: str) -> bool:
 
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
-
-    print("====== SIGNUP PIPELINE: REAL-WORLD MAILBOX VERIFICATION ENGAGED ======")
-    print("====== SIGNUP PIPELINE: ZEROBOUNCE ENGAGED ======")
     print("====== SIGNUP PIPELINE: SMTP REAL EMAIL CHECK ENGAGED ======")
     
     target_email = payload.email.strip()
@@ -290,27 +287,22 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Email is invalid. Please enter a valid email."
         )
 
+    # 2. Domain MX Record Validation (Domain အတုများကို ငြင်းထုတ်ရန်)
     if not check_email_domain_has_mx(target_email):
         raise HTTPException(
             status_code=400, 
             detail="Address not found. Please enter a valid email."
         )
 
-    # 🌟 3. ZEROBOUNCE MAILBOX EXISTENCE CHECK (aww@gmail.com လို အကောင့်မရှိသည့် မေးလ်များကို ဤနေရာတွင် ငြင်းထုတ်မည်)
-    is_real_email = await verify_email_with_zerobounce(target_email)
-    if not is_real_email:
-        raise HTTPException(
-            status_code=400, 
-            detail="Email address does not exist or is invalid. Please enter a valid email."
-        )
-
-    # 3. DB Duplicate Check    user_record = db.query(User).filter(User.user_email == target_email).first()
+    # 3. DB Duplicate Check
+    user_record = db.query(User).filter(User.user_email == target_email).first()
     if user_record:
         raise HTTPException(
             status_code=400, 
             detail="Email is already exist, please login"
         )
 
+    # 4. Password Rules Check
     is_length_valid = len(payload.password) >= 8
     has_uppercase = bool(re.search(r"[A-Z]", payload.password))
     has_lowercase = bool(re.search(r"[a-z]", payload.password))
@@ -323,7 +315,7 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
         )
 
-
+    # 5. Generate OTP Code
     otp_code = str(random.randint(100000, 999999))
 
     message = MessageSchema(
@@ -333,16 +325,6 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         subtype=MessageType.plain
     )
 
-
-    try:
-        fm = FastMail(conf)
-        await fm.send_message(message) # 🌟 ဤလိုင်းကနေ ကမ္ဘာ့ Google Server ဆီသို့ အီးမေးလ်အစစ် ဟုတ်မဟုတ် မီးစမ်းစာ လှမ်းပို့လိုက်ခြင်း ဖြစ်ပါသည်
-    except Exception as e:
-        # 🌟 အကယ်၍ အီးမေးလ်အတုဖြစ်လို့ စာပို့မရပါက (သို့မဟုတ်) Google က ငြင်းပယ်လိုက်ပါက 
-        # OTP စာမျက်နှာသို့ လုံးဝ (လုံးဝ) ဆက်မသွားစေဘဲ "Email is invalid" အမှားစာတန်းကို ချက်ချင်း လွှတ်ထုတ်ခိုင်းလိုက်ခြင်း ဖြစ်ပါတယ်
-        print(f"SMTP Real-world Rejection Detected: {str(e)}")
-
-    # 7. FastMail ဖြင့် OTP ပို့ဆောင်ပေးခြင်း
     try:
         fm = FastMail(conf)
         await fm.send_message(message)
@@ -361,12 +343,6 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             status_code=400, 
             detail="Address not found. Please enter a valid email."
         )
-
-    # 🌟 ၆။ အီးမေးလ်က တကယ်ရှိလို့ အောင်မြင်စွာ ပို့ပြီးမှသာ ယာယီ Memory (otp_storage) ထဲသို့ ဒေတာ သိမ်းဆည်းခွင့်ပြုမည်
-    otp_storage[target_email] = {
-        "otp": otp_code,
-        "payload": payload
-    }
 
     return {"message": "OTP verification code has been sent to your email."}
 
