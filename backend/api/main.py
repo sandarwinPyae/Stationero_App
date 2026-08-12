@@ -17,7 +17,6 @@ from sqlalchemy import func, desc, or_
 import dns.resolver
 import httpx
 
-
 # Route imports
 from .routes import supplier_routes
 from .routes import product_routes
@@ -296,7 +295,6 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Address not found. Please enter a valid email."
         )
 
-    # 🌟 3. ZEROBOUNCE MAILBOX EXISTENCE CHECK (aww@gmail.com လို အကောင့်မရှိသည့် မေးလ်များကို ဤနေရာတွင် ငြင်းထုတ်မည်)
     is_real_email = await verify_email_with_zerobounce(target_email)
     if not is_real_email:
         raise HTTPException(

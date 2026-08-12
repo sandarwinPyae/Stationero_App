@@ -122,10 +122,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                           <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Shopping Cart</Link></li>
                                           <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
                                           <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
-
-                                          {/* 🌟 ၁။ သင်ပြောင်းလဲလိုက်သည့်အတိုင်း LOGOUT စာသားအား အရှေ့ဘက်သို့ ရွှေ့ပြောင်းနေရာချခြင်း (C အပိုစာလုံးအား အပြီးတိုင် ဖြတ်ထုတ်သန့်ရှင်းထားပါသည်) */}
                                           <li><Link to="/" onClick={handleLogoutClick}>Logout</Link></li>
-
                                           <li style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '15px' }}>
                                           <Link 
                                           to="/profile" 
@@ -136,7 +133,7 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                                 width: '35px',
                                                 height: '35px',
                                                 borderRadius: '50%',
-                                                backgroundColor: '#f25278', // သင့်ပုံထဲကအတိုင်း လှပသော ပန်းရောင်ဝိုင်းလေး
+                                                backgroundColor: '#f25278', 
                                                 color: '#ffffff',
                                                 fontWeight: 'bold',
                                                 fontSize: '14px',
@@ -152,21 +149,26 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
                                                 const savedUser = localStorage.getItem('stationero_logged_user');
                                                 if (savedUser && savedUser !== "undefined") {
                                                 const parsed = JSON.parse(savedUser);
+                                                const realCustomerName = parsed.customer_name || parsed.username || parsed.name || "";
                                                 
-                                                const actualName = parsed.name || parsed.customer_name || parsed.username || parsed.user_email || parsed.email;
-                                                
-                                                if (actualName && actualName.toLowerCase() !== 'customer' && actualName.toLowerCase() !== 'user') {
-                                                      return actualName.charAt(0).toUpperCase();
+                                                if (realCustomerName && realCustomerName.toLowerCase() !== 'customer' && realCustomerName.toLowerCase() !== 'user') {
+                                                      return realCustomerName.trim().charAt(0).toUpperCase(); 
+                                                }
+
+                                                const backupSessionProfile = localStorage.getItem('stationero_active_profile'); 
+                                                if (backupSessionProfile) {
+                                                      const parsedBackup = JSON.parse(backupSessionProfile);
+                                                      const backupName = parsedBackup.name || parsedBackup.customer_name;
+                                                      if (backupName) return backupName.trim().charAt(0).toUpperCase();
                                                 }
                                                 }
                                                 } catch (e) {
-                                                console.error("Profile letter extractor failure fallback trigger engaged: ", e);
+                                                console.error("Dynamic initial character pipeline error: ", e);
                                                 }
-                                                return "K"; 
+                                                return "U"; 
                                           })()}
                                           </Link>
                                           </li>
-
                                     </ul>
                               </>
                         ) : (
