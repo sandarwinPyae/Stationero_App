@@ -26,10 +26,14 @@ class BarData(BaseModel):
 class LineData(BaseModel):
     value: float
 
+class MonthlyBarData(BaseModel):
+    month: str
+    sales: float
 class DashboardResponse(BaseModel):
     cards: List[DashboardCard]
     pieData: List[PieData]
     barData: List[BarData]
+    monthlyBarData: List[MonthlyBarData]
     lineData: List[LineData]
     performanceLineData: List[LineData]
     performance: float
@@ -135,6 +139,27 @@ def get_dashboard_data(db: Session = Depends(get_db)):
                 "week": day.strftime("%b %d"),
                 "sales": float(total)
             })
+        # monthly bar data
+        monthly_bar_data = []
+        for i in range(5, -1, -1):
+            target_date = today - timedelta(days=i * 30) # ခန့်မှန်းခြေ လအလိုက်
+            m_month = target_date.month
+            m_year = target_date.year
+
+            total_monthly = (
+                db.query(func.coalesce(func.sum(models.Payment.amount_paid), 0))
+                .filter(
+                    func.extract('month', models.Payment.pay_date) == m_month,
+                    func.extract('year', models.Payment.pay_date) == m_year
+                )
+                .scalar()
+            )
+
+            monthly_bar_data.append({
+                "month": target_date.strftime("%b %Y"), # ဥပမာ: Jan 2026
+                "sales": float(total_monthly)
+            })
+
 
         # 6. Line Chart Data (Last 7 Days)
         line_data = []
@@ -149,13 +174,14 @@ def get_dashboard_data(db: Session = Depends(get_db)):
 
         return {
             "cards": [
-                {"title": "Total Sales", "value": f"{total_sales:,.0f} MMK"},
+                {"title": "Monthly Total Sales", "value": f"{total_sales:,.0f} MMK"},
                 {"title": "Pending Orders", "value": str(pending_orders_count)},
                 {"title": "Top Selling Product", "value": top_product_name},
             ],
             "pieData": pie_data,
             "barData": bar_data,
             "lineData": line_data,
+            "monthlyBarData": monthly_bar_data,
             "performanceLineData": performance_line_data,
             "performance": final_percentage
         }

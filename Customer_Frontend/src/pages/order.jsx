@@ -154,7 +154,7 @@ const OrderPage = () => {
     }
   }, [isFirstOrder, checkoutItems.length]);
 
-       const handleConfirmOrder = async () => {
+         const handleConfirmOrder = async () => {
     try {
       // 1. ---- FIXED: EXTRACTS USER PACKET SAFELY TO GRAB THE RELATIONAL NUMERIC ID ----
       const storedUserStr = localStorage.getItem('stationero_logged_user');
@@ -162,7 +162,6 @@ const OrderPage = () => {
       
       if (storedUserStr && storedUserStr !== "undefined") {
         const parsedUser = JSON.parse(storedUserStr);
-        // Safely extract user_id or fallback integer keys from the database mapping
         numericCustomerId = parseInt(parsedUser.user_id || parsedUser.id || parsedUser.user?.user_id, 10) || 6;
       }
 
@@ -175,7 +174,7 @@ const OrderPage = () => {
 
       // 2. ---- FIXED: MATCHES THE EXACT PAYLOAD VALUES EXPECTED BY YOUR SCHEMAS ----
       const response = await axios.post('http://localhost:8000/api/order/confirm', {
-        customer_id: numericCustomerId, // 👈 INJECTS THE TRUE NUMERIC INTEGER ID DIRECTLY!
+        customer_id: numericCustomerId,
         net_amount: pricingSummary.net,
         total_qty: checkoutItems.reduce((sum, item) => sum + item.qty, 0),
         customer_email: customerProfile.email,
@@ -184,20 +183,31 @@ const OrderPage = () => {
       });
 
       if (response.status === 201 || response.status === 200) { 
-        try {
-          const allKeys = Object.keys(localStorage);
-          allKeys.forEach(key => {
-            if (key.startsWith('stationero_cart')) {
-              console.log(`Force deleting storage residue node: ${key}`);
-              localStorage.removeItem(key);
-            }
-          });
-        } catch (storageErr) {
-          console.error("Global storage purge exception handler: ", storageErr);
+        
+        // 🌟 🌟 🌟 ၃။ CRITICAL FIX: "BUY NOW" နှင့် "CART CHECKOUT" စနစ်အား အပြတ်အသတ် ခွဲခြားခြင်း 🌟 🌟 🌟
+        const checkoutSource = localStorage.getItem('checkout_source');
+        
+        if (checkoutSource === 'buy_now') {
+          // နှုတ်ဆက်လိုက်ပါ Bug ကြီးရေ - "Buy Now" ဖြင့် ဝယ်ယူခြင်းဖြစ်ပါက Cart ထဲက ပစ္စည်းဟောင်းများကို လုံးဝ (လုံးဝ) မဖျက်ခိုင်းပါဘူး
+          console.log("Direct 'Buy Now' purchase successful. Keeping all other items in your cart safe.");
+        } else {
+          // Cart စာမျက်နှာကြီးတစ်ခုလုံးကနေ လာပြီး ဝယ်ယူတာဖြစ်မှသာလျှင် ဝယ်ယူပြီးသွားတဲ့အတွက် Cart ထဲက ပစ္စည်းများကို အလိုအလျောက် သန့်ရှင်းအောင် ရှင်းလင်းခိုင်းမည်
+          try {
+            const allKeys = Object.keys(localStorage);
+            allKeys.forEach(key => {
+              if (key.startsWith('stationero_cart')) {
+                console.log(`Force deleting storage residue node: ${key}`);
+                localStorage.removeItem(key);
+              }
+            });
+          } catch (storageErr) {
+            console.error("Global storage purge exception handler: ", storageErr);
+          }
+          localStorage.removeItem('cart');
+          localStorage.removeItem('cartItems');
         }
 
-        localStorage.removeItem('cart');
-        localStorage.removeItem('cartItems');
+        // ၄။ ယာယီ Checkout Variables များကိုသာ သန့်ရှင်းစွာ ဖျက်ထုတ်ပေးပါသည်
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
         
@@ -208,6 +218,7 @@ const OrderPage = () => {
       alert("Order confirmation failed!");
     }
   };
+
 
   return (
     <div style={styles.container}>

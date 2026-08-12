@@ -5,9 +5,7 @@ import { AuthContext } from '../context/AuthContext';
 import { AuthProvider } from '../context/AuthContext'; 
 import { StationeroNavbar } from './StationeroPage'; 
 
-// ====== 🟢 🎯 FIXED (၁): FUNCTION WRAPPER တဂ်ခေါင်းစဉ်အား စနစ်တကျ ပြန်လည်လွှမ်းခြုံပေးလိုက်ခြင်းဖြစ်သည် ======
 const OrderDetailPage = () => {
-  // ====== 🎯 🟢 UNIVERSAL KEBAB-CASE ROUTER PARAMETER PARSER SECURED (NO LOADING) ======
   const params = useParams();
   const orderId = params["order-id"] || params.orderId || params.order_id;
   const navigate = useNavigate();
@@ -26,7 +24,6 @@ useEffect(() => {
   const [isBackHovered, setIsBackHovered] = useState(false);
   const [hoveredBtn, setHoveredBtn] = useState(null);
 
-  // ====== 🎯 🟢 LIVE DATABASE DATA FETCH LAYER ======
   useEffect(() => {
     if (orderId && orderId !== "undefined") {
       axios.get(`http://localhost:8000/api/order/confirm-orders/details/${orderId}`)
@@ -40,7 +37,6 @@ useEffect(() => {
     }
   }, [orderId]);
 
-  // ====== 🎯 🟢 DATA SECURITY CHECKS LAYER (NO LOADING SCREEN) ======
   if (!orderData || !orderData.header) {
     return (
       <div style={{ textAlign: 'center', marginTop: '100px', fontFamily: "'Poppins', sans-serif" }}>
@@ -50,10 +46,8 @@ useEffect(() => {
     );
   }
 
-  // ====== 🎯 🟢 DESTRUCTURING INCOMING PAYLOADS & MATH LOGICS ======
   const { header, details, payments } = orderData;
   
-  // 🟢 🎯 FIXED (၂): မိတ်ဆွေအောက်ခြေတွင် သုံးစွဲထားသော customerProfile နေရာတွင် ဒေတာဘေ့စ်မှကျလာသော Node အား စာရင်းကိုက် ညွှန်ပြပေးလိုက်ခြင်းဖြစ်သည်
   const customerProfile = {
     name: header.customer?.customer_name || "Customer",
     phone: header.customer?.customer_phone || header.customer?.phone_number || "-",
@@ -139,14 +133,12 @@ const amountPaidFromDb = payments && payments.length > 0 && payments[0]
           </div>
 
 <div style={styles.tableWrapper}>
-  {/* 💻 Desktop Table Headers (Hidden on small mobile viewports) */}
   <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
     <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '35%' : '43%' }}>Product Name</span>
+    <span style={{ ...styles.thCell, width: '48%' }}>Product Name</span>
     <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
-    <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-    {discountAmount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
-    <span style={{ ...styles.thCell, width: discountAmount > 0 ? '19%' : '24%' }}>Total Amount</span>
+    <span style={{ ...styles.thCell, width: '20%' }}>Unit Price</span>
+    <span style={{ ...styles.thCell, width: '24%' }}>Total Amount</span>
   </div>
 
   {details.map((item, idx) => {
@@ -178,15 +170,10 @@ const amountPaidFromDb = payments && payments.length > 0 && payments[0]
         ) : (
           <>
             <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '35%' : '43%' }}>{item.product_name}</span>
+            <span style={{ ...styles.tdCell, width: '48%' }}>{item.product_name}</span>
             <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
-            <span style={{ ...styles.tdCell, width: '13%' }}>{Number(item.selling_price).toLocaleString()}</span>
-            {discountAmount > 0 && (
-              <span style={{ ...styles.tdCell, width: '13%', color: '#000000', fontWeight: 600 }}>
-                {computedRowDiscount.toLocaleString()}
-              </span>
-            )}
-            <span style={{ ...styles.tdCell, width: discountAmount > 0 ? '19%' : '24%', fontWeight: 600 }}>
+            <span style={{ ...styles.tdCell, width: '20%' }}>{Number(item.selling_price).toLocaleString()}</span>
+            <span style={{ ...styles.tdCell, width: '24%', fontWeight: 600 }}>
               {Number(item.sub_total || rowGrossAmount).toLocaleString()} MMK
             </span>
           </>
@@ -196,10 +183,24 @@ const amountPaidFromDb = payments && payments.length > 0 && payments[0]
   })}
 </div>
           <div style={styles.summaryContainer}>
+              {discountAmount > 0 && (
+                <>
+                  <div style={{ ...styles.summaryRow, marginBottom: '8px' }}>
+                    <span style={styles.summaryLabel}>Discount :</span>
+                    <span style={{ ...styles.summaryValue, color: '#dc2626', fontWeight: '600' }}>
+                      - {discountAmount.toLocaleString()} MMK
+                    </span>
+                  </div>
+                </>
+              )}
+
               <div style={styles.summaryRow}>
                 <span style={styles.summaryLabel}>Net Amount :</span>
-                <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '16px', fontWeight: 'bold' }}>{grossAmount.toLocaleString()} MMK</span>
+                <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '18px', fontWeight: 'bold' }}>
+                  {customerPaidNetAmount.toLocaleString()} MMK
+                </span>
               </div>
+
           </div>
 
         </div>
@@ -210,7 +211,7 @@ const amountPaidFromDb = payments && payments.length > 0 && payments[0]
 
 const styles = {
   container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', margin: 0, width: '100%', boxSizing: 'border-box' },
-  mainContent: { padding: '30px 10px', maxWidth: '900px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: '30px 10px', maxWidth: '750px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   mainContentMobile: { padding: '12px 0px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   invoiceCard: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 15px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6' },
   invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 10px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', width: '100%', boxSizing: 'border-box' },

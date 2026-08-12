@@ -2,14 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios'; 
 import { StationeroNavbar } from './StationeroPage'; 
-import { AuthProvider } from '../context/AuthContext';
-import { AlignCenter } from 'lucide-react';
 
 const ProfilePage = () => {
   const navigate = useNavigate();
-
   const [isEditing, setIsEditing] = useState(false);
-  
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -18,22 +14,13 @@ const ProfilePage = () => {
   useEffect(() => {
     const savedProfile = localStorage.getItem('stationero_logged_user');
     let activeEmail = '';
-    
     if (savedProfile && savedProfile !== "undefined") {
       try {
         const parsedUser = JSON.parse(savedProfile);
-        if (parsedUser) {
-          activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim();
-        }
-      } catch (e) {
-        console.error("Failed to parse local storage profile tokens:", e);
-      }
+        if (parsedUser) { activeEmail = (parsedUser.email || parsedUser.user_email || parsedUser.customer_email || '').trim(); }
+      } catch (e) { console.error("Failed to parse local storage tokens:", e); }
     }
-
-    if (!activeEmail) {
-      navigate('/login');
-      return; 
-    }
+    if (!activeEmail) { navigate('/login'); return; }
 
     axios.get(`http://localhost:8000/api/customer/profile/${activeEmail}`)
       .then(res => {
@@ -44,63 +31,96 @@ const ProfilePage = () => {
         setAddress(data.address || '-');
       })
       .catch(err => {
-        console.error("Error pulling database profile info:", err);
-        setName('New Customer');
-        setEmail(activeEmail);
-        setPhone('-');
-        setAddress('-');
+        console.error(err);
+        setName('New Customer'); setEmail(activeEmail);
       });
   }, [navigate]);
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:8000/api/customer/profile/update', { 
-        email, 
-        name, 
-        phone_number: phone, 
-        address 
-      });
-
+      const response = await axios.post('http://localhost:8000/api/customer/profile/update', { email, name, phone_number: phone, address });
       if (response.status === 200 || response.status === 201) {
         setIsEditing(false);
         const userObj = { name, email, phone, address, role: 'customer' };
         localStorage.setItem('stationero_logged_user', JSON.stringify(userObj));
+        window.location.reload();
       }
-    } catch (error) {
-      console.error(error);
-      alert('Failed updating profile parameters.');
-    }
+    } catch (error) { alert('Failed updating profile parameters.'); }
   };
 
   return (
     <div style={styles.container}>
-        <StationeroNavbar showSearch={false} />
+      <StationeroNavbar showSearch={false} />
       <main style={styles.mainContent}>
         <div style={styles.profileCard}>
           <h2 style={styles.heading}>Account Profile</h2>
           <div style={styles.avatarRow}>
-            <div style={styles.avatarCircleLarge}>
-              {name ? name.trim().charAt(0).toUpperCase() : 'K'}
-            </div>
+            <div style={styles.avatarCircleLarge}>{name ? name.trim().charAt(0).toUpperCase() : 'K'}</div>
           </div>
+          
           <form onSubmit={handleUpdateProfile} style={styles.form}>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Full Name</label>
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+            <div style={isEditing ? styles.inputGroupEdit : styles.inputGroupView}>
+              {isEditing && <label style={styles.label}>Full Name</label>}
+              <input 
+                type="text" value={name} onChange={(e) => setName(e.target.value)} disabled={!isEditing} 
+                style={{
+                  ...styles.inputField,
+                  fontWeight: isEditing ? '400' : '700',
+                  fontSize: isEditing ? '14px' : '22px', 
+                  textAlign: isEditing ? 'left' : 'center',
+                  border: isEditing ? '1px solid #d1d5db' : 'none',
+                  backgroundColor: isEditing ? '#ffffff' : 'transparent'
+                }} required 
+              />
             </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Email Address</label>
-              <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+
+            {/* ၂။ Email Address Field Block */}
+            <div style={isEditing ? styles.inputGroupEdit : styles.inputGroupView}>
+              {isEditing && <label style={styles.label}>Email Address</label>}
+              <input 
+                type="text" value={email} onChange={(e) => setEmail(e.target.value)} disabled={!isEditing} 
+                style={{
+                  ...styles.inputField,
+                  textAlign: isEditing ? 'left' : 'center',
+                  border: isEditing ? '1px solid #d1d5db' : 'none',
+                  backgroundColor: isEditing ? '#ffffff' : 'transparent',
+                  fontSize: isEditing ? '14px' : '16px'
+                }} required 
+              />
             </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Phone Number</label>
-              <input type="text" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+
+            {/* ၃။ Phone Number Field Block */}
+            <div style={isEditing ? styles.inputGroupEdit : styles.inputGroupView}>
+              {isEditing && <label style={styles.label}>Phone Number</label>}
+              <input 
+                type="text" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={!isEditing} 
+                style={{
+                  ...styles.inputField,
+                  textAlign: isEditing ? 'left' : 'center',
+                  border: isEditing ? '1px solid #d1d5db' : 'none',
+                  backgroundColor: isEditing ? '#ffffff' : 'transparent',
+                  fontSize: isEditing ? '14px' : '16px'
+                }} required 
+              />
             </div>
-            <div style={styles.inputGroup}>
-              <label style={styles.label}>Home Address</label>
-              <input type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditing} style={styles.inputField} required />
+
+            {/* ၄။ Home Address Field Block */}
+            <div style={isEditing ? styles.inputGroupEdit : styles.inputGroupView}>
+              {isEditing && <label style={styles.label}>Home Address</label>}
+              <input 
+                type="text" value={address} onChange={(e) => setAddress(e.target.value)} disabled={!isEditing} 
+                style={{
+                  ...styles.inputField,
+                  textAlign: isEditing ? 'left' : 'center',
+                  border: isEditing ? '1px solid #d1d5db' : 'none',
+                  backgroundColor: isEditing ? '#ffffff' : 'transparent',
+                  fontSize: isEditing ? '14px' : '16px'
+                }} required 
+              />
             </div>
+
+            {/* ၅။ ခလုတ်များ တည်ရှိရာနေရာ */}
             <div style={styles.btnRow}>
               {!isEditing ? (
                 <button type="button" onClick={() => setIsEditing(true)} style={styles.editBtn}>Edit Profile</button>
@@ -115,30 +135,26 @@ const ProfilePage = () => {
         </div>
       </main>
     </div>
-  );
+  )
 };
-
 
 const styles = {
-  container: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f9fafb', minHeight: '100vh', display: 'flex', flexDirection: 'column', width: '100%', boxSizing: 'border-box' },
-  mainContent: { padding: window.innerWidth <= 768 ? '10px 8px' : '16px 12px', display: 'flex', justifyContent: 'center', alignItems: 'center', flex: 1, width: '100%', boxSizing: 'border-box' },
-  profileCard: { backgroundColor: '#ffffff', padding: window.innerWidth <= 768 ? '16px 16px' : '32px 40px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', width: '100%', maxWidth: '560px', border: '1px solid #f3f4f6', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: window.innerWidth <= 768 ? '12px' : '24px' },
-  heading: { fontFamily: "'Poppins', sans-serif", fontSize: window.innerWidth <= 768 ? '18px' : '24px', fontWeight: '600', color: '#111827', margin: window.innerWidth <= 768 ? '0 0 4px 0' : '0 0 8px 0', textAlign: 'center' },
-  avatarRow: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginBottom: '0px', width: '100%' },
-  avatarCircleLarge: { width: '80px', height: '80px', borderRadius: '50%', backgroundColor: '#fdf2f4', color: '#f25278', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '32px', fontWeight: '600', border: '3px solid #fff', boxShadow: '0 4px 10px rgba(242,82,120,0.15)' },
-  profileGreetingRow: { display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', width: '100%' },
-  inlineLabelText: { fontFamily: "'Poppins', sans-serif", fontSize: '16px', fontWeight: '500', color: '#4b5563', margin: 0 },
-  inlineValueText: { fontFamily: "'Poppins', sans-serif", fontSize: '16px', fontWeight: '600', color: '#f25278', margin: 0, textTransform: 'capitalize' },
-  form: { display: 'flex', flexDirection: 'column', gap: window.innerWidth <= 768 ? '10px' : '20px', width: '100%' },
-  inputGroup: { display: 'flex', flexDirection: window.innerWidth <= 768 ? 'column' : 'row', alignItems: window.innerWidth <= 768 ? 'stretch' : 'center', gap: window.innerWidth <= 768 ? '4px' : '16px', width: '100%', boxSizing: 'border-box' },
-  label: { fontFamily: "'Poppins', sans-serif", fontSize: '13px', fontWeight: '500', color: '#4b5563', width: window.innerWidth <= 768 ? 'auto' : '140px', minWidth: window.innerWidth <= 768 ? 'auto' : '140px', textAlign: 'left', margin: 0 },
-  inputField: { fontFamily: "'Poppins', sans-serif", padding: window.innerWidth <= 768 ? '8px 12px' : '10px 14px', borderRadius: '8px', border: '1px solid #e5e7eb', fontSize: '15px', fontWeight: '500', outline: 'none', backgroundColor: '#ffffff', color: '#1f2937', flex: 1, boxSizing: 'border-box', width: '100%' },
-  btnRow: { display: 'flex', gap: '12px', marginTop: '6px', justifyContent: window.innerWidth <= 768 ? 'stretch' : 'flex-end', width: '100%' },
-  editBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f25278', color: '#ffffff', border: 'none', padding: '12px 32px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', width: '100%', outline: 'none' },
-  cancelBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f3f4f6', color: '#4b5563', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', flex: window.innerWidth <= 768 ? 1 : 'none', outline: 'none' },
-  saveBtn: { fontFamily: "'Poppins', sans-serif", backgroundColor: '#f25278', color: '#ffffff', border: 'none', padding: '12px 24px', borderRadius: '8px', fontSize: '15px', fontWeight: '500', cursor: 'pointer', flex: window.innerWidth <= 768 ? 1 : 'none', outline: 'none' }
+  container: { display: 'flex', flexDirection: 'column', minHeight: '100vh', backgroundColor: '#fafafa' },
+  mainContent: { display: 'flex', flex: 1, justifyContent: 'center', alignItems: 'center', padding: '20px' },
+  profileCard: { backgroundColor: '#ffffff', padding: '30px 24px', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', width: '100%', maxWidth: '360px', boxSizing: 'border-box' },
+  heading: { fontSize: '22px', fontWeight: '700', color: '#333333', marginBottom: '20px', textAlign: 'center' },
+  avatarRow: { display: 'flex', justifyContent: 'center', marginBottom: '25px' },
+  avatarCircleLarge: { width: '85px', height: '85px', borderRadius: '50%', backgroundColor: '#f25278', color: '#ffffff', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '32px', fontWeight: '700',boxShadow: '0 4px 12px rgba(242, 82, 120, 0.2)' },
+  form: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  inputGroupView: { display: 'flex', flexDirection: 'column', gap: '0px', width: '100%', textAlign: 'center' },
+  inputGroupEdit: { display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', textAlign: 'left' },
+  label: { fontSize: '13px', fontWeight: '600', color: '#6b7280', fontFamily: "'Poppins', sans-serif" },
+  inputField: { width: '100%', padding: '10px 12px', boxSizing: 'border-box', borderRadius: '6px', color: '#333333', fontFamily: "inherit", outline: 'none', transition: 'all 0.2s ease' },
+  btnRow: { display: 'flex', gap: '10px', marginTop: '10px', width: '100%' },
+  editBtn: { width: '100%', padding: '11px', backgroundColor: '#f25278', color: '#ffffff', border: 'none', borderRadius: '6px', fontWeight: '600', fontSize: '14px', cursor: 'pointer', transition: 'background 0.2s ease' },
+  saveBtn: { flex: 1, padding: '11px', backgroundColor: '#f25278', color: '#ffffff', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' },
+  cancelBtn: { flex: 1, padding: '11px', backgroundColor: '#e5e7eb', color: '#4b5563', border: 'none', borderRadius: '6px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }
 };
 
-
-
 export default ProfilePage;
+

@@ -48,10 +48,51 @@ const ProductDetail = () => {
     }
   };
 
-  const handleAction = (actionType) => {
+    const handleAction = (actionType) => {
     if (!product) return;
 
+    // 🌟 ယူဆာရဲ့ Email ကို Dynamic မှန်ကန်စွာ ဆွဲထုတ်ယူခြင်း (Cart Key မလွဲစေရန်)
+    let userEmail = 'guest';
+    try {
+      const savedProfile = localStorage.getItem('stationero_logged_user');
+      if (savedProfile && savedProfile !== "undefined") {
+        const parsed = JSON.parse(savedProfile);
+        userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
+      }
+    } catch (e) { }
+    const cartKey = `stationero_cart_${userEmail}`;
+
+    // ==========================================================================
+    // 🌟 ၁။ BUY_NOW FUNCTIONS - Cart ထဲက ပစ္စည်းဟောင်းများကို လုံးဝ မဖျက်ဆီးစေရန် ပြုပြင်ခြင်း
+    // ==========================================================================
     if (actionType === 'BUY_NOW') {
+      // ကနဦးအဆင့် - Cart ထဲမှာ ရှိပြီးသား ပစ္စည်းဟောင်းများကို အရင်ဆွဲထုတ်ပါသည်
+      const savedCart = localStorage.getItem(cartKey);
+      let cartItems = savedCart ? JSON.parse(savedCart) : [];
+
+      const newItem = {
+        id: product.product_id,
+        product_id: product.product_id,
+        name: product.product_name,
+        price: product.selling_price,
+        quantity: quantity,
+        image: `http://localhost:8000/${product.product_img_url}`
+      };
+
+      // လက်ရှိ Buy Now နှိပ်လိုက်သော ပစ္စည်းသည် Cart ထဲတွင် ရှိနေပြီးသားလား စစ်ဆေးခြင်း
+      const existingIndex = cartItems.findIndex(i => i.id === newItem.id);
+      if (existingIndex > -1) {
+        // ရှိပြီးသားဆိုလျှင် အရေအတွက်ကိုသာ ပေါင်းထည့်ပေးပြီး Cart ဟောင်းကို ဆက်ထိန်းထားပါသည်
+        cartItems[existingIndex].quantity += quantity;
+      } else {
+        // မရှိသေးလျှင် Cart ထဲသို့ ဤပစ္စည်းအသစ်ကိုပါ အောက်ခြေတွင် ထည့်သွင်းပေးပါသည်
+        cartItems.push(newItem);
+      }
+
+      // 🌟 အရေးကြီးချက် - Cart တစ်ခုလုံးကို ဖျက်မချဘဲ ပစ္စည်းအသစ်ပါဝင်သော Cart ကို ဒိုင်ခံ သိမ်းဆည်းခိုင်းလိုက်ခြင်းဖြစ်သည်
+      localStorage.setItem(cartKey, JSON.stringify(cartItems));
+
+      // Order Checkout ဒေတာပြင်ဆင်ခြင်း
       const checkoutData = [
         {
           product_id: product.product_id,
@@ -62,23 +103,20 @@ const ProductDetail = () => {
           amount: quantity * product.selling_price
         }
       ];
+      
       localStorage.setItem('stationero_active_checkout', JSON.stringify(checkoutData));
-      localStorage.setItem('checkout_source', 'buy_now');
+      
+      // 🌟 SAFETY OVERRIDE: Cart ရှင်းပစ်မည့် logic ထဲမဝင်စေရန် source အား 'cart_checkout' အဖြစ် ပြောင်းလဲသတ်မှတ်ခြင်း
+      localStorage.setItem('checkout_source', 'cart_checkout'); 
+      
       navigate('/order');
       return;
     }
 
+    // ==========================================================================
+    // 🌟 ၂။ ADD_TO_CART FUNCTIONS (မူရင်းအတိုင်း သန့်ရှင်းစွာ ဆက်လက်ထားရှိပါသည်)
+    // ==========================================================================
     if (actionType === 'ADD_TO_CART') {
-      let userEmail = 'guest';
-      try {
-        const savedProfile = localStorage.getItem('stationero_logged_user');
-        if (savedProfile && savedProfile !== "undefined") {
-          const parsed = JSON.parse(savedProfile);
-          userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
-        }
-      } catch (e) { }
-
-      const cartKey = `stationero_cart_${userEmail}`;
       const savedCart = localStorage.getItem(cartKey);
       let cartItems = savedCart ? JSON.parse(savedCart) : [];
 
@@ -178,8 +216,6 @@ return (
       </main>
     </div>
   );
-
-
 };
 
 const styles = {

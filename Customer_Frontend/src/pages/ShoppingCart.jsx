@@ -119,9 +119,9 @@ useEffect(() => {
             {/* 👈 Headers are hidden on mobile screens to save massive space */}
             <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
               <span style={{ ...styles.headerCell, width: '15%' }}>Product Image</span>
-              <span style={{ ...styles.headerCell, width: '25%' }}>Product Name</span>
-              <span style={{ ...styles.headerCell, width: '15%' }}>Unit Price</span>
-              <span style={{ ...styles.headerCell, width: '15%', textAlign: 'center' }}>Quantity</span>
+              <span style={{ ...styles.headerCell, width: '35%' }}>Product Name</span>
+              <span style={{ ...styles.headerCell, width: '10%' }}>Unit Price</span>
+              <span style={{ ...styles.headerCell, width: '10%', textAlign: 'center' }}>Quantity</span>
               <span style={{ ...styles.headerCell, width: '15%', textAlign: 'center' }}>Total Amount</span>
               <span style={{ ...styles.headerCell, width: '15%', textAlign: 'center' }}>Action</span>
             </div>
@@ -181,16 +181,16 @@ useEffect(() => {
                   </>
                 ) : (
                   <>
-                    <span style={{ width: '15%', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ width: '15%', display: 'flex', alignItems: 'center', }}>
                       <img src={item.image} alt={item.name} style={styles.productThumb} />
                     </span>
-                    <span style={{ width: '25%', color: '#333', fontWeight: 600, paddingLeft: '5px', boxSizing: 'border-box' }}>
+                    <span style={{ width: '35%', color: '#333', fontWeight: 500, paddingLeft: '5px', boxSizing: 'border-box' }}>
                       {item.name}
                     </span>
-                    <span style={{ width: '15%', color: '#333', fontWeight: 600 }}>
+                    <span style={{ width: '10%', color: '#333', fontWeight: 500 }}>
                       {(item.price || 0).toLocaleString()} MMK
                     </span>
-                    <span style={{ width: '15%', textAlign: 'center',fontWeight: 600 }}>
+                    <span style={{ width: '10%', textAlign: 'center',fontWeight: 500 }}>
                       {editingId === item.id ? (
                         <input
                           type="number"
@@ -210,7 +210,7 @@ useEffect(() => {
                         item.quantity
                       )}
                     </span>
-                    <span style={{ width: '15%', color: '#333', fontWeight: 600, textAlign: 'center' }}>
+                    <span style={{ width: '15%', color: '#333', fontWeight: 500, textAlign: 'center' }}>
                       {((item.price || 0) * item.quantity).toLocaleString()} MMK
                     </span>
                     <span style={{ width: '15%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '20px' }}>

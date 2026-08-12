@@ -179,7 +179,7 @@ from sqlalchemy.orm import Session
 from pydantic import EmailStr, BaseModel
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
-ZEROBOUNCE_API_KEY = "21dda22cc4cd4b29921fd264e86750b1"
+ZEROBOUNCE_API_KEY = "17cf5214e2ba48b4b23b3d99434a999e"
 
 conf = ConnectionConfig(
     MAIL_USERNAME = "sandarwpyae275@gmail.com",  # သင့် App Email
@@ -273,36 +273,12 @@ def check_email_domain_has_mx(email: str) -> bool:
     except Exception:
         return False
 
-async def verify_email_with_zerobounce(email: str) -> bool:
-    """
-    ZeroBounce API ကို ခေါ်ယူပြီး aww@gmail.com ကဲ့သို့ အကောင့်မရှိသည့် Mailbox များကို စစ်ဆေးခြင်း
-    """
-    url = f"https://api.zerobounce.net/v2/validate?api_key={ZEROBOUNCE_API_KEY}&email={email}"
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            response = await client.get(url)
-            if response.status_code == 200:
-                data = response.json()
-                status_result = data.get("status", "").lower()
-                
-                # ZeroBounce status အရ 'valid' ဖြစ်မှသာ အကောင့်အစစ် ရှိသည်ဟု သတ်မှတ်မည်
-                # (invalid, abuse, spamtrap စသည်တို့ဆိုပါက False ပြန်ပေးမည်)
-                return status_result == "valid"
-            
-            # API Limit ကုန်သွားခြင်း သို့မဟုတ် အခြား Error များအတွက်
-            return True
-            
-    except Exception as e:
-        print(f"ZeroBounce Verification Error: {e}")
-        # Network Error သို့မဟုတ် Timeout ဖြစ်ပါက Signup Flow မပျက်စေရန် True ပေးမည်
-        return True
-
-
 @app.post("/api/signup", status_code=status.HTTP_200_OK)
 async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depends(get_db)):
 
     print("====== SIGNUP PIPELINE: REAL-WORLD MAILBOX VERIFICATION ENGAGED ======")
     print("====== SIGNUP PIPELINE: ZEROBOUNCE ENGAGED ======")
+    print("====== SIGNUP PIPELINE: SMTP REAL EMAIL CHECK ENGAGED ======")
     
     target_email = payload.email.strip()
 
@@ -314,11 +290,10 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Email is invalid. Please enter a valid email."
         )
 
-
     if not check_email_domain_has_mx(target_email):
         raise HTTPException(
             status_code=400, 
-            detail="Email address does not exist or is invalid. Please enter a valid email."
+            detail="Address not found. Please enter a valid email."
         )
 
     # 🌟 3. ZEROBOUNCE MAILBOX EXISTENCE CHECK (aww@gmail.com လို အကောင့်မရှိသည့် မေးလ်များကို ဤနေရာတွင် ငြင်းထုတ်မည်)
@@ -328,7 +303,8 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             status_code=400, 
             detail="Email address does not exist or is invalid. Please enter a valid email."
         )
-    user_record = db.query(User).filter(User.user_email == target_email).first()
+
+    # 3. DB Duplicate Check    user_record = db.query(User).filter(User.user_email == target_email).first()
     if user_record:
         raise HTTPException(
             status_code=400, 
@@ -347,6 +323,7 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
             detail="Password requirement validation failed. Must include uppercase, lowercase, numbers, and special characters."
         )
 
+
     otp_code = str(random.randint(100000, 999999))
 
     message = MessageSchema(
@@ -355,6 +332,7 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         body=f"Hello {payload.name},\n\nYour OTP verification code is: {otp_code}\n\nPlease use this code to complete your signup.",
         subtype=MessageType.plain
     )
+
 
     try:
         fm = FastMail(conf)
@@ -375,13 +353,13 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
         }
 
     except Exception as e:
-        print(f"SMTP Mail Sending Exception: {str(e)}")
+        print(f"SMTP Mail Sending Exception (Address not found / Invalid Mailbox): {str(e)}")
         if target_email in otp_storage:
             del otp_storage[target_email]
 
         raise HTTPException(
             status_code=400, 
-            detail="Email address does not exist or is invalid. Please enter a valid email."
+            detail="Address not found. Please enter a valid email."
         )
 
     # 🌟 ၆။ အီးမေးလ်က တကယ်ရှိလို့ အောင်မြင်စွာ ပို့ပြီးမှသာ ယာယီ Memory (otp_storage) ထဲသို့ ဒေတာ သိမ်းဆည်းခွင့်ပြုမည်
@@ -393,9 +371,7 @@ async def request_signup_otp(payload: CustomerSignUpRequest, db: Session = Depen
     return {"message": "OTP verification code has been sent to your email."}
 
 
-# ==========================================================================
-# 2. OTP စစ်ဆေးခြင်း၊ COBOL စစ်ခြင်းနှင့် DB ထဲသိမ်းခြင်း
-# ==========================================================================
+
 @app.post("/api/verify-otp", status_code=status.HTTP_201_CREATED)
 def verify_otp_and_register(otp_payload: VerifyOTPRequest, db: Session = Depends(get_db)):
     
