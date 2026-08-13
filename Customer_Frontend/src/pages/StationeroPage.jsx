@@ -2,7 +2,7 @@ import './StationeroPage.css';
 import React, { useContext, useState, useEffect } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-
+import axios from "axios";
 
 import Footer from "../components/Footer";
 
@@ -105,87 +105,120 @@ export const StationeroNavbar = ({ searchQuery, setSearchQuery, showSearch = tru
             )
       );
 
-      return (
-            <nav className="navbar">
-                  <div className="container">
-                        <h1 className="logo">Stationero</h1>
-                        <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                              ☰
-                        </button>
-                        {isUserAuthenticated ? (
-                              <>
-                                    {renderSearchBar()}
-                                    <ul className="nav-links user-nav-links">
-                                          <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
-                                          <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
-                                          <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
-                                          <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Shopping Cart</Link></li>
-                                          <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
-                                          <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
-                                          <li><Link to="/" onClick={handleLogoutClick}>Logout</Link></li>
-                                          <li style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '15px' }}>
-                                          <Link 
-                                          to="/profile" 
-                                          style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                width: '35px',
-                                                height: '35px',
-                                                borderRadius: '50%',
-                                                backgroundColor: '#f25278', 
-                                                color: '#ffffff',
-                                                fontWeight: 'bold',
-                                                fontSize: '14px',
-                                                textDecoration: 'none',
-                                                border: '2px solid #f25278',
-                                                transition: 'all 0.2s ease',
-                                                cursor: 'pointer'
-                                          }}
-                                          title="My Profile"
-                                          >
-                                          {(() => {
-                                                try {
-                                                const savedUser = localStorage.getItem('stationero_logged_user');
-                                                if (savedUser && savedUser !== "undefined") {
-                                                const parsed = JSON.parse(savedUser);
-                                                const realCustomerName = parsed.customer_name || parsed.username || parsed.name || "";
-                                                
-                                                if (realCustomerName && realCustomerName.toLowerCase() !== 'customer' && realCustomerName.toLowerCase() !== 'user') {
-                                                      return realCustomerName.trim().charAt(0).toUpperCase(); 
-                                                }
+      const [userLetter, setUserLetter] = useState("U");
 
-                                                const backupSessionProfile = localStorage.getItem('stationero_active_profile'); 
-                                                if (backupSessionProfile) {
-                                                      const parsedBackup = JSON.parse(backupSessionProfile);
-                                                      const backupName = parsedBackup.name || parsedBackup.customer_name;
-                                                      if (backupName) return backupName.trim().charAt(0).toUpperCase();
-                                                }
-                                                }
-                                                } catch (e) {
-                                                console.error("Dynamic initial character pipeline error: ", e);
-                                                }
-                                                return "U"; 
-                                          })()}
-                                          </Link>
-                                          </li>
-                                    </ul>
-                              </>
-                        ) : (
-                              <>
-                                    {renderSearchBar()}
-                                    <ul className="nav-links">
-                                          <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
-                                          <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
-                                          <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
-                                    </ul>
-                                    <div className="auth-btns">
-                                          <button className="btn btn-auth" onClick={handleLogin}>Login</button>
-                                          <button className="btn btn-auth" onClick={() => navigate('/signup')}>Sign Up</button>
-                                    </div>
-                              </>
-                        )}
+      useEffect(() => {
+      const updateUserLetter = async () => {
+      try {
+            const savedUser = localStorage.getItem("stationero_logged_user");
+
+            if (!savedUser || savedUser === "undefined") {
+            setUserLetter("U");
+            return;
+            }
+
+            const parsedUser = JSON.parse(savedUser);
+
+            const email = (
+            parsedUser.email ||
+            parsedUser.user_email ||
+            parsedUser.customer_email ||
+            ""
+            ).trim();
+
+            if (!email) {
+            setUserLetter("U");
+            return;
+            }
+
+            const response = await axios.get(
+            `http://localhost:8000/api/customer/profile/${email}`
+            );
+
+            const data = response.data;
+
+            const name = (
+            data.name ||
+            data.customer_name ||
+            "New Customer"
+            ).trim();
+
+            if (name && name !== "New Customer") {
+            setUserLetter(name.charAt(0).toUpperCase());
+            } else {
+            setUserLetter("U");
+            }
+
+      } catch (error) {
+            console.error("Error updating navbar user letter:", error);
+            setUserLetter("U");
+      }
+      };
+
+      updateUserLetter();
+      }, [isLoggedIn, location.pathname]);
+
+
+return (
+  <nav className="navbar">
+    <div className="container">
+      <h1 className="logo">Stationero</h1>
+      <button className="menu-toggle" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        ☰
+      </button>
+      {isUserAuthenticated ? (
+        <>
+          {renderSearchBar()}
+          <ul className="nav-links user-nav-links">
+            <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
+            <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
+            <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
+            <li><Link to="/cart" className={location.pathname === "/cart" ? "active" : ""}>Shopping Cart</Link></li>
+            <li><Link to="/returns" className={location.pathname === "/returns" ? "active" : ""}>Returns</Link></li>
+            <li><Link to="/history" className={location.pathname === "/history" ? "active" : ""}>History</Link></li>
+            <li><Link to="/" onClick={handleLogoutClick}>Logout</Link></li>
+            <li style={{ display: 'inline-flex', alignItems: 'center', marginLeft: '15px' }}>
+              <Link
+                to="/profile"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '35px',
+                  height: '35px',
+                  borderRadius: '50%',
+                  backgroundColor: '#f25278',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  fontSize: '14px',
+                  textDecoration: 'none',
+                  border: '2px solid #f25278',
+                  transition: 'all 0.2s ease',
+                  cursor: 'pointer'
+                }}
+                title="My Profile"
+              >
+                {userLetter}
+              </Link>
+            </li>
+
+      </ul>
+      </>
+      ) : (
+            <>
+            {renderSearchBar()}
+                  <ul className="nav-links">
+                        <li><Link to="/" className={location.pathname === "/" ? "active" : ""}>Home</Link></li>
+                        <li><Link to="/about" className={location.pathname === "/about" ? "active" : ""}>About Us</Link></li>
+                        <li><Link to="/product" className={location.pathname === "/product" ? "active" : ""}>Product</Link></li>
+                  </ul>
+                  <div className="auth-btns">
+                        <button className="btn btn-auth" onClick={handleLogin}>Login</button>
+                        <button className="btn btn-auth" onClick={() => navigate('/signup')}>Sign Up</button>
                   </div>
+            </>
+            )}
+    </div>
                   {showLogoutModal && (
                   <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw',height: '100vh', backgroundColor: 'rgba(0,0,0,0.4)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 99999}}>
                   <div style={{ backgroundColor: '#ffffff', borderRadius: '15px', padding: '20px 30px', maxWidth: '250px', width: '90%', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>

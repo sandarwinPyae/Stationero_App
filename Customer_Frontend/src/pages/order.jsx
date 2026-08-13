@@ -32,17 +32,6 @@ const OrderPage = () => {
 
   const [isFirstOrder, setIsFirstOrder] = useState(false);
 
-  /*const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'About Us', path: '/about' },
-    { label: 'Product', path: '/product' },
-    { label: 'Shopping Cart', path: '/cart' },
-    { label: 'Order', path: '/order', isOrderPage: true },
-    { label: 'Returns', path: '/returns' },
-    { label: 'History', path: '/history' },
-    { label: 'Profile', path: '/profile' }
-  ];*/
-
   const calculate = (items, checkFirstOrderFlag = isFirstOrder) => {
     try {
       const totalAmount = items.reduce((sum, item) => sum + (item.amount || item.price * item.qty), 0);
@@ -98,11 +87,9 @@ const OrderPage = () => {
 
         let firstOrderCheck = false;
         try {
-          // Hits her direct history-logs list array wrapper path
           const historyRes = await axios.get(`http://localhost:8000/api/order/history-logs/${activeEmail}`);
           const historyData = historyRes.data;
           
-          // ---- FIXED: EXTRACTS LIST FROM NATIVE .orders OBJECT WRAPPER ----
           let ordersArray = [];
           if (historyData) {
             if (Array.isArray(historyData.orders)) {
@@ -112,7 +99,6 @@ const OrderPage = () => {
             }
           }
 
-          // STRICT SECURITY LOCK: If any past rows exist on her back-end, discount drops to false!
           if (ordersArray.length === 0) {
             firstOrderCheck = true; 
           } else {
@@ -154,11 +140,10 @@ const OrderPage = () => {
     }
   }, [isFirstOrder, checkoutItems.length]);
 
-         const handleConfirmOrder = async () => {
+  const handleConfirmOrder = async () => {
     try {
-      // 1. ---- FIXED: EXTRACTS USER PACKET SAFELY TO GRAB THE RELATIONAL NUMERIC ID ----
       const storedUserStr = localStorage.getItem('stationero_logged_user');
-      let numericCustomerId = 6; // Standard safe fallback user ID integer if empty
+      let numericCustomerId = 6; 
       
       if (storedUserStr && storedUserStr !== "undefined") {
         const parsedUser = JSON.parse(storedUserStr);
@@ -172,7 +157,6 @@ const OrderPage = () => {
         sub_total: parseFloat(item.amount || (item.price * item.qty))
       }));
 
-      // 2. ---- FIXED: MATCHES THE EXACT PAYLOAD VALUES EXPECTED BY YOUR SCHEMAS ----
       const response = await axios.post('http://localhost:8000/api/order/confirm', {
         customer_id: numericCustomerId,
         net_amount: pricingSummary.net,
@@ -184,22 +168,32 @@ const OrderPage = () => {
 
       if (response.status === 201 || response.status === 200) { 
         
-        // 🌟 🌟 🌟 ၃။ CRITICAL FIX: "BUY NOW" နှင့် "CART CHECKOUT" စနစ်အား အပြတ်အသတ် ခွဲခြားခြင်း 🌟 🌟 🌟
-        const checkoutSource = localStorage.getItem('checkout_source');
+        const checkoutSource = localStorage.getItem('checkout_source') || (location.state && location.state.source);
         
-        if (checkoutSource === 'buy_now') {
-          // နှုတ်ဆက်လိုက်ပါ Bug ကြီးရေ - "Buy Now" ဖြင့် ဝယ်ယူခြင်းဖြစ်ပါက Cart ထဲက ပစ္စည်းဟောင်းများကို လုံးဝ (လုံးဝ) မဖျက်ခိုင်းပါဘူး
-          console.log("Direct 'Buy Now' purchase successful. Keeping all other items in your cart safe.");
+        const savedProfile = localStorage.getItem('stationero_logged_user');
+        let userEmail = 'guest';
+        if (savedProfile && savedProfile !== "undefined") {
+          const parsedLocal = JSON.parse(savedProfile);
+          userEmail = (userProfile?.email || userProfile?.customer_email || parsedLocal?.email || parsedLocal?.customer_email || 'guest').trim();
+        }
+        const specificCartKey = `stationero_cart_${userEmail}`;
+
+        if (checkoutSource === 'buy_now' || (location.state && location.state.source === 'buy_now')) {
+          
+          const currentCartData = localStorage.getItem(specificCartKey);
+          if (currentCartData) {
+            let cartItemsList = JSON.parse(currentCartData);
+            
+            const purchasedIds = checkoutItems.map(item => item.product_id);
+            const remainingCartItems = cartItemsList.filter(item => !purchasedIds.includes(item.id) && !purchasedIds.includes(item.product_id));
+            
+            localStorage.setItem(specificCartKey, JSON.stringify(remainingCartItems));
+          }
+          console.log("Buy Now checkout completed. Safely removed only purchased tokens while preserving remaining items.");
+
         } else {
-          // Cart စာမျက်နှာကြီးတစ်ခုလုံးကနေ လာပြီး ဝယ်ယူတာဖြစ်မှသာလျှင် ဝယ်ယူပြီးသွားတဲ့အတွက် Cart ထဲက ပစ္စည်းများကို အလိုအလျောက် သန့်ရှင်းအောင် ရှင်းလင်းခိုင်းမည်
           try {
-            const allKeys = Object.keys(localStorage);
-            allKeys.forEach(key => {
-              if (key.startsWith('stationero_cart')) {
-                console.log(`Force deleting storage residue node: ${key}`);
-                localStorage.removeItem(key);
-              }
-            });
+            localStorage.removeItem(specificCartKey);
           } catch (storageErr) {
             console.error("Global storage purge exception handler: ", storageErr);
           }
@@ -207,17 +201,20 @@ const OrderPage = () => {
           localStorage.removeItem('cartItems');
         }
 
-        // ၄။ ယာယီ Checkout Variables များကိုသာ သန့်ရှင်းစွာ ဖျက်ထုတ်ပေးပါသည်
+        // ယာယီ Variables များကို သန့်ရှင်းရေးလုပ်ခြင်း
         localStorage.removeItem('stationero_active_checkout');
         localStorage.removeItem('checkout_source');
         
-        window.location.href = '/history';
+        // Browser Reload မဖြစ်စေရန် စနစ်တကျ ပြောင်းလဲလမ်းညွှန်ခြင်း
+        navigate('/history');
       }
     } catch (error) {
       console.error(error);
       alert("Order confirmation failed!");
     }
   };
+
+
 
 
   return (
@@ -291,11 +288,10 @@ const OrderPage = () => {
                 {/* 👈 Hidden on mobile to avoid squishing the layout columns */}
                 <div style={{ ...styles.tableHeaderRow, display: isMobile ? 'none' : 'flex' }}>
                   <span style={{ ...styles.thCell, width: '10%' }}>No</span>
-                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '35%' : '43%' }}>Product Name</span>
+                  <span style={{ ...styles.thCell, width: '48%' }}>Product Name</span>
                   <span style={{ ...styles.thCell, width: '10%' }}>Qty</span>
-                  <span style={{ ...styles.thCell, width: '13%' }}>Unit Price</span>
-                  {pricingSummary.discount > 0 && <span style={{ ...styles.thCell, width: '13%' }}>Discount</span>}
-                  <span style={{ ...styles.thCell, width: pricingSummary.discount > 0 ? '19%' : '24%' }}>Total Amount</span>
+                  <span style={{ ...styles.thCell, width: '18%' }}>Unit Price</span>
+                  <span style={{ ...styles.thCell, width: '24%' }}>Total Amount</span>
                 </div>
 
                 {checkoutItems.map((item, idx) => {
@@ -318,11 +314,10 @@ const OrderPage = () => {
                         /* 💻 Desktop Layout: Preserved exactly as your original code */
                         <>
                           <span style={{ ...styles.tdCell, width: '10%' }}>{idx + 1}</span>
-                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '35%' : '43%' }}>{item.name}</span>
+                          <span style={{ ...styles.tdCell, width: '48%' }}>{item.name}</span>
                           <span style={{ ...styles.tdCell, width: '10%' }}>{item.qty}</span>
-                          <span style={{ ...styles.tdCell, width: '13%' }}>{(item.price || 0).toLocaleString()}</span>
-                          {pricingSummary.discount > 0 && <span style={{ ...styles.tdCell, width: '13%', color: '#dc2626', fontWeight: 'bold' }}>{computedRowDiscount.toLocaleString()}</span>}
-                          <span style={{ ...styles.tdCell, width: pricingSummary.discount > 0 ? '19%' : '24%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
+                          <span style={{ ...styles.tdCell, width: '18%' }}>{(item.price || 0).toLocaleString()}</span>
+                          <span style={{ ...styles.tdCell, width: '24%', fontWeight: 'bold' }}>{(item.amount || 0).toLocaleString()} MMK</span>
                         </>
                       )}
                     </div>
@@ -382,7 +377,7 @@ const styles = {
   navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
   link: { cursor: 'pointer', color: '#333', fontSize: '14px', transition: 'color 0.2s ease' },
   activeLink: { color: '#f25278', fontWeight: 'bold' },
-  mainContent: { padding: '16px 10px', maxWidth: '850px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
+  mainContent: { padding: '16px 10px', maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   mainContentMobile: { padding: '50px 5px', maxWidth: '100%', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', boxSizing: 'border-box' },
   invoiceCard: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '40px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6' },
   invoiceCardMobile: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '20px 15px', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', border: '1px solid #f3f4f6', width: '100%', boxSizing: 'border-box' },

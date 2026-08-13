@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthProvider } from '../context/AuthContext'; 
+import { AuthContext } from '../context/AuthContext'; 
 import { StationeroNavbar } from './StationeroPage'; 
 import { AlignCenter, ArrowLeft } from 'lucide-react';
+
 
 const ShoppingCart = () => {
   const navigate = useNavigate();
@@ -22,22 +23,39 @@ useEffect(() => {
   const [editingId, setEditingId] = useState(null);
   const [editQuantity, setEditQuantity] = useState(1);
 
+  const { userProfile } = useContext(AuthContext);
+
   const getCartKey = () => {
     let userEmail = 'guest';
     try {
       const savedProfile = localStorage.getItem('stationero_logged_user');
       if (savedProfile && savedProfile !== "undefined") {
-        const parsed = JSON.parse(savedProfile);
-        userEmail = (parsed.email || parsed.user_email || parsed.customer_email || 'guest').trim();
+        const parsedLocal = JSON.parse(savedProfile);
+        
+        const activeEmail = (
+          userProfile?.email || 
+          userProfile?.customer_email || 
+          parsedLocal?.email || 
+          parsedLocal?.customer_email || 
+          parsedLocal?.user_email ||
+          ""
+        ).trim();
+
+        if (activeEmail) {
+          userEmail = activeEmail;
+        }
       }
-    } catch (e) { }
+    } catch (e) { 
+      console.error("Cart Key synchronization error: ", e);
+    }
     return `stationero_cart_${userEmail}`;
   };
 
+  // 🌟 ၃။ FIXED EFFECT DEPENDENCY: User Context ဒေတာများ တက်လာချိန်တွင် Cart Item အား စနစ်တကျ Dynamic ပြန်ဖတ်ခိုင်းခြင်း
   useEffect(() => {
     const savedCart = localStorage.getItem(getCartKey());
-    setCartItems(savedCart ? JSON.parse(savedCart) : []); // Data မရှိရင် Array အလွတ် [] သတ်မှတ်ပေးခြင်း
-  }, []);
+    setCartItems(savedCart ? JSON.parse(savedCart) : []); 
+  }, [userProfile]); // 🌟 userProfile ပြောင်းလဲမှုကိုပါ စောင့်ကြည့်ခိုင်းထားသဖြင့် ဘယ်သောအခါမှ Array အလွတ်ကြီး ဖြစ်မသွားတော့ပါဗျာ
 
   const startEditing = (item) => {
     setEditingId(item.id);

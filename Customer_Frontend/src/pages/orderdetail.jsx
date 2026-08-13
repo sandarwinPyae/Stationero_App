@@ -196,7 +196,7 @@ const amountPaidFromDb = payments && payments.length > 0 && payments[0]
 
               <div style={styles.summaryRow}>
                 <span style={styles.summaryLabel}>Net Amount :</span>
-                <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '18px', fontWeight: 'bold' }}>
+                <span style={{ ...styles.summaryValue, color: '#f25278', fontSize: '16px', fontWeight: 'bold' }}>
                   {customerPaidNetAmount.toLocaleString()} MMK
                 </span>
               </div>
