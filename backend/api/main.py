@@ -62,7 +62,7 @@ app.include_router(sale_report_routes.router)
 # =====================================================================
 # 🌟 PATH CONFIGURATION (Folder Structure အမှန်အတိုင်း အတိအကျ ချိန်ညှိထားခြင်း)
 # =====================================================================
-# 1. လက်ရှိ main.py ရှိသောနေရာ (STATIONERO_APP/backend/api)
+# 1. လက်ရှိ main.py ရှိသောနေရာ (STATIONERO_APP/backend/api)ConnectionConfig
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 2. Backend Folder (STATIONERO_APP/backend)
@@ -176,6 +176,11 @@ from fastapi import status, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import EmailStr, BaseModel
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
+import ssl
+import certifi
+# ZEROBOUNCE_API_KEY = "17cf5214e2ba48b4b23b3d99434a999e"
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
+ssl_context = ssl.create_default_context(cafile=certifi.where())
 
 
 conf = ConnectionConfig(
